@@ -1,3 +1,4 @@
+import {withDialog} from './dialog.mjs';
 import {duplicatePool,editNodes} from '../core/editing.mjs';
 import {bulkItemsDialog} from './bulk-items.mjs';
 import {treeSummary} from '../core/tree.mjs';
@@ -15,7 +16,7 @@ async function switchBanner(id){if(result)drafts.set(activeProfile(doc).activeBa
 async function switchProfile(id){if(result)drafts.set(activeBanner(doc).id,result);doc.activeProfileId=id;result=drafts.get(activeBanner(doc).id)||null;resetView();render();await save();}
 async function changeSetting(key,value){const old={...doc.settings};doc.settings[key]=value;try{validateWorkspace(doc);}catch(e){doc.settings=old;render();throw e;}stopWorker();render();await save();}
 
-let updateState={status:'unsupported',currentVersion:'0.4.4',version:null,percent:0,error:null};
+let updateState={status:'unsupported',currentVersion:'0.4.5',version:null,percent:0,error:null};
 function applyTheme(theme){
   const value=theme==='light'?'light':'dark';document.documentElement.dataset.theme=value;
   try{localStorage.setItem('gd-toolkit-theme',value);}catch{}
@@ -93,7 +94,7 @@ document.addEventListener('paste',e=>{
   e.preventDefault();const field=document.createElement('input');field.type='hidden';field.name='bulkText';field.value=input.value.slice(0,input.selectionStart)+text+input.value.slice(input.selectionEnd);
   input.form.append(field);$('#dialog').close('ok');
 });
-function modal(title,body,yes='Xác nhận',fields=''){return new Promise(resolve=>{const d=$('#dialog');d.innerHTML=`<form method="dialog"><h2>${esc(title)}</h2><p>${esc(body)}</p>${fields}<div class="actions"><button value="cancel" formnovalidate>Hủy</button><button class="primary" value="ok">${esc(yes)}</button></div></form>`;d.onclose=()=>{const data=Object.fromEntries(new FormData(d.querySelector('form')));resolve(d.returnValue==='ok'?data:null);};d.returnValue="cancel";d.showModal();});}
+function modal(title,body,yes='Xác nhận',fields=''){return withDialog(d=>{d.innerHTML=`<form method="dialog"><h2>${esc(title)}</h2><p>${esc(body)}</p>${fields}<div class="actions"><button value="cancel" formnovalidate>Hủy</button><button class="primary" value="ok">${esc(yes)}</button></div></form>`;const form=d.querySelector('form');return value=>value==='ok'?Object.fromEntries(new FormData(form)):null;});}
 async function importJson(){if(api)return api.import();return new Promise(resolve=>{const input=document.createElement('input');input.type='file';input.accept='.json';input.onchange=async()=>{try{resolve(JSON.parse(await input.files[0].text()));}catch(e){toast(e.message);resolve(null);}};input.oncancel=()=>resolve(null);input.click();});}
 async function exportJson(value,name){if(api){if(await api.export(value,name))toast('Đã xuất JSON.');}else{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000);}}
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-action]');if(!b||e.target.matches('[data-weight],[data-check]'))return;const {action,id,value}=b.dataset;try{

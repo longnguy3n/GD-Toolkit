@@ -284,9 +284,10 @@ app.whenReady().then(async()=>{
     assert.notEqual(await js("document.querySelector('[data-pity=target]').value"),'featured');
     await js("document.querySelector('.insert-controls [data-action=bulk-items]').click()");await waitFor("document.querySelector('dialog').classList.contains('bulk-dialog')");
     assert.ok((await js("document.querySelector('dialog').textContent")).includes('pool “Copied legend”'));
-    await js("document.querySelector('textarea[name=items]').value='Pool item A\\nPool item B';document.querySelector('textarea[name=items]').dispatchEvent(new Event('input',{bubbles:true}));document.querySelector('dialog button[value=cancel]').click()");await waitFor("!document.querySelector('dialog').open");
+    // Reopen in the same task, before the native dialog's queued close event fires.
+    await js("document.querySelector('textarea[name=items]').value='Pool item A\\nPool item B';document.querySelector('textarea[name=items]').dispatchEvent(new Event('input',{bubbles:true}));document.querySelector('dialog button[value=cancel]').click();document.querySelector('.insert-controls [data-action=bulk-items]').click()");
     assert.equal(await js("document.querySelectorAll('.tree-row').length"),18);
-    await js("document.querySelector('.insert-controls [data-action=bulk-items]').click()");await waitFor("document.querySelector('dialog').classList.contains('bulk-dialog')");
+    await waitFor("document.querySelector('dialog').open && document.querySelector('dialog').classList.contains('bulk-dialog') && document.querySelector('textarea[name=items]').value===''");
     await js("document.querySelector('textarea[name=items]').value='Pool item A\\nPool item B';document.querySelector('textarea[name=items]').dispatchEvent(new Event('input',{bubbles:true}));document.querySelector('dialog .primary').click()");await waitFor("document.querySelectorAll('.tree-row').length===20 && document.querySelector('#save-state').textContent.includes('Đã lưu')");
     win.webContents.reload();await sleep(250);await waitFor("document.querySelectorAll('.tree-row').length===20");
     const copied=await js("(async()=>{const d=await window.desktop.load();const p=d.profiles.find(p=>p.id===d.activeProfileId);return p.banners.find(b=>b.id===p.activeBannerId).config.root.children.find(n=>n.name==='Copied legend')})()");
