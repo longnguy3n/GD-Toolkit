@@ -1,15 +1,14 @@
-# GD Toolkit v0.3.0
+# GD Toolkit v0.4.0
 
-- Tạo, nhân bản, đổi tên, xóa và chuyển giữa tối đa 50 profile/banner gacha.
-- Mỗi banner có currency mỗi lượt, số dư, giá tiền mỗi currency và đơn vị tiền. Calculate và Simulate hiển thị dự toán, tổng giá trị và tiền cần nạp thêm.
-- Mở/thu gọn từng pool; mở/thu gọn tất cả. Giữ trạng thái riêng theo banner sau khi mở lại app.
-- Chọn và xóa nhiều item/pool cùng lúc, bao gồm con đang thu gọn. Không xóa một phần nếu thao tác làm cấu hình mất hợp lệ.
-- Đưa random engine và seed vào **Cài đặt chung**. Thêm **Unity giả lập · Xorshift128** chạy ngay, giữ **Custom · xoshiro128** và **Unity · mẫu thực**.
-- History giữ snapshot cả banner, RNG, seed và chi phí. Xóa banner vẫn giữ history đã lưu; dùng cấu hình history tạo banner mới.
-- Tự chuyển dữ liệu cũ sang banner đầu tiên, giữ theme/history và tạo bản sao `workspace.json.v1.backup` trước khi ghi định dạng mới.
+- Sửa cấu trúc thành **Profile → nhiều Banner → Pool → Item**. Tạo, nhân bản, đổi tên, xóa profile và banner riêng biệt.
+- Currency, số dư và giá tiền chỉ nằm trong **Thiết lập banner**, cùng quy tắc reset pity.
+- Thêm bật/tắt **reset khi trúng mục tiêu trước hard pity**. **Hard pity luôn reset** counter về 0.
+- Simulate đánh dấu từng lượt có hard pity/trúng trong vùng soft, ghi counter trước/sau, số lần gọi còn lại đến hard pity và trạng thái reset cho mọi pool.
+- Tổng kết số hard pity, số lượt có hard pity và soft pity. History/JSON giữ đầy đủ log mới; history cũ vẫn xem được.
+- Calculate so sánh tỷ lệ có/không pity, rate trung bình trong N lượt và số lần pity kỳ vọng toàn banner, kèm chi tiết từng pool.
+- Giải thích horizon ngay cạnh ô nhập: giới hạn tìm mốc 50/90/95/99%, không thay đổi pity hay số lượt N.
+- Tự chuyển dữ liệu cũ vào Profile mặc định và sao lưu workspace trước khi đổi định dạng.
 
-**Unity giả lập** dùng cùng họ thuật toán, không bảo đảm chuỗi trùng Unity `InitState/Random.value`. Chế độ **Unity · mẫu thực** tiếp tục hỗ trợ JSON xuất từ Unity để đối chiếu chính xác.
+**Cập nhật:** Cập nhật → Kiểm tra ngay → Tải bản mới → Cài và mở lại.
 
-**Đang dùng v0.2:** chọn **Cập nhật → Kiểm tra ngay → Tải bản mới → Cài và mở lại**.
-
-**Cài lần đầu:** tải `GD-Toolkit-Setup-0.3.0-x64.exe`. Các file `.blockmap` và `latest.yml` dành cho updater.
+**Cài lần đầu:** tải GD-Toolkit-Setup-0.4.0-x64.exe. File blockmap/latest.yml phục vụ updater.

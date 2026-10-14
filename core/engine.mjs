@@ -1,8 +1,8 @@
 import {validateEconomy} from './economy.mjs';
-export const VERSION = 1;
+export const VERSION = 2;
 export const clone = x => structuredClone(x);
 export function preset() {
-  return {version:1,name:'Character Event · 90 pity',rng:'custom',seed:2026,root:{id:'root',name:'Character banner',weight:1,children:[
+  return {version:VERSION,name:'Character Event · 90 pity',rng:'custom',seed:2026,root:{id:'root',name:'Character banner',weight:1,children:[
     {id:'legend',name:'5★ · Legendary',weight:6,children:[
       {id:'featured',name:'Astra · Featured',weight:50},
       {id:'standard',name:'Standard characters',weight:50,children:[
@@ -17,10 +17,11 @@ export function walk(root, fn, path=[]) {fn(root,path); for(const child of root.
 export function findNode(root,id) {let result; walk(root,n=>{if(n.id===id) result=n;}); return result;}
 export function leaves(root) {let out=[];walk(root,(n,path)=>{if(!n.children)out.push({...n,path:path.map(p=>p.name).concat(n.name).join(' / ')});});return out;}
 export function validate(config) {
-  if(!config || config.version!==1 || !config.root)throw Error('Định dạng cấu hình không được hỗ trợ.');
+  if(!config || ![1,2].includes(config.version) || !config.root)throw Error('Định dạng cấu hình không được hỗ trợ.');
   if(typeof config.name!=='string'||config.name.length>120)throw Error('Tên cấu hình tối đa 120 ký tự.');
   if(!['custom','unity-emulated','unity'].includes(config.rng))throw Error('Nguồn random không hợp lệ.');
   if(config.economy!==undefined)validateEconomy(config.economy);
+  if(config.pityReset!==undefined&&(!config.pityReset||typeof config.pityReset.onTarget!=='boolean'||config.pityReset.onHard===false))throw Error('Reset khi trúng sớm phải là bật/tắt; hard pity luôn reset.');
   if(!Number.isInteger(config.seed)||config.seed<0||config.seed>4294967295)throw Error('Seed phải là số nguyên từ 0 đến 4.294.967.295.');
   let ids=new Set(), count=0;
   function visit(n,depth) {
@@ -54,20 +55,31 @@ export function probabilities(pool,counter=0) {
   let rate=roll>=p.hard?1:Math.min(1,base+(p.soft>0&&roll>=p.soft?(roll-p.soft+1)*p.step:0));
   return out.map((x,j)=>j===i?rate:base===1?0:x*(1-rate)/(1-base));
 }
-export function nextCounter(pool,counter,childId) {return !pool.pity?.enabled||childId===pool.pity.target?0:Math.min(counter+1,pool.pity.hard-1);}
-export function effective(pool) {
+export function resetsOnHit(pool,counter,childId,policy={}) {
+  return !!pool.pity?.enabled&&childId===pool.pity.target&&(counter+1>=pool.pity.hard||policy.onTarget!==false);
+}
+export function nextCounter(pool,counter,childId,policy={}) {return !pool.pity?.enabled||resetsOnHit(pool,counter,childId,policy)?0:Math.min(counter+1,pool.pity.hard-1);}
+// Event bits: 1 hard guarantee, 2 boosted soft-pity rate, 4 target hit, 8 reset.
+export function pityFlags(pool,counter,childId,policy={}) {
+  if(!pool.pity?.enabled)return 0;
+  const i=pool.children.findIndex(c=>c.id===pool.pity.target),base=pool.children[i].weight/pool.children.reduce((s,c)=>s+c.weight,0);
+  const hard=counter+1>=pool.pity.hard,soft=!hard&&probabilities(pool,counter)[i]>base;
+  return (hard?1:0)|(soft?2:0)|(childId===pool.pity.target?4:0)|(resetsOnHit(pool,counter,childId,policy)?8:0);
+}
+export function effective(pool,policy={}) {
   let sum=pool.children.reduce((s,c)=>s+c.weight,0), base=pool.children.map(c=>c.weight/sum);
   if(!pool.pity?.enabled)return base;
-  let idx=pool.children.findIndex(c=>c.id===pool.pity.target), survival=1, mean=0;
-  for(let k=0;k<pool.pity.hard;k++){mean+=survival;survival*=1-probabilities(pool,k)[idx];}
-  let rate=1/mean;
+  let idx=pool.children.findIndex(c=>c.id===pool.pity.target), survival=1, mean=0,hits=0;
+  const ps=Array.from({length:pool.pity.hard},(_,k)=>probabilities(pool,k)[idx]);
+  for(let k=0;k<pool.pity.hard;k++){mean+=survival;hits+=survival*ps[k];if(k+1===pool.pity.hard||policy.onTarget!==false)survival*=1-ps[k];}
+  let rate=hits/mean;
   return base.map((b,i)=>i===idx?rate:base[idx]===1?0:b*(1-rate)/(1-base[idx]));
 }
-export function leafRates(root) {
+export function leafRates(root,policy={}) {
   const result=[];
   function rec(node,base,real,next,path) {
     if(!node.children){result.push({id:node.id,name:node.name,path:[...path,node.name].join(' / '),base,real,next});return;}
-    let sum=node.children.reduce((s,c)=>s+c.weight,0), rates=effective(node), ps=probabilities(node,node.pity?.enabled?node.pity.start:0);
+    let sum=node.children.reduce((s,c)=>s+c.weight,0), rates=effective(node,policy), ps=probabilities(node,node.pity?.enabled?node.pity.start:0);
     node.children.forEach((c,i)=>rec(c,base*c.weight/sum,real*rates[i],next*ps[i],[...path,node.name]));
   }
   rec(root,1,1,1,[]);return result;
@@ -101,20 +113,25 @@ export function simulate(config,pulls,{tape,onProgress=()=>{}}={}) {
   validate(config);
   if(!Number.isInteger(pulls)||pulls<1||pulls>1000000)throw Error('Mô phỏng từ 1 đến 1.000.000 lượt.');
   let used=0, rng=config.rng==='custom'?customRandom(config.seed):config.rng==='unity-emulated'?unityEmulated(config.seed):(()=>{validateTape(tape);return ()=>{if(used>=tape.values.length)throw Error('Đã dùng hết mẫu Unity. Xuất file nhiều mẫu hơn; lượt chạy này chưa được lưu.');return Math.min(tape.values[used++],1-Number.EPSILON);};})();
-  const counters={},counts={},sequence=[],poolStats={};
-  walk(config.root,n=>{if(n.children){counters[n.id]=n.pity?.enabled?n.pity.start:0;poolStats[n.id]={visits:0,hardHits:0};}else counts[n.id]=0;});
+  const counters={},counts={},sequence=[],poolStats={},logs=new Map(),pitySummary={hardTriggers:0,hardPulls:0,softWins:0,resets:0};
+  walk(config.root,n=>{if(n.children){counters[n.id]=n.pity?.enabled?n.pity.start:0;poolStats[n.id]={visits:0,hardHits:0,softVisits:0,softWins:0,targetHits:0,resets:0};if(n.pity?.enabled)logs.set(n.id,{id:n.id,rolls:[],after:[],flags:[]});}else counts[n.id]=0;});
   for(let roll=0;roll<pulls;roll++) {
-    let node=config.root;
+    let node=config.root,hardThisPull=false;
     while(node.children) {
       const ps=probabilities(node,counters[node.id]);let draw=rng(),cum=0,index=ps.findLastIndex(p=>p>0);
       for(let j=0;j<ps.length;j++){cum+=ps[j];if(draw<cum){index=j;break;}}
-      poolStats[node.id].visits++;if(node.pity?.enabled&&counters[node.id]+1>=node.pity.hard)poolStats[node.id].hardHits++;
-      const child=node.children[index];counters[node.id]=nextCounter(node,counters[node.id],child.id);node=child;
+      const child=node.children[index],before=counters[node.id],flags=pityFlags(node,before,child.id,config.pityReset),stats=poolStats[node.id];
+      stats.visits++;if(flags&1){stats.hardHits++;pitySummary.hardTriggers++;hardThisPull=true;}
+      if(flags&2)stats.softVisits++;if((flags&6)===6){stats.softWins++;pitySummary.softWins++;}
+      if(flags&4)stats.targetHits++;if(flags&8){stats.resets++;pitySummary.resets++;}
+      counters[node.id]=nextCounter(node,before,child.id,config.pityReset);
+      const log=logs.get(node.id);if(log){log.rolls.push(roll+1);log.after.push(counters[node.id]);log.flags.push(flags);}
+      node=child;
     }
-    counts[node.id]++;sequence.push(node.id);
+    counts[node.id]++;sequence.push(node.id);if(hardThisPull)pitySummary.hardPulls++;
     if(roll%10000===0)onProgress(roll/pulls);
   }
-  return {id:globalThis.crypto.randomUUID(),createdAt:new Date().toISOString(),config:clone(config),pulls,counts,sequence,counters,poolStats,randomSamples:used||null,unity:tape&&config.rng==='unity'?{version:tape.unityVersion,seed:tape.seed,samples:tape.values.length}:null};
+  return {id:globalThis.crypto.randomUUID(),createdAt:new Date().toISOString(),config:clone(config),pulls,counts,sequence,counters,poolStats,pityLog:{version:1,pools:[...logs.values()]},pitySummary,randomSamples:used||null,unity:tape&&config.rng==='unity'?{version:tape.unityVersion,seed:tape.seed,samples:tape.values.length}:null};
 }
 function targetPath(root,id,path=[]) {
   if(root.id===id&&!root.children)return path;
@@ -157,7 +174,7 @@ export function analyze(config,id,copies,pulls,horizon=2000,onProgress=()=>{}) {
     function visit(depth,prob,next) {
       if(depth===path.length){out.push({state:encode(next),hit:1,p:prob});return;}
       const {pool,child}=path[depth],ps=probabilities(pool,cs[depth]);
-      pool.children.forEach((c,j)=>{if(ps[j]===0)return;const updated=next.slice();updated[depth]=nextCounter(pool,cs[depth],c.id);if(c.id===child.id)visit(depth+1,prob*ps[j],updated);else out.push({state:encode(updated),hit:0,p:prob*ps[j]});});
+      pool.children.forEach((c,j)=>{if(ps[j]===0)return;const updated=next.slice();updated[depth]=nextCounter(pool,cs[depth],c.id,config.pityReset);if(c.id===child.id)visit(depth+1,prob*ps[j],updated);else out.push({state:encode(updated),hit:0,p:prob*ps[j]});});
     }
     visit(0,1,cs);transitions.set(state,out);return out;
   }
@@ -183,7 +200,51 @@ export function analyze(config,id,copies,pulls,horizon=2000,onProgress=()=>{}) {
     if(n%Math.max(1,Math.floor(horizon/180))===0||n===pulls||n===horizon)curve.push({n,p:maxCdf});
     if(n%50===0)onProgress(n/horizon);
   }
-  return {id,copies,pulls,horizon,...snapshot,...waitingSummary(path,copies),quantiles,curve,lowerMean,tail:Math.max(0,1-maxCdf),states:stateSize*(copies+1),rates:leafRates(config.root).find(r=>r.id===id)};
+  const waiting=waitingSummary(path,copies);
+  if(config.pityReset?.onTarget===false&&path.some(p=>p.pool.pity?.enabled))waiting.mean=waiting.guarantee!==null&&horizon>=waiting.guarantee?lowerMean:null;
+  let pity;try{pity=expectedPity(config,pulls,id);}catch(e){if(e.code!=='PITY_LIMIT')throw e;pity={unavailable:e.message};}
+  return {id,copies,pulls,horizon,...snapshot,...waiting,quantiles,curve,lowerMean,tail:Math.max(0,1-maxCdf),states:stateSize*(copies+1),rates:leafRates(config.root,config.pityReset).find(r=>r.id===id),pity};
+}
+// Full-banner Markov rewards, independent of the target copy cutoff used by analyze().
+// This keeps counting pity events after K copies have already been acquired.
+export function expectedPity(config,pulls,targetId) {
+  validate(config);
+  if(!Number.isInteger(pulls)||pulls<1||pulls>10000)throw Error('Số lượt tính pity từ 1–10.000.');
+  const pools=[];walk(config.root,n=>{if(n.children&&n.pity?.enabled)pools.push(n);});
+  const target=leafRates(config.root,config.pityReset).find(n=>n.id===targetId);
+  if(!target)throw Error('Không tìm thấy item mục tiêu.');
+  const stats=pools.map(p=>({id:p.id,name:p.name,visits:0,hardHits:0,softVisits:0,softWins:0,resets:0}));
+  let hardTriggers=0,hardPulls=0,softWins=0,targetHits=0,operations=0,cachedEdges=0;
+  if(!pools.length)return {pools:stats,hardTriggers,hardPulls,softWins,targetHits:pulls*target.base,rate:target.base,withoutPity:target.base,pulls};
+  const indices=new Map(pools.map((p,i)=>[p.id,i])),initial=pools.map(p=>p.pity.start),cache=new Map();
+  function limit(states=0){if(++operations>40000000||cache.size>50000||states>50000||cachedEdges>250000){const e=Error('Thống kê pity toàn banner vượt giới hạn 50.000 trạng thái / 250.000 nhánh / 40 triệu bước. Dùng Simulate để thống kê cấu hình này.');e.code='PITY_LIMIT';throw e;}}
+  function edges(key,state){
+    if(cache.has(key))return cache.get(key);
+    const out=[];
+    function visit(node,mass,next,events){
+      limit();
+      if(!node.children){cachedEdges++;out.push({key:next.join(','),state:next,mass,hit:node.id===targetId,events});return;}
+      const i=indices.get(node.id),counter=i===undefined?0:state[i],ps=probabilities(node,counter);
+      node.children.forEach((c,j)=>{if(ps[j]===0)return;let updated=next,log=events;
+        if(i!==undefined){updated=next.slice();updated[i]=nextCounter(node,counter,c.id,config.pityReset);log=[...events,[i,pityFlags(node,counter,c.id,config.pityReset)]];}
+        visit(c,mass*ps[j],updated,log);
+      });
+    }
+    visit(config.root,1,state,[]);cache.set(key,out);return out;
+  }
+  let dist=new Map([[initial.join(','),{state:initial,mass:1}]]);
+  for(let n=0;n<pulls;n++){
+    const next=new Map();
+    for(const [key,entry] of dist)for(const t of edges(key,entry.state)){
+      limit();const mass=entry.mass*t.mass;let anyHard=false;
+      if(t.hit)targetHits+=mass;
+      for(const [i,flags] of t.events){const s=stats[i];s.visits+=mass;if(flags&1){s.hardHits+=mass;hardTriggers+=mass;anyHard=true;}if(flags&2)s.softVisits+=mass;if((flags&6)===6){s.softWins+=mass;softWins+=mass;}if(flags&8)s.resets+=mass;}
+      if(anyHard)hardPulls+=mass;
+      const old=next.get(t.key);if(old)old.mass+=mass;else {next.set(t.key,{state:t.state,mass});limit(next.size);}
+    }
+    dist=next;
+  }
+  return {pools:stats,hardTriggers,hardPulls,softWins,targetHits,rate:targetHits/pulls,withoutPity:target.base,pulls};
 }
 export function hardPityRate(base,hard) {
   if(!Number.isFinite(base)||base<0||base>1||!Number.isInteger(hard)||hard<1||hard>10000)throw Error('Rate phải từ 0–100%; hard pity từ 1–10.000.');

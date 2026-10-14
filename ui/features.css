@@ -27,3 +27,27 @@
 .cost-panel td{font-size:11px}
 html[data-theme=light] .side-tool:not(.active){background:transparent;color:var(--muted);border-color:transparent}
 @media(max-width:1150px){.profile-bar>small{display:none}.tree-header,.tree-row{grid-template-columns:minmax(0,1fr) 60px 60px;gap:6px}.tree-weight{width:60px}.tree-name .badge{display:none}.settings-panel .radio-cards{grid-template-columns:1fr}.cost-summary{gap:10px}.cost-summary strong{font-size:14px}}
+.workspace-hierarchy{margin-bottom:20px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel)}
+.workspace-hierarchy .profile-bar{margin:0;border:0;border-radius:0}
+.workspace-hierarchy .profile-parent{background:var(--panel2)}
+.workspace-hierarchy .banner-child{border-top:1px solid var(--line);padding-left:35px}
+.banner-settings{margin-bottom:20px}
+.banner-settings>summary{cursor:pointer;padding:16px 20px;font-weight:600;font-size:13px;color:var(--text)}
+.banner-settings>summary small{display:block;font-weight:400;margin:7px 0 0 15px}
+.banner-settings-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:16px;padding:0 16px 16px}
+.banner-settings-grid .inline{line-height:1.5;align-items:flex-start;font-size:13px}
+.banner-settings-grid .inline input{flex:none}
+.banner-settings-grid [data-action=reset-counters]{margin-top:15px}
+.horizon-help{line-height:1.6}
+.sequence.pity-sequence{display:flex;flex-direction:column;gap:8px;padding:16px}
+.pity-sequence .pull{display:block;padding:0;border:1px solid var(--line);background:var(--panel2);border-radius:7px;overflow:hidden}
+.pity-sequence .pull>summary{cursor:pointer;padding:12px 14px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.pity-sequence .pull>summary>span:first-child{font-size:11px;min-width:42px;color:var(--muted)}
+.pity-sequence .pull>summary b{font-size:12px;color:var(--text)}
+.remaining-line{width:100%;line-height:1.6;color:var(--muted);font-size:10px}
+.pity-sequence .hard-pull{border-color:var(--gold)}
+.pity-hard{color:var(--gold);border-color:var(--gold);background:transparent}
+.pity-sequence .pull .table-wrap{border-top:1px solid var(--line)}
+.pagination label{font-size:10px}.pagination input{width:95px;height:30px}
+html[data-theme=light] .profile-parent{background:#eeebf6}
+@media(max-width:1100px){.banner-settings-grid{grid-template-columns:1fr}.workspace-hierarchy .profile-bar>label{flex-basis:100%}.pagination{flex-wrap:wrap}.workspace-hierarchy .banner-child{padding-left:18px}}

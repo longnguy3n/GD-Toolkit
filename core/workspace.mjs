@@ -2,56 +2,79 @@ import {preset,validate,clone,walk} from './engine.mjs';
 import {defaultEconomy,validateEconomy} from './economy.mjs';
 
 export function profileConfig(config) {
-  const c=clone(config);delete c.rng;delete c.seed;
-  c.economy??=defaultEconomy();return c;
+  const c=clone(config);delete c.rng;delete c.seed;c.version=2;
+  c.economy??=defaultEconomy();c.pityReset??={onTarget:true};return c;
 }
-export const activeProfile = doc => doc.profiles.find(p=>p.id===doc.activeProfileId);
-export const runConfig = doc => ({...doc.config,rng:doc.settings.rng,seed:doc.settings.seed});
-export function attachConfig(doc) {
-  Object.defineProperty(doc,'config',{configurable:true,get(){return activeProfile(this).config;},set(c){activeProfile(this).config=profileConfig(c);}});
-  return doc;
+export const activeProfile = d => d.profiles.find(p=>p.id===d.activeProfileId);
+export const activeBanner = d => activeProfile(d)?.banners.find(b=>b.id===activeProfile(d).activeBannerId);
+export const runConfig = d => ({...d.config,rng:d.settings.rng,seed:d.settings.seed});
+export function attachConfig(d) {
+  Object.defineProperty(d,'config',{configurable:true,get(){return activeBanner(this).config;},set(c){activeBanner(this).config=profileConfig(c);}});
+  return d;
 }
 export function upgradeWorkspace(input) {
   if(!input)input={version:1,config:preset(),history:[]};
-  const d=clone(input);
+  let d=clone(input);
   if(d.version===1){
-    validate(d.config);
+    validate(d.config);const id=crypto.randomUUID();
+    d={version:2,settings:{theme:d.settings?.theme||'dark',rng:d.config.rng,seed:d.config.seed},activeProfileId:id,profiles:[{id,config:d.config,collapsed:[]}],history:Array.isArray(d.history)?d.history.map(h=>({...h,profileId:id})):d.history};
+  }
+  if(d.version===2){
     const id=crypto.randomUUID();
-    const settings={theme:d.settings?.theme||'dark',rng:d.config.rng,seed:d.config.seed};
-    const migrated={version:2,settings,activeProfileId:id,profiles:[{id,config:profileConfig(d.config),collapsed:[]}],history:d.history};
-    if(Array.isArray(migrated.history))migrated.history=migrated.history.map(h=>({...h,profileId:id}));
-    validateWorkspace(migrated);return attachConfig(migrated);
+    d={version:3,settings:d.settings,activeProfileId:id,profiles:[{id,name:'Profile mặc định',activeBannerId:d.activeProfileId,banners:d.profiles?.map(b=>({...b,config:profileConfig(b.config)}))}],history:Array.isArray(d.history)?d.history.map(h=>({...h,bannerId:h.profileId,profileId:id,profileName:'Profile mặc định'})):d.history};
   }
   validateWorkspace(d);return attachConfig(d);
 }
 export function validateWorkspace(d) {
-  if(!d||d.version!==2||!Array.isArray(d.profiles)||!d.profiles.length||d.profiles.length>50||!Array.isArray(d.history)||d.history.length>30)throw Error('Workspace cần 1–50 banner và tối đa 30 lịch sử.');
+  if(!d||d.version!==3||!Array.isArray(d.profiles)||!d.profiles.length||d.profiles.length>50||!Array.isArray(d.history)||d.history.length>30)throw Error('Workspace cần 1–50 profile và tối đa 30 lịch sử.');
   if(!d.settings||!['dark','light'].includes(d.settings.theme))throw Error('Theme không hợp lệ.');
   const ids=new Set();
+  const checkId=id=>{if(typeof id!=='string'||!/^[-\w]{1,80}$/.test(id)||ids.has(id))throw Error('ID profile/banner không hợp lệ.');ids.add(id);};
   for(const p of d.profiles){
-    if(typeof p.id!=='string'||!/^[-\w]{1,80}$/.test(p.id)||ids.has(p.id))throw Error('ID banner không hợp lệ.');
-    ids.add(p.id);
-    validate({...p.config,rng:d.settings.rng,seed:d.settings.seed});validateEconomy(p.config.economy);
-    if(!Array.isArray(p.collapsed)||p.collapsed.length>200||p.collapsed.some(id=>typeof id!=='string'))throw Error('Trạng thái thu gọn pool không hợp lệ.');
+    checkId(p.id);validName(p.name,'profile');
+    if(!Array.isArray(p.banners)||!p.banners.length||p.banners.length>50)throw Error('Mỗi profile cần 1–50 banner.');
+    for(const b of p.banners){
+      checkId(b.id);validate({...b.config,rng:d.settings.rng,seed:d.settings.seed});validateEconomy(b.config.economy);
+      if(!Array.isArray(b.collapsed)||b.collapsed.length>200||b.collapsed.some(id=>typeof id!=='string'))throw Error('Trạng thái thu gọn pool không hợp lệ.');
+    }
+    if(!p.banners.some(b=>b.id===p.activeBannerId))throw Error('Banner hiện tại không tồn tại.');
   }
-  if(!ids.has(d.activeProfileId))throw Error('Banner hiện tại không tồn tại.');
-  for(const h of d.history){validate(h.config);if(!Number.isInteger(h.pulls)||h.pulls<1||h.pulls>1000000||!Array.isArray(h.sequence)||h.sequence.length!==h.pulls)throw Error('Lịch sử không hợp lệ.');}
-  if(JSON.stringify(d).length>100000000)throw Error('Workspace vượt 100 MB. Hãy xuất và xóa bớt lịch sử.');
-  return d;
+  if(!d.profiles.some(p=>p.id===d.activeProfileId))throw Error('Profile hiện tại không tồn tại.');
+  for(const h of d.history){
+    validate(h.config);
+    if(!Number.isInteger(h.pulls)||h.pulls<1||h.pulls>1000000||!Array.isArray(h.sequence)||h.sequence.length!==h.pulls)throw Error('Lịch sử không hợp lệ.');
+    if(h.pityLog){
+      if(h.pityLog.version!==1||!Array.isArray(h.pityLog.pools)||h.pityLog.pools.length>200)throw Error('Log pity không hợp lệ.');
+      const pools=new Map();walk(h.config.root,n=>{if(n.children&&n.pity?.enabled)pools.set(n.id,n);});
+      for(const l of h.pityLog.pools){const p=pools.get(l.id);if(!p||!Array.isArray(l.rolls)||!Array.isArray(l.after)||!Array.isArray(l.flags)||l.rolls.length!==l.after.length||l.rolls.length!==l.flags.length||l.rolls.length>h.pulls)throw Error('Log pity không hợp lệ.');
+        for(let i=0;i<l.rolls.length;i++)if(!Number.isInteger(l.rolls[i])||l.rolls[i]<1||l.rolls[i]>h.pulls||(i>0&&l.rolls[i]<=l.rolls[i-1])||!Number.isInteger(l.after[i])||l.after[i]<0||l.after[i]>=p.pity.hard||!Number.isInteger(l.flags[i])||l.flags[i]<0||l.flags[i]>15)throw Error('Counter trong log pity không hợp lệ.');
+        pools.delete(l.id);
+      }
+      if(pools.size)throw Error('Log pity thiếu pool.');
+    }
+  }
+  if(JSON.stringify(d).length>100000000)throw Error('Workspace vượt 100 MB. Hãy xuất và xóa bớt lịch sử.');return d;
 }
-export function addProfile(d,name,source=preset()) {
-  if(d.profiles.length>=50)throw Error('Tối đa 50 banner.');
-  if(typeof name!=='string'||!name.trim()||name.length>120)throw Error('Tên banner phải có 1–120 ký tự.');
-  const p={id:crypto.randomUUID(),config:profileConfig(source),collapsed:[]};p.config.name=name.trim();
-  validate({...p.config,rng:d.settings.rng,seed:d.settings.seed});validateEconomy(p.config.economy);
-  d.profiles.push(p);return p;
+function validName(name,label){if(typeof name!=='string'||!name.trim()||name.length>120)throw Error(`Tên ${label} phải có 1–120 ký tự.`);}
+function newBanner(d,name,source){validName(name,'banner');const b={id:crypto.randomUUID(),config:profileConfig(source),collapsed:[]};b.config.name=name.trim();validate({...b.config,rng:d.settings.rng,seed:d.settings.seed});return b;}
+export function addBanner(d,name,source=preset()) {
+  const p=activeProfile(d);if(p.banners.length>=50)throw Error('Tối đa 50 banner mỗi profile.');
+  const b=newBanner(d,name,source);p.banners.push(b);return b;
+}
+export function removeBanner(d,id) {
+  const p=activeProfile(d);if(p.banners.length===1)throw Error('Cần giữ ít nhất một banner trong profile.');
+  if(!p.banners.some(b=>b.id===id))throw Error('Không tìm thấy banner.');
+  p.banners=p.banners.filter(b=>b.id!==id);if(p.activeBannerId===id)p.activeBannerId=p.banners[0].id;
+}
+export function addProfile(d,name,source=null) {
+  if(d.profiles.length>=50)throw Error('Tối đa 50 profile.');validName(name,'profile');
+  const banners=source?source.banners.map(b=>({...newBanner(d,b.config.name||'Banner',b.config),collapsed:[...b.collapsed]})):[newBanner(d,'Banner đầu tiên',preset())];
+  const p={id:crypto.randomUUID(),name:name.trim(),activeBannerId:banners[0].id,banners};d.profiles.push(p);return p;
 }
 export function removeProfile(d,id) {
-  if(d.profiles.length===1)throw Error('Cần giữ ít nhất một banner.');
-  if(!d.profiles.some(p=>p.id===id))throw Error('Không tìm thấy banner.');
-  d.profiles=d.profiles.filter(p=>p.id!==id);
-  if(d.activeProfileId===id)d.activeProfileId=d.profiles[0].id;
-  // History keeps its self-contained snapshot even when its banner is deleted.
+  if(d.profiles.length===1)throw Error('Cần giữ ít nhất một profile.');
+  if(!d.profiles.some(p=>p.id===id))throw Error('Không tìm thấy profile.');
+  d.profiles=d.profiles.filter(p=>p.id!==id);if(d.activeProfileId===id)d.activeProfileId=d.profiles[0].id;
 }
 export function deleteNodes(config,selected) {
   const ids=new Set(selected),next=clone(config);let removed=0,disabledPity=0;

@@ -1,96 +1,96 @@
-# GD Toolkit · Windows v0.3
+# GD Toolkit · Windows v0.4
 
-Ứng dụng desktop offline dành cho game designer. Tool đầu tiên: Gacha Tool, gồm Setup / Calculate / Simulate và History bên trong Simulate.
+Ứng dụng desktop offline dành cho game designer. Gacha Tool gồm Setup / Calculate / Simulate, với History trong Simulate.
 
-## Chạy ứng dụng
+## Cài đặt và cập nhật
 
-Tải **GD-Toolkit-Setup-0.3.0-x64.exe** từ [GitHub Releases](https://github.com/longnguy3n/GD-Toolkit/releases/latest), chạy bộ cài, rồi mở **GD Toolkit** từ Start Menu hoặc shortcut desktop. Bản dành cho Windows x64, không cần Node.js hay Unity để dùng Custom random. Bộ cài cài cho tài khoản Windows hiện tại; chưa có chữ ký số thương mại.
+Tải **GD-Toolkit-Setup-0.4.0-x64.exe** từ [GitHub Releases](https://github.com/longnguy3n/GD-Toolkit/releases/latest). Windows x64, không cần Node.js hay Unity để chạy Custom hoặc Unity giả lập. Bộ cài dành cho tài khoản Windows hiện tại, chưa có chữ ký số thương mại.
 
-Nếu đang dùng bản portable v0.1, cài bản v0.2 **một lần** để có chức năng cập nhật. Bản v0.1 cũ không thể tự có chức năng mới. Cấu hình/history vẫn được đọc từ cùng thư mục `%APPDATA%/GD Toolkit`, không cần nhập lại. Có thể giữ bản portable cũ làm dự phòng, nhưng không mở đồng thời hai phiên bản.
+Nếu đã cài v0.2 trở lên: **Cập nhật → Kiểm tra ngay → Tải bản mới → Cài và mở lại**. Bản portable v0.1 cần chạy bộ cài mới một lần. App tự kiểm tra khi mở nhưng chỉ tải/cài khi bạn chọn; mất mạng vẫn dùng gacha bình thường. Nguồn cập nhật là repository public longnguy3n/GD-Toolkit, không cần token. Updater kiểm tra SHA-512 của bộ cài và không tự hạ phiên bản.
 
-Dữ liệu lưu ở `%APPDATA%/GD Toolkit/workspace.json`. Nút ↗ cạnh “Local workspace” mở thư mục dữ liệu thực tế. Cấu hình tự lưu sau mỗi thay đổi hợp lệ; kết quả mô phỏng được lưu khi bấm **Lưu history**. Đóng cửa sổ là thoát app. Các chức năng gacha hoạt động offline; kết nối GitHub chỉ phục vụ cập nhật. Không gửi cấu hình hoặc history lên mạng, không có đồng bộ đám mây.
+Nút **Sáng / Tối** đổi theme và lưu lựa chọn. Dữ liệu nằm ở `%APPDATA%/GD Toolkit/workspace.json`; nút ↗ cạnh Local workspace mở thư mục này. App không gửi cấu hình/history lên mạng. Bộ cài giữ dữ liệu; gỡ cài đặt không tự xóa dữ liệu người dùng.
 
-## Theme và cập nhật
+## Profile → Banner → Pool → Item
 
-- Nút **☀ Sáng / ☾ Tối** ở góc trên bên phải đổi theme ngay lập tức. Lựa chọn được lưu cùng workspace và khôi phục khi mở lại. Đổi theme không thay cấu hình gacha hay kết quả mô phỏng.
-- **↻ Cập nhật** mở thông tin phiên bản và nút **Kiểm tra ngay**. App cũng kiểm tra một lần sau khi mở; mất mạng vẫn dùng gacha bình thường.
-- Khi có release stable mới: **Tải bản mới → Cài và mở lại**. App không tự tải/cài nếu bạn chưa chọn. Trước khi chạy bộ cài, app lưu workspace và kết quả mô phỏng chưa lưu nếu history còn chỗ; nếu history đầy hoặc đang tính toán, app yêu cầu xử lý trước.
-- Nguồn duy nhất: [longnguy3n/GD-Toolkit](https://github.com/longnguy3n/GD-Toolkit), repository public. Không cần GitHub token. Dữ liệu update gồm bộ cài `.exe`, `.blockmap`, `latest.yml`; thư viện kiểm tra SHA-512 trước khi chấp nhận bản tải. Không cập nhật xuống phiên bản cũ hoặc tự lấy prerelease.
-- **Commit mới chưa phải bản cập nhật.** Bản cập nhật là release stable mới nhất. Workflow tạo bộ cài và phát hành khi maintainer push tag `vX.Y.Z` khớp version trong package.json.
-- Bản chạy bằng `npm start` không cài cập nhật. Bộ cài mới giữ cấu hình, history và theme; gỡ cài đặt cũng không tự xóa dữ liệu người dùng.
+- **Profile** là cấp lớn nhất, có tên và chứa nhiều banner. Tạo, nhân bản toàn bộ, đổi tên, chuyển và xóa profile bằng hàng PROFILE.
+- Mỗi profile có **nhiều banner**. Hàng BANNER phía dưới dùng để tạo, nhân bản, đổi tên, chuyển và xóa banner trong profile đang chọn. Mỗi banner giữ cây pool/item, counter khởi đầu, quy tắc reset và currency riêng.
+- Tối đa 50 profile, 50 banner/profile. Luôn giữ ít nhất một profile và một banner/profile để có chỗ làm việc.
+- Pool chứa các item cuối cùng hoặc pool con. Pool gốc chọn nhánh đầu tiên; mỗi lượt tiếp tục random cho tới đúng một item cuối cùng. Tối đa 200 node/banner và 8 tầng pool.
+- Nút tam giác mở/thu gọn pool; **Mở tất cả / Thu gọn tất cả** áp dụng toàn cây, giữ trạng thái riêng theo banner. Thu gọn không loại item khỏi phép tính.
+- Checkbox chọn nhiều item/pool rồi **Xóa đã chọn**. Xóa cha gồm tất cả con, kể cả đang ẩn; chọn cha và con không đếm trùng. Xóa mục tiêu pity sẽ tắt pity tương ứng. Thao tác làm rỗng pool hoặc tổng weight bằng 0 bị từ chối toàn bộ. Pool gốc không bị xóa.
+- **Nhập cấu hình** tạo banner mới trong profile hiện tại. **Xuất JSON** xuất banner hiện tại, kèm currency và quy tắc pity. Random engine chung không bị thay bởi import/history.
+- Xóa banner/profile không xóa history đã lưu. Kết quả chưa lưu được giữ trong bộ nhớ khi chuyển banner/profile; bấm **Lưu history** trước khi thoát nếu muốn giữ.
 
-## Banner, currency và pool thu gọn
+Dữ liệu v0.2/v0.3 tự chuyển sang schema workspace v3: mọi banner cũ được đặt trong một **Profile mặc định**, giữ banner đang chọn, currency, thu gọn, theme và history. Trước khi ghi, app sao lưu một lần thành `workspace.json.v1.backup` hoặc `workspace.json.v2.backup`. Bản app cũ không đọc workspace mới. Cấu hình banner mới dùng schema v2 để bản app cũ không âm thầm bỏ qua quy tắc reset mới; v0.4 vẫn đọc cấu hình schema v1.
 
-- Thanh **PROFILE / BANNER**: tạo, nhân bản, đổi tên, chuyển và xóa banner (tối đa 50). Mỗi banner giữ cây item, pity, currency và trạng thái thu gọn riêng. Kết quả mô phỏng chưa lưu được giữ trong bộ nhớ khi chuyển banner; đóng app cần **Lưu history** nếu muốn giữ.
-- **Currency & chi phí** trong Setup: tên currency, số currency cho một lượt, số dư hiện có, giá tiền của một currency, đơn vị tiền (mặc định VND). Giá 0 nghĩa là chưa định giá. Các số được nhập theo đơn vị thực, không phải nghìn đồng.
-- Calculate hiển thị currency, tổng giá trị và tiền cần nạp thêm cho N lượt, các mốc tin cậy và bảo đảm. Chi phí trung bình = E[T] × giá mỗi lượt; không suy diễn tiền nạp trung bình từ E[T]. Simulate hiển thị chi phí theo snapshot của lần chạy, không tự trừ số dư.
-- Nút tam giác cạnh pool mở/thu gọn con; **Mở tất cả / Thu gọn tất cả** áp dụng cho toàn cây. Thu gọn chỉ thay cách xem, không loại item khỏi tính toán. Trạng thái được lưu riêng cho mỗi banner.
-- Checkbox chọn nhiều item/pool rồi **Xóa đã chọn**. Xóa pool xóa cả con, kể cả con đang ẩn; chọn cha và con không đếm trùng. Nếu xóa mục tiêu pity thì tắt pity đó. Không cho xóa pool gốc, làm rỗng pool hoặc khiến tổng weight bằng 0; cả thao tác bị từ chối, không xóa một phần. **Chọn tất cả** gồm cả node ẩn và không chọn pool gốc.
-- History hiển thị toàn bộ banner. Xóa banner không xóa history đã lưu; mỗi history giữ đủ tên, cây, RNG, seed và chi phí tại lúc chạy.
-- Lần đầu mở v0.3, workspace cũ tự chuyển thành một banner và giữ lịch sử/theme. Trước lần ghi định dạng mới, app giữ bản sao một lần tại workspace.json.v1.backup. Workspace mới dùng schema v2, còn JSON cấu hình xuất vẫn dùng schema v1 có thêm economy. Bản cũ v0.2 không đọc được workspace v2.
+## Setup và currency
 
-## Setup
+Chọn node để đổi tên, weight hoặc cấu hình pity. **+ Item / + Pool** thêm vào pool đang chọn; chọn item cuối thì thêm cạnh item đó. Weight không âm; mỗi pool phải có ít nhất một con và tổng weight lớn hơn 0.
 
-- Chọn node trong cây để đổi tên hoặc thiết lập pity. Sửa weight trực tiếp trong bảng.
-- **+ Item / + Pool** thêm vào pool đang chọn; nếu chọn item cuối cùng thì thêm cạnh item đó trong pool cha.
-- Pool có thể lồng tối đa 8 tầng; tối đa 200 node. Mỗi pool có ít nhất 1 con và tổng weight phải lớn hơn 0. Item có weight 0 có thể nhận qua pity nếu là mục tiêu pity.
-- Mỗi pool có **một** mục tiêu pity là một con trực tiếp. Có thể là item hoặc pool con.
-- **Hard pity H:** lượt thứ H kể từ lần trúng mục tiêu gần nhất được bảo đảm. Trúng mục tiêu reset counter về 0.
-- **Soft pity S:** từ lượt S, cộng `step` điểm phần trăm mỗi lượt, chặn ở 100%. S=0 tắt soft pity. Ví dụ rate 0,6%, S=74, step=6 điểm % → lượt 74 là 6,6%, lượt 75 là 12,6%.
-- **Đã trượt liên tiếp:** counter khởi đầu trong mọi phép tính và mô phỏng. Phải nhỏ hơn H.
-- Các item còn lại được phân bổ phần xác suất còn lại theo tỷ trọng weight ban đầu. Pool con chỉ tăng counter khi được gọi. Trúng ở cha không reset các pool con chưa được gọi.
-- Xuất/nhập JSON để chuyển cấu hình. Nhập cấu hình tạo banner mới, giữ random engine chung và history. Có nút nạp lại mẫu.
+Mở **Thiết lập banner · Currency & reset pity** để nhập:
 
-Mẫu ban đầu: pool 5★ có rate gốc 0,6%, soft pity từ 74, tăng 6 điểm %, hard pity 90; bên trong là 50/50 giữa Featured và Standard, hard pity 2 cho Featured. Thua 50/50 thì lần vào pool 5★ tiếp theo được Featured. Mẫu này minh họa phong cách gacha, **không phải thông số chính thức hoặc bản sao đầy đủ của game HoYoverse**. Không có bộ đếm 4★ mỗi 10 lượt trong mẫu. Chưa có nhiều bộ đếm pity song song trong cùng pool, chuyển pity giữa banner hay các cơ chế như Epitomized Path/Capturing Radiance.
+- Tên currency, số currency cho một lượt gacha, số dư đang có.
+- Giá tiền của một currency và đơn vị tiền, ví dụ VND. Giá 0 = chưa định giá, không được hiểu là mọi lượt miễn phí.
+- Chi phí chỉ đặt ở banner, không nhập ở pool hoặc item. Giá tuyến tính, chưa mô hình hóa gói nạp/khuyến mãi.
 
-## Calculate
+Calculate/Simulate hiển thị tổng currency, tổng giá trị và số tiền cần nạp thêm sau khi trừ số dư. Mô phỏng không tự trừ currency. History giữ chi phí theo cấu hình lúc chạy.
 
-Chọn một item cuối cùng, số bản sao K, số lượt N, horizon tìm mốc tin cậy, rồi bấm **Tính xác suất**.
+## Quy tắc pity
 
-- Rate gốc: tích weight / tổng weight của từng cạnh trên đường đi.
-- Rate lượt kế tiếp: tích xác suất có điều kiện tại counter khởi đầu của từng pool.
-- Rate thực: tần suất dài hạn sau pity. Được tính bằng chu kỳ tái sinh của từng mục tiêu pity, rồi nhân tỷ lệ có điều kiện trên đường đi.
-- `P(X_N = K)` và `P(X_N ≥ K)` được tính riêng bằng quy hoạch động Markov với các counter trên đường tới item. Đây là tính giải tích số, không phải ước lượng từ mô phỏng.
-- Biểu đồ là xác suất nhận ít nhất K bản sao theo số lượt. Các mốc 50/90/95/99% là số lượt đầu đạt ngưỡng trong horizon. `> horizon` nghĩa là chưa đạt trong khoảng đã tính; không mặc nhiên là bất khả thi.
-- Thời gian chờ trung bình chính xác được hiển thị khi tất cả các pool có pity trên đường đi đều bảo đảm đúng nhánh đang xét. Khi đó, sau mỗi lần nhận mục tiêu, các counter liên quan tái sinh về 0. Tính từ counter hiện tại, không dùng rate dài hạn thay cho xác suất lượt đầu.
-- Mốc bảo đảm hữu hạn chỉ hiển thị khi mọi cạnh trên đường đi có bảo đảm hoặc xác suất bằng 1. `E[min(T,horizon)]` luôn hiển thị dưới dạng **cận dưới**, kèm phần xác suất còn chưa đạt để tránh hiểu nhầm là kỳ vọng đầy đủ.
-- **Rate ↔ Hard pity** là bộ tính riêng cho rate p cố định trước hard pity H: `rate thực = p / (1 - (1-p)^H)`. Với p=0, rate thực là 1/H. Tìm H nguyên gần nhất từ 1–10.000 cho rate thực mong muốn; đồng thời tính N đạt 95% nếu không có pity. Không áp dụng công thức này cho soft pity, không tự thay Setup.
+Mỗi pool có một mục tiêu pity là một con trực tiếp, có thể là item hoặc pool. Các pool có counter độc lập và chỉ tăng khi được gọi; pool con không được gọi sẽ giữ counter.
 
-Giới hạn tính chính xác: K≤50, N≤10.000, horizon≤10.000, tối đa 250.000 trạng thái và 40 triệu bước. Tác vụ chạy ở worker, có nút hủy. Vượt giới hạn sẽ báo lỗi rõ ràng; dùng Simulate cho hệ thống lớn. Mô hình giả định các mẫu RNG độc lập đều; sai số làm tròn số thực và lượng tử hóa của nguồn RNG không được mô hình hóa riêng.
+- **Hard pity H:** lần gọi thứ H kể từ khi reset bảo đảm chọn mục tiêu. **Hard pity luôn reset counter pool đó về 0.**
+- **Reset khi trúng mục tiêu trước hard pity** là tùy chọn của banner, áp dụng mọi pool. Bật: trúng tự nhiên hoặc trong vùng soft pity sẽ reset pool đó. Tắt: counter tiếp tục tăng dù trúng sớm; hard pity vẫn reset, nên các lần hard pity cách nhau H lần gọi của pool.
+- **Soft pity S:** từ lần gọi S, cộng step điểm phần trăm mỗi lần, chặn ở 100%. S=0 tắt. Rate các nhánh khác giảm theo tỷ trọng weight. Ví dụ rate 0,6%, S=74, step=6 → lần 74 là 6,6%, lần 75 là 12,6%.
+- **Counter khởi đầu:** số lần gọi đã tích lũy trong chu kỳ hiện tại, từ 0 đến H−1. Nút **Reset mọi counter khởi đầu** đặt tất cả về 0. Mỗi lần Calculate/Simulate bắt đầu từ các counter này, không nối với lần chạy trước.
 
-## Simulate & History
+Mẫu 90 pity + 50/50 minh họa hệ thống gacha, không phải thông số chính thức hoặc bản sao đầy đủ của game HoYoverse. Chưa có nhiều bộ đếm pity song song trên cùng pool, chuyển pity giữa banner, hay Epitomized Path/Capturing Radiance.
 
-- Từ 1 đến 1.000.000 lượt mỗi lần chạy. Mỗi lượt đi từ gốc đến đúng 1 item cuối cùng; vì vậy tổng số item bằng tổng số lượt.
-- Mỗi lần chạy bắt đầu từ counter trong Setup, cùng seed hoặc cùng đầu file Unity RNG. Chạy lại cùng thông số cho cùng kết quả. Không tự nối counter hay seed của lần trước.
-- Bảng hiển thị **tất cả** item cuối cùng kể cả số lượng 0, số lượng nhận, tỷ lệ quan sát, rate thực dài hạn và chênh lệch theo điểm phần trăm.
-- Pull log lưu đầy đủ thứ tự từng item; giao diện phân trang 48 lượt. JSON xuất chứa toàn bộ thứ tự, counts, cấu hình, seed, các counter cuối và thống kê mỗi pool.
-- Lưu tối đa 30 lần chạy; workspace tối đa 100 MB. Khi đầy, xuất kết quả và xóa bớt history. Dữ liệu lưu trên ổ đĩa; phép ghi dùng file tạm rồi đổi tên. Không có tự xóa lịch sử cũ.
-- History giữ bản chụp cấu hình của lần chạy, xem lại đúng tên/rate cũ dù Setup hiện tại đã đổi. Dùng cấu hình từ history tạo một banner mới, giữ random engine chung.
+## Calculate và horizon
 
-## Random engine trong Cài đặt chung
+Chọn item cuối, số bản sao K, số lượt N và horizon.
 
-Random engine và seed là cài đặt chung, áp dụng cho mọi banner. Cấu hình import và history không tự đổi lựa chọn chung. Calculate vẫn dùng mô hình xác suất; chỉ Simulate dùng chuỗi RNG.
+**Horizon** là số lượt tối đa để tìm các mốc 50%, 90%, 95%, 99% cơ hội có **ít nhất K bản sao**. Mốc 95% = số lượt đầu tiên xác suất tích lũy đạt 95%, không phải bảo đảm chắc chắn và không phải khoảng tin cậy của một phép ước lượng Monte Carlo. Ví dụ horizon 1.000, mốc 99% báo >1.000 nghĩa là chưa đạt trong phạm vi đã xét, không phải không thể đạt.
 
-**Custom:** xoshiro128** 1.1 của Blackman & Vigna, seed uint32 qua bộ trộn xác định được ghi trong `core/engine.mjs`. Không dùng `Math.random`. Thuật toán phù hợp mô phỏng, không dùng cho mật mã. Cùng seed/config/phiên bản engine tái tạo được kết quả.
+Horizon phải ≥ N, tối đa 10.000. Tăng horizon tốn thêm thời gian, không thay đổi pity hay kết quả tại N. Các thống kê pity/chi phí của N lượt được tính trên **N**, không phải horizon.
 
-**Unity giả lập:** chạy ngay với Xorshift128 (biến thể Marsaglia 11/8/19). [Tài liệu Unity](https://docs.unity3d.com/ScriptReference/Random.html) xác nhận họ thuật toán này. GD Toolkit mở rộng seed thành 4 uint32 bằng 4 đầu ra đầu tiên của bộ xoshiro ở trên, và chuyển uint32 thành số thực bằng cách chia 2^32. Đây là quy ước riêng, **không bảo đảm chuỗi trùng Unity InitState/Random.value**. Vector trạng thái [1,2,3,4] cho đầu ra uint32 [2061,6175,4,8224]. Cùng seed/config cho cùng kết quả trong phiên bản engine này.
+- Tính riêng `P(X_N = K)` và `P(X_N ≥ K)` theo Markov, gồm counter trên đường tới item.
+- So sánh **có pity** với **tắt tất cả pity**: rate dài hạn, rate trung bình trong N lượt từ counter khởi đầu, số item mục tiêu kỳ vọng.
+- Đếm **số lần hard pity kỳ vọng toàn banner**, số lượt có ít nhất một hard pity, và thống kê từng pool: số lần gọi, hard pity, lần tăng rate soft, trúng vùng soft, reset. Các số kỳ vọng có thể là số thập phân, khác số lần thực tế của từng lần mô phỏng. Vẫn đếm sự kiện sau khi đã đủ K bản sao.
+- Một lượt gacha có thể kích hoạt nhiều pool pity, nên tổng số sự kiện có thể lớn hơn số lượt có pity.
+- Rate không pity là tích weight/tổng weight trên đường đi. Rate dài hạn có pity dùng phân phối dừng của counter tại mỗi pool. Nếu tắt reset trúng sớm, một chu kỳ luôn dài H lần gọi và rate là trung bình rate của H vị trí.
+- Mean chính xác hiển thị khi mô hình chu kỳ cho phép tính, hoặc khi horizon bao phủ một cận bảo đảm hữu hạn để tổng xác suất chờ cho kết quả đầy đủ. Luôn hiển thị `E[min(T,horizon)]` như cận dưới và phần xác suất chưa đạt mục tiêu; không coi cận dưới là mean đầy đủ.
+- Chi phí trung bình = E[T] × giá mỗi lượt. Không suy diễn tiền nạp trung bình bằng cách trừ số dư khỏi E[T].
 
-**Unity · mẫu thực:** sử dụng các giá trị thực của UnityEngine.Random.value, xuất bằng script đi kèm. Unity không được nhúng trong exe.
+Giới hạn phép tính mục tiêu: K≤50, N/horizon≤10.000, 250.000 trạng thái và 40 triệu bước. Thống kê pity toàn banner dùng bộ đếm riêng, tối đa 50.000 trạng thái, 250.000 nhánh được lưu và 40 triệu bước. Nếu phần thống kê toàn banner vượt giới hạn, xác suất mục tiêu vẫn hiển thị và phần pity báo không khả dụng, hướng dẫn dùng Simulate. Worker có thể hủy.
 
-1. Cài đặt chung → Unity · mẫu thực → **Script Unity** để lưu `GDToolkitRandomExporter.cs`.
-2. Thêm script vào `Assets/Editor` của dự án Unity.
-3. Trong Unity mở **Tools → GD Toolkit → Export Random**. Chọn seed và số mẫu (tối đa 3 triệu), xuất JSON.
-4. Trong GD Toolkit chọn **Nhập RNG JSON**, sau đó Simulate.
+**Rate ↔ Hard pity** là bộ tính độc lập cho rate cố định trước hard pity và reset sau mỗi hit: rate thực = p / (1 − (1 − p)^H), p=0 thì 1/H. Không áp dụng công thức này cho soft pity hay chế độ không reset khi trúng sớm.
 
-Mỗi pool được ghé tiêu thụ 1 mẫu, kể cả lượt bảo đảm. Một pull nhiều tầng cần nhiều mẫu. Hết mẫu thì báo lỗi và không trả về kết quả chưa hoàn tất, không quay vòng. Mẫu `1.0` được đưa vào khoảng cuối cùng có xác suất dương. Exporter khôi phục trạng thái random của Unity sau khi chạy. File Unity được giữ trong bộ nhớ phiên; mở app lại cần nhập lại. History vẫn xem được mà không cần file đó; muốn replay cần giữ file RNG gốc. Seed Unity do Unity quyết định và được lưu trong metadata.
+## Simulate, log pity và History
 
-Script exporter được cung cấp theo API Unity Editor; **chưa chạy kiểm thử trong Unity Editor trên máy này**. Định dạng JSON, các giá trị biên 0/1, hết mẫu và đầu ra của nhánh Unity đã được kiểm thử bằng dữ liệu mẫu.
+Mô phỏng 1–1.000.000 lượt, mỗi lượt trả đúng một item cuối. Bảng liệt kê mọi item kể cả số lượng 0; tổng item bằng số lượt. Cùng seed/config/phiên bản engine cho cùng chuỗi.
 
-Nguồn kỹ thuật:
-- Unity Random: https://docs.unity3d.com/ScriptReference/Random.html
-- xoshiro128** (public domain): https://prng.di.unimi.it/xoshiro128starstar.c
+- Tổng kết số hard pity kích hoạt, số lượt có hard pity, số lần tăng rate soft và số lần trúng trong vùng soft.
+- **Pull log** đánh dấu HARD PITY hoặc TRÚNG VÙNG SOFT. Mỗi dòng ghi số lần gọi còn lại đến hard pity của mọi pool đang bật pity.
+- Bấm mở dòng để xem từng pool: được gọi hay giữ nguyên, rate mục tiêu tại thời điểm đó, counter trước → sau, còn bao nhiêu lần gọi, có reset hay không.
+- “Còn 1 lần gọi” nghĩa là lần gọi pool kế tiếp được hard pity bảo đảm. Sau hard pity H=90, còn 90 lần gọi đến hard tiếp theo. Đây là lần gọi của pool, không phải luôn bằng số lượt quay banner.
+- Hard pity bảo đảm nhánh mục tiêu tại pool đó, không nhất thiết bảo đảm item cuối bên trong các pool con. Trúng trong vùng soft pity không có nghĩa item chỉ xuất hiện nhờ pity; không gán nhân quả chắc chắn cho một mẫu random.
+- Log phân trang 48 lượt; nhập số ở **Tới lượt** để nhảy trang. JSON xuất chứa đủ sequence, counts, cấu hình, seed, tổng kết và log pity.
+- Log dùng định dạng thưa: mỗi pool có mảng rolls/after/flags, chỉ lưu lần pool được gọi. Các bit flags: 1=hard, 2=rate được soft boost, 4=trúng mục tiêu, 8=reset. Pool không được gọi được phục hồi bằng counter gần nhất.
+- Lưu tối đa 30 history toàn workspace, tổng workspace tối đa 100 MB. Nếu đầy, xuất rồi xóa bớt; app không tự xóa history.
+- History cũ vẫn mở được nhưng không có log counter chi tiết chưa từng được lưu. **Dùng cấu hình** tạo banner mới trong profile hiện tại. History vẫn giữ tên profile/banner cũ và snapshot ngay cả khi đã xóa chúng.
 
-## Phát triển & kiểm thử
+## Random engine chung
+
+**Cài đặt chung** chứa RNG và seed áp dụng mọi profile/banner. Calculate dùng mô hình mẫu độc lập đều, không phụ thuộc seed; chỉ Simulate dùng chuỗi RNG. Mỗi lần mô phỏng bắt đầu từ đầu chuỗi, không nối qua banner khác.
+
+- **Custom:** xoshiro128** 1.1, seed uint32 qua bộ trộn xác định trong core/engine.mjs; không dùng Math.random và không dành cho mật mã.
+- **Unity giả lập:** Xorshift128 (11/8/19), mở rộng seed bằng 4 đầu ra xoshiro rồi chia uint32 cho 2^32. Không bảo đảm trùng Unity InitState/Random.value. Vector trạng thái [1,2,3,4] cho [2061,6175,4,8224]. [Unity xác nhận dùng họ Xorshift128](https://docs.unity3d.com/ScriptReference/Random.html).
+- **Unity · mẫu thực:** lưu Script Unity vào Assets/Editor, mở Tools → GD Toolkit → Export Random trong Unity, xuất JSON rồi nhập RNG JSON vào app. Exporter khôi phục Random.state sau khi chạy. Unity không được nhúng trong exe.
+
+Mỗi pool được gọi tiêu thụ một mẫu, kể cả lượt bảo đảm. File Unity tối đa 3 triệu mẫu; hết mẫu báo lỗi và không trả kết quả thiếu, không lặp lại. Mẫu 1.0 ánh xạ vào nhánh cuối có xác suất dương. Mẫu chỉ giữ trong phiên, cần nhập lại khi mở app; history xem được không cần file RNG. Exporter chưa được kiểm thử trong Unity Editor trên máy phát triển này.
+
+## Phát triển và phát hành
 
 ```
 npm ci
@@ -100,18 +100,8 @@ npm run test:desktop
 npm run package
 ```
 
-Node 22.12+ để phát triển (CI dùng Node 24). Electron 42 tải runtime theo nhu cầu; nếu cần tải trước: `node node_modules/electron/install.js`. `npm run package` dùng electron-builder tạo bộ cài NSIS Windows x64 và manifest cập nhật trong `releases/`. Mã nguồn nằm ở `desktop/` (cửa sổ, IPC, lưu file, updater), `core/` (toán và RNG), `ui/` (giao diện, worker, theme), `unity/` (exporter).
+Node 22.12+ (CI dùng 24), Electron 42, electron-builder tạo NSIS x64. Source: desktop/ (IPC, persistence, updater), core/ (toán, RNG, profile/banner), ui/ (giao diện/worker), unity/ (exporter).
 
-Kiểm thử bao gồm phân phối nhị thức, đối chiếu liệt kê tất cả nhánh của một cấu hình nhỏ, mốc pity, bảo đảm 50/50, counter khởi đầu, kỳ vọng, hạt giống lặp lại, vector chuẩn xoshiro, Monte Carlo 200.000 lượt và các trường hợp nhập sai. Kiểm thử Electron chạy trên hồ sơ tạm trong `test-output/profile`, không dùng dữ liệu của người dùng; kiểm tra thêm/xóa, worker, persistence sau reload, history, phân trang và bố cục 1020px. Ảnh QA được lưu ở `test-output/`.
+Tests kiểm tra xác suất bằng liệt kê nhánh độc lập, Monte Carlo, pity/reset, reward Markov sau K bản sao, log các pool không được gọi, seed, migration v1/v2 → v3, profile/banner độc lập, currency và updater. Test Electron dùng test-output/profile, không dùng dữ liệu người dùng, và chụp ảnh QA ở test-output/.
 
-Updater có kiểm thử trạng thái cho kiểm tra/tải/cài, mất mạng, lỗi file tải, lỗi ghi dữ liệu, chống thao tác trùng, không tải/cài ngoài ý muốn. Kiểm thử desktop xác nhận theme sáng và tối, giữ theme sau reload, và hộp cập nhật. Kiểm thử live release (chạy riêng sau khi phát hành) xác minh nguồn GitHub và tải checksum hợp lệ, không tự cài lên máy kiểm thử.
-
-## Phát hành phiên bản tiếp theo
-
-1. Sửa mã nguồn, chạy `npm test` và `npm run test:desktop`.
-2. Tăng version: `npm version patch --no-git-tag-version` (hoặc minor/major), cập nhật release notes, rồi commit.
-3. Push branch main, tạo và push tag trùng version, ví dụ `git tag v0.2.1` rồi `git push origin v0.2.1`.
-4. Workflow `.github/workflows/release.yml` chạy trên Windows, kiểm thử, build, tải asset vào draft, rồi publish stable release. Token CI do GitHub cung cấp; không đưa token vào source hoặc exe.
-5. App đang cài phiên bản cũ sẽ nhận phiên bản mới khi kiểm tra cập nhật. Release có lỗi build/test sẽ không được phát hành.
-
-Có thể phát hành thủ công bằng `tools/github-release.cjs publish` sau khi đã push đúng commit/tag và build. Helper dùng Git credential manager trong bộ nhớ, không ghi token ra file. Không ghi đè asset của release đã publish; sửa lỗi bằng version mới.
+Tăng version bằng npm version --no-git-tag-version, cập nhật RELEASE_NOTES.md, chạy tests/build, commit/push main rồi push tag vX.Y.Z. Workflow Windows kiểm thử, đóng gói, phát hành exe/blockmap/latest.yml. Commit chưa phải cập nhật; chỉ stable release mới được updater nhận. Helper tools/github-release.cjs dùng Git Credential Manager trong bộ nhớ; không ghi token vào source/installer. Test live-update kiểm tra feed, tải bộ cài và SHA-512, không chạy installer.
