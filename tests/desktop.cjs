@@ -14,7 +14,7 @@ app.whenReady().then(async()=>{
     await fs.mkdir(output,{recursive:true});
     const win=BrowserWindow.getAllWindows()[0];
     async function capture(name){await sleep(400);await fs.writeFile(path.join(output,name),(await win.webContents.capturePage(undefined,{stayHidden:true,stayAwake:true})).toPNG());}
-    let errors=[];win.webContents.on('console-message',(_event,level,message)=>{if(level>=3)errors.push(message);});
+    let errors=[];win.webContents.on('console-message',event=>{if(event.level==='error'||event.level>=3)errors.push(event.message);});
     const js=async code=>{try{return await win.webContents.executeJavaScript(code);}catch(e){throw Error(code+'\n'+e.message);}};
     async function waitFor(code){for(let i=0;i<200;i++){if(await js(code))return;await sleep(100);}console.log(await js("document.querySelector('#toast').textContent+' | '+document.querySelector('dialog').outerHTML"));throw Error('Timeout: '+code);}
     await waitFor("!!document.querySelector('.tree-row')");
@@ -22,6 +22,10 @@ app.whenReady().then(async()=>{
     await js("(async()=>window.desktop.save({version:1, config: (await import('../core/engine.mjs')).preset(),history:[]}))()");
     win.webContents.reload();await sleep(250);await waitFor("!!document.querySelector('.tree-row')");
     assert.equal(await js("document.querySelectorAll('.tree-row').length"),13);
+    assert.equal(await js("window.desktop.save(null).then(()=>false,()=>true)"),true);
+    await waitFor("document.querySelector('#save-state').textContent.includes('Đã lưu')");
+    const backup=JSON.parse(await fs.readFile(path.join(output,'profile/workspace.json.v1.backup'),'utf8'));
+    assert.equal(backup.version,1);
     await sleep(500);
     await capture('setup.png');
     await js("document.querySelector('#theme-toggle').click()");
@@ -38,7 +42,7 @@ app.whenReady().then(async()=>{
     await js("document.querySelector('[data-weight=featured]').value='75';document.querySelector('[data-weight=featured]').dispatchEvent(new Event('change',{bubbles:true}));");
     await waitFor("document.querySelector('#save-state').textContent.includes('Đã lưu')");
     let saved=JSON.parse(await fs.readFile(path.join(output,'profile/workspace.json'),'utf8'));
-    assert.equal(saved.config.root.children[0].children[0].weight,75);
+    assert.equal(saved.profiles.find(p=>p.id===saved.activeProfileId).config.root.children[0].children[0].weight,75);
     await js("document.querySelector('[data-weight=featured]').value='50';document.querySelector('[data-weight=featured]').dispatchEvent(new Event('change',{bubbles:true}));");
     await js("document.querySelector('[data-action=add-item]').click()");await waitFor("document.querySelector('dialog').open");
     await js("document.querySelector('dialog input[name=name]').value='QA item';document.querySelector('dialog .primary').click()");
@@ -68,12 +72,77 @@ app.whenReady().then(async()=>{
     await js("document.querySelector('[data-action=history-back]').click();document.querySelector('[data-action=delete-history]').click()");await waitFor("document.querySelector('dialog').open");
     await js("document.querySelector('dialog .primary').click()");await waitFor("document.querySelectorAll('.history-card').length===0");
     saved=JSON.parse(await fs.readFile(path.join(output,'profile/workspace.json'),'utf8'));assert.equal(saved.history.length,0);
+    // New banner management, hierarchy controls, global RNG and economy workflows.
+    await js("document.querySelector('.tabs [data-tab=setup]').click()");
+    assert.equal(await js("document.querySelector('#content').textContent.includes('Random engine')"),false);
+    await js("document.querySelector('[data-action=pool-toggle][data-id=legend]').click()");
+    assert.equal(await js("document.querySelectorAll('.tree-row').length"),8);
+    await waitFor("document.querySelector('#save-state').textContent.includes('Đã lưu')");
+    win.webContents.reload();await sleep(250);await waitFor("!!document.querySelector('.tree-row')");
+    assert.equal(await js("document.querySelectorAll('.tree-row').length"),8);
+    await js("document.querySelector('[data-action=pool-collapse-all]').click()");
+    assert.equal(await js("document.querySelectorAll('.tree-row').length"),1);
+    await js("document.querySelector('[data-action=pool-expand-all]').click()");
+    assert.equal(await js("document.querySelectorAll('.tree-row').length"),13);
+    const firstProfile=await js("document.querySelector('[data-profile]').value");
+    await js("document.querySelector('[data-action=profile-copy]').click()");await waitFor("document.querySelector('dialog').open");
+    await js("document.querySelector('dialog input[name=name]').value='Weapon banner QA';document.querySelector('dialog .primary').click()");
+    await waitFor("document.querySelectorAll('[data-profile] option').length===2");
+    const secondProfile=await js("document.querySelector('[data-profile]').value");
+    const change=async(selector,value)=>{await js(`document.querySelector(${JSON.stringify(selector)}).value=${JSON.stringify(String(value))};document.querySelector(${JSON.stringify(selector)}).dispatchEvent(new Event('change',{bubbles:true}));`);await waitFor("document.querySelector('#save-state').textContent.includes('Đã lưu')");};
+    await change('[data-economy=balance]',1600);await change('[data-economy=unitPrice]',250);
+    await change('[data-economy=perPull]',80);
+    assert.ok((await js("document.querySelector('.budget-summary').textContent")).includes('20 lượt'));
+    await capture('banner-economy.png');
+    // Selecting a pool and one of its descendants counts/deletes that subtree only once.
+    await js("document.querySelector('[data-check=legend]').click();document.querySelector('[data-check=featured]').click();document.querySelector('[data-check=epic]').click();document.querySelector('[data-action=delete-selected]').click()");
+    await waitFor("document.querySelector('dialog').open");
+    assert.ok((await js("document.querySelector('dialog').textContent")).includes('9 node'));
+    await js("document.querySelector('dialog .primary').click()");await waitFor("document.querySelectorAll('.tree-row').length===4");
+    await js("document.querySelector('[data-action=check-all]').click();document.querySelector('[data-action=delete-selected]').click()");
+    assert.equal(await js("document.querySelector('dialog').open"),false);
+    assert.equal(await js("document.querySelectorAll('.tree-row').length"),4);
+    await js("document.querySelector('[data-action=check-clear]').click();document.querySelector('.side-tool[data-tab=settings]').click()");
+    assert.equal(await js("document.querySelector('#profile-bar').hidden"),true);
+    await js("document.querySelector('[data-action=rng][data-value=unity-emulated]').click()");
+    await change('[data-setting=seed]',1234);await capture('settings.png');
+    await js("document.querySelector('.side-tool[data-tab=setup]').click()");
+    await change('[data-profile]',firstProfile);
+    assert.equal(await js("document.querySelectorAll('.tree-row').length"),13);
+    assert.equal(await js("document.querySelector('[data-economy=balance]').value"),'0');
+    await change('[data-profile]',secondProfile);
+    assert.equal(await js("document.querySelectorAll('.tree-row').length"),4);
+    await js("document.querySelector('.tabs [data-tab=simulate]').click();document.querySelector('[data-action=sim-tab][data-value=run]').click()");
+    await change('[data-sim=pulls]',100);
+    await js("document.querySelector('[data-action=simulate]').click()");await waitFor("!!document.querySelector('[data-action=save-result]')");
+    assert.ok((await js("document.querySelector('.cost-panel').textContent")).includes('1.600.000 VND'));
+    await change('[data-profile]',firstProfile);await change('[data-profile]',secondProfile);
+    assert.equal(await js("!!document.querySelector('[data-action=save-result]')"),true);
+    await js("document.querySelector('[data-action=save-result]').click()");await waitFor("document.querySelector('[data-action=save-result]').disabled");
+    saved=JSON.parse(await fs.readFile(path.join(output,'profile/workspace.json'),'utf8'));
+    assert.equal(saved.history[0].config.rng,'unity-emulated');assert.equal(saved.history[0].config.seed,1234);
+    assert.equal(saved.history[0].config.economy.perPull,80);assert.equal(saved.history[0].profileId,secondProfile);
+    // Delete the banner; saved results must remain readable, with their own costs and RNG.
+    await js("document.querySelector('[data-action=profile-delete]').click()");await waitFor("document.querySelector('dialog').open");
+    await js("document.querySelector('dialog .primary').click()");await waitFor("document.querySelectorAll('[data-profile] option').length===1");
+    await js("document.querySelector('[data-action=sim-tab][data-value=history]').click();document.querySelector('[data-action=view-history]').click()");
+    assert.ok((await js("document.querySelector('#content').textContent")).includes('Weapon banner QA'));
+    await js("document.querySelector('[data-action=history-back]').click();document.querySelector('[data-action=restore-history]').click()");
+    await waitFor("document.querySelectorAll('[data-profile] option').length===2");
+    await waitFor("!!document.querySelector('[data-economy=perPull]')");
+    assert.equal(await js("document.querySelector('[data-economy=perPull]').value"),'80');
+    await js("document.querySelector('[data-action=pool-collapse-all]').click()");await waitFor("document.querySelector('#save-state').textContent.includes('Đã lưu')");
+    win.webContents.reload();await sleep(250);await waitFor("!!document.querySelector('.tree-row')");
+    assert.equal(await js("document.querySelectorAll('.tree-row').length"),1);
+    await js("document.querySelector('.side-tool[data-tab=settings]').click()");
+    assert.equal(await js("document.querySelector('.radio-card.active').dataset.value"),'unity-emulated');
+    await js("document.querySelector('#theme-toggle').click()");await capture('settings-light.png');
     // Resize and check the application doesn't create horizontal page overflow.
     win.setSize(1020,760);await sleep(200);await js("document.querySelector('.tabs [data-tab=setup]').click()");
     assert.equal(await js("document.documentElement.scrollWidth > window.innerWidth"),false);
     await capture('setup-small.png');
     assert.deepEqual(errors,[]);
-    console.log('PASS desktop: render, edit weight, add/delete item, calculate worker, simulate worker, save/reload/delete history, pagination, responsive layout, no console errors.');
+    console.log('PASS desktop: migration, themes, updater, math workers, history, profiles, currency, global Unity emulation, bulk deletion, collapse persistence, responsive layout, no console errors.');
     app.exit(0);
   }catch(e){console.error(e);app.exit(1);}
 });

@@ -1,0 +1,63 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {preset,simulate,clone,xorshiftState,unityEmulated,leafRates} from '../core/engine.mjs';
+import {upgradeWorkspace,validateWorkspace,activeProfile,runConfig,addProfile,removeProfile,deleteNodes} from '../core/workspace.mjs';
+import {costs,validateEconomy} from '../core/economy.mjs';
+
+test('v1 migration preserves config, theme, actual Unity mode and history snapshots',()=>{
+  const config=preset(),history=[simulate(config,50)];config.rng='unity';
+  const original={version:1,config,history,settings:{theme:'light'}},before=clone(original);
+  const d=upgradeWorkspace(original);
+  assert.equal(d.version,2);assert.equal(d.settings.rng,'unity');assert.equal(d.settings.theme,'light');
+  assert.deepEqual(d.config.root,config.root);assert.equal(d.history[0].config.rng,'custom');
+  assert.equal(d.history[0].profileId,d.activeProfileId);assert.deepEqual(original,before);
+  const persisted=JSON.parse(JSON.stringify(d));assert.equal(persisted.config,undefined);
+  assert.equal(persisted.profiles[0].config.rng,undefined);
+  assert.deepEqual(runConfig(upgradeWorkspace(persisted)),runConfig(d));
+  const unnamed=clone(original);unnamed.config.name='';
+  assert.equal(upgradeWorkspace(unnamed).config.name,''); // v0.2 permitted this value.
+});
+test('banners isolate trees, economy and collapsed pools; RNG is global',()=>{
+  const d=upgradeWorkspace(null),first=activeProfile(d),p=addProfile(d,'Weapon banner',d.config);
+  d.activeProfileId=p.id;d.config.root.children[0].weight=99;d.config.economy.balance=1600;p.collapsed=['root','standard'];
+  assert.equal(first.config.root.children[0].weight,6);assert.equal(first.config.economy.balance,0);assert.deepEqual(first.collapsed,[]);
+  d.settings.rng='unity-emulated';d.settings.seed=9;
+  const r=simulate(runConfig(d),100);d.history.push({...r,profileId:p.id});
+  removeProfile(d,p.id);assert.equal(d.activeProfileId,first.id);assert.equal(runConfig(d).rng,'unity-emulated');
+  assert.equal(d.history[0].config.economy.balance,1600);assert.equal(d.history[0].config.seed,9);
+  assert.throws(()=>removeProfile(d,first.id),/ít nhất/);validateWorkspace(d);
+});
+test('bulk deletion deduplicates parent/descendant, disables affected pity and is atomic',()=>{
+  const c=preset(),original=clone(c),d=deleteNodes(c,['legend','featured','epic']);
+  assert.equal(d.removed,9);assert.equal(d.disabledPity,1);assert.equal(d.config.root.pity.enabled,false);
+  assert.equal(leafRates(d.config.root).length,2);assert.deepEqual(c,original);
+  for(const ids of [['root'],['featured','standard'],['legend','epic','common']]){
+    assert.throws(()=>deleteNodes(c,ids));assert.deepEqual(c,original);
+  }
+});
+test('currency costs distinguish gross value, top up and affordable whole pulls',()=>{
+  const e={currency:'Gem',money:'VND',perPull:160,balance:1600,unitPrice:250};
+  assert.deepEqual(costs(e,20),{currency:3200,total:800000,shortfall:1600,topUp:400000,affordable:10});
+  assert.equal(costs(e,5).topUp,0);assert.equal(costs(e,5.5).currency,880);
+  assert.equal(costs({...e,perPull:.1,balance:.3},3).affordable,3);
+  assert.equal(costs({...e,perPull:160,balance:1599.999},3).affordable,9);
+  assert.throws(()=>validateEconomy({...e,perPull:0}));assert.throws(()=>validateEconomy({...e,unitPrice:-1}));
+  assert.throws(()=>validateEconomy({...e,perPull:1e-320}));
+  assert.throws(()=>costs(e,NaN));
+});
+test('Unity-like xorshift reference recurrence and deterministic usable seeds',()=>{
+  const vector=xorshiftState([1,2,3,4]);assert.deepEqual(Array.from({length:4},()=>vector()*4294967296),[2061,6175,4,8224]);
+  for(const seed of [0,1,2026,4294967295]){
+    const a=unityEmulated(seed),b=unityEmulated(seed),values=Array.from({length:1000},()=>a());
+    assert.deepEqual(values,Array.from({length:1000},()=>b()));assert.ok(values.every(x=>x>=0&&x<1));assert.ok(new Set(values).size>990);
+  }
+  const c={...preset(),rng:'unity-emulated'},a=simulate(c,10000),b=simulate(c,10000);
+  assert.deepEqual(a.sequence,b.sequence);assert.equal(Object.values(a.counts).reduce((a,b)=>a+b,0),10000);
+  assert.equal(a.unity,null);assert.notDeepEqual(a.sequence,simulate({...c,rng:'custom'},10000).sequence);
+});
+test('corrupt workspaces and global settings cannot be silently accepted',()=>{
+  const d=upgradeWorkspace(null);
+  for(const mutate of [x=>x.activeProfileId='missing',x=>x.settings.seed=-1,x=>x.settings.rng='fake',x=>x.profiles.push(clone(x.profiles[0])),x=>x.profiles[0].config.economy.balance=NaN]){
+    const invalid=clone(d);mutate(invalid);assert.throws(()=>upgradeWorkspace(invalid));
+  }
+});

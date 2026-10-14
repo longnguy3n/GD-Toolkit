@@ -5,3 +5,5 @@ Electron and its bundled Chromium/Node licenses are distributed in the portable 
 xoshiro128** 1.1 is based on the public-domain implementation by David Blackman and Sebastiano Vigna. Source: https://prng.di.unimi.it/xoshiro128starstar.c . Their dedication permits use, modification, and distribution for any purpose, without warranty. The seed mixer and float conversion are documented in `core/engine.mjs`; the sequence is not Unity-compatible.
 
 Unity and UnityEngine are trademarks/APIs of Unity Technologies. Unity is not bundled with GD Toolkit. The optional exporter calls the user's installed Unity Editor and preserves its previous Random.state.
+
+The Unity-like simulation uses the Xorshift128 recurrence described by George Marsaglia with a separately specified seed expansion and float mapping. It is an independent implementation, not Unity source code, and does not promise sequence parity with Unity. Unity's documentation identifies Xorshift128 as its generator family: https://docs.unity3d.com/ScriptReference/Random.html .

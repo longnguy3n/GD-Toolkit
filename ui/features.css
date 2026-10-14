@@ -1,0 +1,29 @@
+[hidden]{display:none!important}
+.side-tool+.side-tool{margin-top:10px}
+.side-tool:not(.active){background:transparent;border-color:transparent;color:var(--muted)}
+.profile-bar{display:flex;align-items:end;gap:14px;padding:16px 18px;border:1px solid var(--line);background:var(--panel);border-radius:10px;margin-bottom:20px;flex-wrap:wrap}
+.profile-bar label{flex:1;min-width:220px;letter-spacing:1px;font-size:10px}
+.profile-bar select{letter-spacing:0;font-size:14px;max-width:100%;width:100%}
+.profile-bar .actions{display:flex;flex-wrap:wrap;gap:6px;padding-bottom:3px}
+.profile-bar>small{align-self:center}
+.bulk-toolbar{display:flex;flex-wrap:wrap;gap:6px;padding:12px 15px;border-top:1px solid var(--line)}
+.bulk-toolbar small{flex-basis:100%;padding-top:4px}
+.tree-name{gap:5px}
+.tree-name input[type=checkbox]{flex:0 0 14px;width:14px;height:14px;margin:0 3px 0 0;cursor:pointer}
+.check-spacer{flex:0 0 17px}
+.tree-name .pool-toggle{flex:0 0 21px;font-size:18px;min-height:26px;text-align:center;color:var(--purple);border:1px solid var(--line);border-radius:4px}
+.tree-name .tree-symbol{width:21px;text-align:center;font-size:12px}
+.tree-name .child-count{font-size:10px;flex:none}
+.tree-name .badge{padding:2px 4px;font-size:8px}
+.tree-list{min-height:120px}
+.settings-panel .radio-cards{grid-template-columns:repeat(3,minmax(0,1fr))}
+.settings-panel .radio-card{min-height:85px}
+.settings-panel .config-line{max-width:480px;margin-bottom:20px}
+.cost-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.cost-summary>div,.budget-summary{display:flex;flex-direction:column;gap:8px}
+.cost-summary strong{font-size:17px;font-weight:600;overflow-wrap:anywhere}
+.budget-summary strong{font-size:22px;color:var(--purple)}
+.cost-panel{margin-bottom:18px}
+.cost-panel td{font-size:11px}
+html[data-theme=light] .side-tool:not(.active){background:transparent;color:var(--muted);border-color:transparent}
+@media(max-width:1150px){.profile-bar>small{display:none}.tree-header,.tree-row{grid-template-columns:minmax(0,1fr) 60px 60px;gap:6px}.tree-weight{width:60px}.tree-name .badge{display:none}.settings-panel .radio-cards{grid-template-columns:1fr}.cost-summary{gap:10px}.cost-summary strong{font-size:14px}}

@@ -9,15 +9,12 @@ if(process.env.GD_TOOLKIT_TEST!=='1'&&!app.commandLine.hasSwitch('user-data-dir'
 if(!app.requestSingleInstanceLock())app.quit();
 app.on('second-instance',()=>{if(win){if(win.isMinimized())win.restore();win.focus();}});
 async function validDocument(doc){
-  const {validate}=await import('../core/engine.mjs');
-  if(!doc||doc.version!==1||!Array.isArray(doc.history)||doc.history.length>30)throw Error('Workspace không hợp lệ; tối đa 30 lịch sử.');
-  validate(doc.config);
-  if(doc.settings?.theme&&!['dark','light'].includes(doc.settings.theme))throw Error('Theme không hợp lệ.');
-  for(const h of doc.history){validate(h.config);if(!Number.isInteger(h.pulls)||h.pulls<1||h.pulls>1000000||!Array.isArray(h.sequence)||h.sequence.length!==h.pulls)throw Error('Lịch sử không hợp lệ.');}
-  if(JSON.stringify(doc).length>100000000)throw Error('Workspace vượt 100 MB. Hãy xuất và xóa bớt lịch sử.');
+  if(!doc||typeof doc!=='object')throw Error('Workspace không hợp lệ.');
+  const {upgradeWorkspace,validateWorkspace}=await import('../core/workspace.mjs');
+  if(doc.version===2)validateWorkspace(doc);else upgradeWorkspace(doc);
 }
 ipcMain.handle('load',async()=>{try{return JSON.parse(await fs.readFile(dataPath(),'utf8'));}catch(e){if(e.code==='ENOENT')return null;throw Error('Không đọc được workspace. Dữ liệu cũ được giữ nguyên; hãy kiểm tra thư mục dữ liệu.');}});
-ipcMain.handle('save',async(_,doc)=>{await validDocument(doc);const job=saveQueue.catch(()=>{}).then(async()=>{await fs.mkdir(app.getPath('userData'),{recursive:true});const file=dataPath(),temp=file+'.tmp';await fs.writeFile(temp,JSON.stringify(doc),'utf8');await fs.rename(temp,file);});saveQueue=job;await job;return true;});
+ipcMain.handle('save',async(_,doc)=>{await validDocument(doc);const job=saveQueue.catch(()=>{}).then(async()=>{await fs.mkdir(app.getPath('userData'),{recursive:true});const file=dataPath(),temp=file+'.tmp';if(doc.version===2){try{const old=JSON.parse(await fs.readFile(file,'utf8'));if(old.version===1)await fs.copyFile(file,file+'.v1.backup',require('node:fs').constants.COPYFILE_EXCL);}catch(e){if(!['ENOENT','EEXIST'].includes(e.code))throw e;}}await fs.writeFile(temp,JSON.stringify(doc),'utf8');await fs.rename(temp,file);});saveQueue=job;await job;return true;});
 ipcMain.handle('export',async(_,value,name)=>{const result=await dialog.showSaveDialog(win,{defaultPath:String(name).replace(/[^a-zA-Z0-9._-]/g,'_'),filters:[{name:'JSON',extensions:['json']}]});if(result.canceled)return false;await fs.writeFile(result.filePath,JSON.stringify(value,null,2),'utf8');return true;});
 ipcMain.handle('import',async()=>{const result=await dialog.showOpenDialog(win,{properties:['openFile'],filters:[{name:'JSON',extensions:['json']}]});if(result.canceled)return null;const file=result.filePaths[0];if((await fs.stat(file)).size>100000000)throw Error('File vượt 100 MB.');return JSON.parse(await fs.readFile(file,'utf8'));});
 ipcMain.handle('open-data',()=>shell.openPath(app.getPath('userData')));

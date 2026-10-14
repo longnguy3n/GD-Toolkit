@@ -1,10 +1,10 @@
-# GD Toolkit · Windows v0.2
+# GD Toolkit · Windows v0.3
 
 Ứng dụng desktop offline dành cho game designer. Tool đầu tiên: Gacha Tool, gồm Setup / Calculate / Simulate và History bên trong Simulate.
 
 ## Chạy ứng dụng
 
-Tải **GD-Toolkit-Setup-0.2.0-x64.exe** từ [GitHub Releases](https://github.com/longnguy3n/GD-Toolkit/releases/latest), chạy bộ cài, rồi mở **GD Toolkit** từ Start Menu hoặc shortcut desktop. Bản dành cho Windows x64, không cần Node.js hay Unity để dùng Custom random. Bộ cài cài cho tài khoản Windows hiện tại; chưa có chữ ký số thương mại.
+Tải **GD-Toolkit-Setup-0.3.0-x64.exe** từ [GitHub Releases](https://github.com/longnguy3n/GD-Toolkit/releases/latest), chạy bộ cài, rồi mở **GD Toolkit** từ Start Menu hoặc shortcut desktop. Bản dành cho Windows x64, không cần Node.js hay Unity để dùng Custom random. Bộ cài cài cho tài khoản Windows hiện tại; chưa có chữ ký số thương mại.
 
 Nếu đang dùng bản portable v0.1, cài bản v0.2 **một lần** để có chức năng cập nhật. Bản v0.1 cũ không thể tự có chức năng mới. Cấu hình/history vẫn được đọc từ cùng thư mục `%APPDATA%/GD Toolkit`, không cần nhập lại. Có thể giữ bản portable cũ làm dự phòng, nhưng không mở đồng thời hai phiên bản.
 
@@ -19,6 +19,16 @@ Dữ liệu lưu ở `%APPDATA%/GD Toolkit/workspace.json`. Nút ↗ cạnh “L
 - **Commit mới chưa phải bản cập nhật.** Bản cập nhật là release stable mới nhất. Workflow tạo bộ cài và phát hành khi maintainer push tag `vX.Y.Z` khớp version trong package.json.
 - Bản chạy bằng `npm start` không cài cập nhật. Bộ cài mới giữ cấu hình, history và theme; gỡ cài đặt cũng không tự xóa dữ liệu người dùng.
 
+## Banner, currency và pool thu gọn
+
+- Thanh **PROFILE / BANNER**: tạo, nhân bản, đổi tên, chuyển và xóa banner (tối đa 50). Mỗi banner giữ cây item, pity, currency và trạng thái thu gọn riêng. Kết quả mô phỏng chưa lưu được giữ trong bộ nhớ khi chuyển banner; đóng app cần **Lưu history** nếu muốn giữ.
+- **Currency & chi phí** trong Setup: tên currency, số currency cho một lượt, số dư hiện có, giá tiền của một currency, đơn vị tiền (mặc định VND). Giá 0 nghĩa là chưa định giá. Các số được nhập theo đơn vị thực, không phải nghìn đồng.
+- Calculate hiển thị currency, tổng giá trị và tiền cần nạp thêm cho N lượt, các mốc tin cậy và bảo đảm. Chi phí trung bình = E[T] × giá mỗi lượt; không suy diễn tiền nạp trung bình từ E[T]. Simulate hiển thị chi phí theo snapshot của lần chạy, không tự trừ số dư.
+- Nút tam giác cạnh pool mở/thu gọn con; **Mở tất cả / Thu gọn tất cả** áp dụng cho toàn cây. Thu gọn chỉ thay cách xem, không loại item khỏi tính toán. Trạng thái được lưu riêng cho mỗi banner.
+- Checkbox chọn nhiều item/pool rồi **Xóa đã chọn**. Xóa pool xóa cả con, kể cả con đang ẩn; chọn cha và con không đếm trùng. Nếu xóa mục tiêu pity thì tắt pity đó. Không cho xóa pool gốc, làm rỗng pool hoặc khiến tổng weight bằng 0; cả thao tác bị từ chối, không xóa một phần. **Chọn tất cả** gồm cả node ẩn và không chọn pool gốc.
+- History hiển thị toàn bộ banner. Xóa banner không xóa history đã lưu; mỗi history giữ đủ tên, cây, RNG, seed và chi phí tại lúc chạy.
+- Lần đầu mở v0.3, workspace cũ tự chuyển thành một banner và giữ lịch sử/theme. Trước lần ghi định dạng mới, app giữ bản sao một lần tại workspace.json.v1.backup. Workspace mới dùng schema v2, còn JSON cấu hình xuất vẫn dùng schema v1 có thêm economy. Bản cũ v0.2 không đọc được workspace v2.
+
 ## Setup
 
 - Chọn node trong cây để đổi tên hoặc thiết lập pity. Sửa weight trực tiếp trong bảng.
@@ -29,9 +39,9 @@ Dữ liệu lưu ở `%APPDATA%/GD Toolkit/workspace.json`. Nút ↗ cạnh “L
 - **Soft pity S:** từ lượt S, cộng `step` điểm phần trăm mỗi lượt, chặn ở 100%. S=0 tắt soft pity. Ví dụ rate 0,6%, S=74, step=6 điểm % → lượt 74 là 6,6%, lượt 75 là 12,6%.
 - **Đã trượt liên tiếp:** counter khởi đầu trong mọi phép tính và mô phỏng. Phải nhỏ hơn H.
 - Các item còn lại được phân bổ phần xác suất còn lại theo tỷ trọng weight ban đầu. Pool con chỉ tăng counter khi được gọi. Trúng ở cha không reset các pool con chưa được gọi.
-- Xuất/nhập JSON để chuyển cấu hình. Nhập cấu hình không xóa history. Có nút nạp lại mẫu.
+- Xuất/nhập JSON để chuyển cấu hình. Nhập cấu hình tạo banner mới, giữ random engine chung và history. Có nút nạp lại mẫu.
 
-Mẫu ban đầu: pool 5★ có rate gốc 0,6%, soft pity từ 74, tăng 6 điểm %, hard pity 90; bên trong là 50/50 giữa Featured và Standard, hard pity 2 cho Featured. Thua 50/50 thì lần vào pool 5★ tiếp theo được Featured. Mẫu này minh họa phong cách gacha, **không phải thông số chính thức hoặc bản sao đầy đủ của game HoYoverse**. Không có bộ đếm 4★ mỗi 10 lượt trong mẫu. V0.1 chưa có nhiều bộ đếm pity song song trong cùng pool, chuyển pity giữa banner hay các cơ chế như Epitomized Path/Capturing Radiance.
+Mẫu ban đầu: pool 5★ có rate gốc 0,6%, soft pity từ 74, tăng 6 điểm %, hard pity 90; bên trong là 50/50 giữa Featured và Standard, hard pity 2 cho Featured. Thua 50/50 thì lần vào pool 5★ tiếp theo được Featured. Mẫu này minh họa phong cách gacha, **không phải thông số chính thức hoặc bản sao đầy đủ của game HoYoverse**. Không có bộ đếm 4★ mỗi 10 lượt trong mẫu. Chưa có nhiều bộ đếm pity song song trong cùng pool, chuyển pity giữa banner hay các cơ chế như Epitomized Path/Capturing Radiance.
 
 ## Calculate
 
@@ -55,15 +65,19 @@ Giới hạn tính chính xác: K≤50, N≤10.000, horizon≤10.000, tối đa 
 - Bảng hiển thị **tất cả** item cuối cùng kể cả số lượng 0, số lượng nhận, tỷ lệ quan sát, rate thực dài hạn và chênh lệch theo điểm phần trăm.
 - Pull log lưu đầy đủ thứ tự từng item; giao diện phân trang 48 lượt. JSON xuất chứa toàn bộ thứ tự, counts, cấu hình, seed, các counter cuối và thống kê mỗi pool.
 - Lưu tối đa 30 lần chạy; workspace tối đa 100 MB. Khi đầy, xuất kết quả và xóa bớt history. Dữ liệu lưu trên ổ đĩa; phép ghi dùng file tạm rồi đổi tên. Không có tự xóa lịch sử cũ.
-- History giữ bản chụp cấu hình của lần chạy, xem lại đúng tên/rate cũ dù Setup hiện tại đã đổi. Có thể lấy cấu hình từ history về Setup.
+- History giữ bản chụp cấu hình của lần chạy, xem lại đúng tên/rate cũ dù Setup hiện tại đã đổi. Dùng cấu hình từ history tạo một banner mới, giữ random engine chung.
 
-## Hai nguồn random
+## Random engine trong Cài đặt chung
+
+Random engine và seed là cài đặt chung, áp dụng cho mọi banner. Cấu hình import và history không tự đổi lựa chọn chung. Calculate vẫn dùng mô hình xác suất; chỉ Simulate dùng chuỗi RNG.
 
 **Custom:** xoshiro128** 1.1 của Blackman & Vigna, seed uint32 qua bộ trộn xác định được ghi trong `core/engine.mjs`. Không dùng `Math.random`. Thuật toán phù hợp mô phỏng, không dùng cho mật mã. Cùng seed/config/phiên bản engine tái tạo được kết quả.
 
-**Unity:** sử dụng các giá trị thực của `UnityEngine.Random.value`, xuất bằng script đi kèm. Không gắn nhãn một bản xorshift JS là Unity. Unity không được nhúng trong exe.
+**Unity giả lập:** chạy ngay với Xorshift128 (biến thể Marsaglia 11/8/19). [Tài liệu Unity](https://docs.unity3d.com/ScriptReference/Random.html) xác nhận họ thuật toán này. GD Toolkit mở rộng seed thành 4 uint32 bằng 4 đầu ra đầu tiên của bộ xoshiro ở trên, và chuyển uint32 thành số thực bằng cách chia 2^32. Đây là quy ước riêng, **không bảo đảm chuỗi trùng Unity InitState/Random.value**. Vector trạng thái [1,2,3,4] cho đầu ra uint32 [2061,6175,4,8224]. Cùng seed/config cho cùng kết quả trong phiên bản engine này.
 
-1. Setup → Unity random → **Script Unity** để lưu `GDToolkitRandomExporter.cs`.
+**Unity · mẫu thực:** sử dụng các giá trị thực của UnityEngine.Random.value, xuất bằng script đi kèm. Unity không được nhúng trong exe.
+
+1. Cài đặt chung → Unity · mẫu thực → **Script Unity** để lưu `GDToolkitRandomExporter.cs`.
 2. Thêm script vào `Assets/Editor` của dự án Unity.
 3. Trong Unity mở **Tools → GD Toolkit → Export Random**. Chọn seed và số mẫu (tối đa 3 triệu), xuất JSON.
 4. Trong GD Toolkit chọn **Nhập RNG JSON**, sau đó Simulate.

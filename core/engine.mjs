@@ -1,3 +1,4 @@
+import {validateEconomy} from './economy.mjs';
 export const VERSION = 1;
 export const clone = x => structuredClone(x);
 export function preset() {
@@ -18,7 +19,8 @@ export function leaves(root) {let out=[];walk(root,(n,path)=>{if(!n.children)out
 export function validate(config) {
   if(!config || config.version!==1 || !config.root)throw Error('Định dạng cấu hình không được hỗ trợ.');
   if(typeof config.name!=='string'||config.name.length>120)throw Error('Tên cấu hình tối đa 120 ký tự.');
-  if(!['custom','unity'].includes(config.rng))throw Error('Nguồn random không hợp lệ.');
+  if(!['custom','unity-emulated','unity'].includes(config.rng))throw Error('Nguồn random không hợp lệ.');
+  if(config.economy!==undefined)validateEconomy(config.economy);
   if(!Number.isInteger(config.seed)||config.seed<0||config.seed>4294967295)throw Error('Seed phải là số nguyên từ 0 đến 4.294.967.295.');
   let ids=new Set(), count=0;
   function visit(n,depth) {
@@ -85,10 +87,20 @@ export function validateTape(tape) {
   if(tape?.source!=='UnityEngine.Random.value'||typeof tape.unityVersion!=='string'||!Array.isArray(tape.values)||!tape.values.length||tape.values.length>3000000||tape.values.some(v=>!Number.isFinite(v)||v<0||v>1))throw Error('File Unity RNG không hợp lệ (tối đa 3 triệu mẫu, giá trị 0–1).');
   return tape;
 }
+// Unity documents the Xorshift128 family, but does not specify InitState/float mapping.
+// This simulation uses a stated seed expansion and [0,1) mapping, not binary Unity parity.
+export function unityEmulated(seed) {
+  const mixer=customRandom(seed);return xorshiftState(Array.from({length:4},()=>Math.floor(mixer()*4294967296)));
+}
+export function xorshiftState(state) {
+  let s=Uint32Array.from(state);
+  if(s.length!==4||!s.some(x=>x))throw Error('Trạng thái RNG không hợp lệ.');
+  return ()=>{let t=s[0]^(s[0]<<11);s[0]=s[1];s[1]=s[2];s[2]=s[3];s[3]=(s[3]^(s[3]>>>19)^t^(t>>>8))>>>0;return s[3]/4294967296;};
+}
 export function simulate(config,pulls,{tape,onProgress=()=>{}}={}) {
   validate(config);
   if(!Number.isInteger(pulls)||pulls<1||pulls>1000000)throw Error('Mô phỏng từ 1 đến 1.000.000 lượt.');
-  let used=0, rng=config.rng==='custom'?customRandom(config.seed):(()=>{validateTape(tape);return ()=>{if(used>=tape.values.length)throw Error('Đã dùng hết mẫu Unity. Xuất file nhiều mẫu hơn; lượt chạy này chưa được lưu.');return Math.min(tape.values[used++],1-Number.EPSILON);};})();
+  let used=0, rng=config.rng==='custom'?customRandom(config.seed):config.rng==='unity-emulated'?unityEmulated(config.seed):(()=>{validateTape(tape);return ()=>{if(used>=tape.values.length)throw Error('Đã dùng hết mẫu Unity. Xuất file nhiều mẫu hơn; lượt chạy này chưa được lưu.');return Math.min(tape.values[used++],1-Number.EPSILON);};})();
   const counters={},counts={},sequence=[],poolStats={};
   walk(config.root,n=>{if(n.children){counters[n.id]=n.pity?.enabled?n.pity.start:0;poolStats[n.id]={visits:0,hardHits:0};}else counts[n.id]=0;});
   for(let roll=0;roll<pulls;roll++) {
