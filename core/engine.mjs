@@ -158,11 +158,11 @@ export function simulate(config,pulls,{tape,onProgress=()=>{}}={}) {
   }
   return {id:globalThis.crypto.randomUUID(),createdAt:new Date().toISOString(),config:clone(config),pulls,counts,sequence,counters,poolStats,pityLog:{version:1,pools:[...logs.values()]},pitySummary,randomSamples:used||null,unity:tape&&config.rng==='unity'?{version:tape.unityVersion,seed:tape.seed,samples:tape.values.length}:null};
 }
-function targetPath(root,id,path=[]) {
+export function targetPath(root,id,path=[]) {
   if(root.id===id&&!root.children)return path;
   for(const c of root.children||[]){let p=targetPath(c,id,[...path,{pool:root,child:c}]);if(p)return p;}
 }
-function waitingSummary(path,copies) {
+export function waitingSummary(path,copies) {
   let first=1,repeat=1,bound=1,repeatBound=1;
   for(const {pool,child} of [...path].reverse()) {
     const idx=pool.children.indexOf(child),p=pool.pity,base=child.weight/pool.children.reduce((s,c)=>s+c.weight,0);

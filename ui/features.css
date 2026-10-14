@@ -62,7 +62,7 @@ html[data-theme=light] .side-tool:not(.active){background:transparent;color:var(
 .banner-settings-grid .inline{line-height:1.5;align-items:flex-start;font-size:13px}
 .banner-settings-grid .inline input{flex:none}
 .banner-settings-grid [data-action=reset-counters]{margin-top:15px}
-.horizon-help{line-height:1.6}
+
 .sequence.pity-sequence{display:flex;flex-direction:column;gap:8px;padding:16px}
 .pity-sequence .pull{display:block;padding:0;border:1px solid var(--line);background:var(--panel2);border-radius:7px;overflow:hidden}
 .pity-sequence .pull>summary{cursor:pointer;padding:12px 14px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
@@ -116,3 +116,5 @@ html[data-theme=light] .pity-sequence .soft-pull>summary,html[data-theme=light] 
 html[data-theme=light] .pity-sequence .soft-pull .remaining-line{color:#285c51}
 html[data-theme=light] .pity-summary .cost-summary>div:first-child{background:#fff0bf;border-color:#b87800}
 html[data-theme=light] .pity-summary .cost-summary>div:first-child small,html[data-theme=light] .pity-summary .cost-summary>div:first-child strong{color:#603600}
+
+.forecast-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.forecast-panel .quantiles{margin-top:0;margin-bottom:20px}.quantile .unresolved{font-size:14px;line-height:1.5}.forecast-explanation{font-size:12px;line-height:1.8;margin-bottom:20px}.forecast-notice{margin-bottom:20px}.forecast-help{line-height:1.7}.forecast-progress>div{opacity:.5}

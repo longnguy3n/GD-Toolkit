@@ -181,8 +181,8 @@ app.whenReady().then(async()=>{
     assert.deepEqual(pityHistory.pityLog.pools.find(p=>p.id==='root').after,[1,2,0,1,2,0]);
     assert.equal(pityHistory.profileId,project);
     await js("document.querySelector('.tabs [data-tab=calculate]').click()");
-    await change('[data-calc=pulls]',6);await change('[data-calc=horizon]',12);
-    assert.ok((await js("document.querySelector('.horizon-help').textContent")).includes('Horizon ≥ số lượt N'));
+    await change('[data-calc=pulls]',6);
+    assert.equal(await js("document.querySelector('[data-calc=horizon]')===null"),true);
     await js("document.querySelector('[data-action=analyze]').click()");await waitFor("!!document.querySelector('.pity-analysis')");
     assert.ok((await js("document.querySelector('.pity-analysis').textContent")).includes('TẮT TẤT CẢ PITY'));
     await js("document.querySelector('.pity-analysis').scrollIntoView()");await capture('pity-calculate.png');
@@ -389,7 +389,7 @@ app.whenReady().then(async()=>{
     assert.deepEqual(await js("[...document.querySelectorAll('.pull summary>b')].map(e=>e.textContent)"),['A','B','A','B']);
     await js("document.querySelector('.pull').open=true;document.querySelector('.pull').scrollIntoView({block:'center'})");await capture('multi-pity-log.png');
     await js("document.querySelector('[data-action=save-result]').click()");await waitFor("document.querySelector('[data-action=save-result]').disabled");
-    await js("document.querySelector('.tabs [data-tab=calculate]').click()");await change('[data-calc=id]','b');await change('[data-calc=copies]',2);await change('[data-calc=pulls]',4);await change('[data-calc=horizon]',6);
+    await js("document.querySelector('.tabs [data-tab=calculate]').click()");await change('[data-calc=id]','b');await change('[data-calc=copies]',2);await change('[data-calc=pulls]',4);
     await js("document.querySelector('[data-action=analyze]').click()");await waitFor("!!document.querySelector('.pity-analysis')");
     assert.equal(await js("document.querySelector('.result-kpis strong').textContent"),'100%');
     assert.ok((await js("document.querySelector('.pity-analysis').textContent")).includes('CHỜ ƯU TIÊN'));
@@ -442,6 +442,26 @@ app.whenReady().then(async()=>{
     await js("document.querySelector('#theme-toggle').click()");await capture('pity-contrast-light.png');
     assert.equal(await js("getComputedStyle(document.querySelector('.hard-pull>summary')).backgroundColor"),'rgb(255, 240, 191)');
     win.setSize(1020,760);await sleep(150);assert.equal(await js("document.documentElement.scrollWidth>innerWidth"),false);
+    // No horizon or exact-K input: forecast beyond N automatically, with readable milestones.
+    await js("(async()=>{const d=await window.desktop.load(),p=d.profiles.find(p=>p.id===d.activeProfileId),b=p.banners.find(b=>b.id===p.activeBannerId);b.config.version=2;b.config.name='Auto forecast QA';b.config.root={id:'r',name:'Banner',weight:1,children:[{id:'target',name:'Frostspire Blade',weight:1},{id:'other',name:'Other',weight:999}]};b.collapsed=[];await window.desktop.save(d)})()");
+    win.webContents.reload();await sleep(250);await waitFor("document.querySelectorAll('.tree-row').length===2");
+    win.setSize(1440,960);
+    await js("document.querySelector('.tabs [data-tab=calculate]').click()");await change('[data-calc=copies]',2);await change('[data-calc=pulls]',200);
+    assert.equal(await js("document.querySelector('[data-calc=horizon]')===null"),true);
+    await js("document.querySelector('[data-action=analyze]').click()");await waitFor("!!document.querySelector('.forecast-panel')");
+    assert.equal(await js("document.querySelectorAll('.result-kpis .kpi').length"),2);
+    assert.equal(await js("/Horizon|horizon|TIN CẬY|ĐÚNG 2/.test(document.querySelector('#content').textContent)"),false);
+    const milestones=await js("[...document.querySelectorAll('.quantile b')].map(e=>Number(e.textContent.replaceAll('.','')))");
+    assert.ok(milestones.every(n=>n>200));assert.ok(milestones[3]>milestones[0]);
+    assert.ok((await js("document.querySelector('.forecast-explanation').textContent")).includes('50% cơ hội nhận ít nhất 2 bản sao'));
+    await js("document.querySelector('.forecast-panel').scrollIntoView({block:'start'})");await capture('automatic-forecast.png');
+    await change('[data-calc=pulls]',10000);await js("document.querySelector('[data-action=analyze]').click()");await waitFor("!!document.querySelector('.forecast-panel')");
+    assert.deepEqual(await js("[...document.querySelectorAll('.quantile b')].map(e=>Number(e.textContent.replaceAll('.','')))"),milestones);
+    assert.ok((await js("document.querySelector('.result-kpis').textContent")).includes('10.000 lượt'));
+    await js("document.querySelector('.tabs [data-tab=setup]').click()");await change('[data-weight=target]',0);
+    await js("document.querySelector('.tabs [data-tab=calculate]').click();document.querySelector('[data-action=analyze]').click()");await waitFor("!!document.querySelector('.forecast-notice')");
+    assert.ok((await js("document.querySelector('.forecast-notice').textContent")).includes('không thể xuất hiện'));
+    assert.equal(await js("document.querySelector('.quantile b').textContent"),'Không thể đạt');
     assert.deepEqual(errors,[]);
     console.log('PASS desktop: migration, themes, updater, math workers, history, profiles, currency, global Unity emulation, bulk deletion, collapse persistence, responsive layout, no console errors.');
     app.exit(0);

@@ -1,10 +1,10 @@
-# GD Toolkit · Windows v0.5
+# GD Toolkit · Windows v0.6
 
 Ứng dụng desktop offline dành cho game designer. Gacha Tool gồm Setup / Calculate / Simulate, với History trong Simulate.
 
 ## Cài đặt và cập nhật
 
-Tải **GD-Toolkit-Setup-0.5.2-x64.exe** từ [GitHub Releases](https://github.com/longnguy3n/GD-Toolkit/releases/latest). Windows x64, không cần Node.js hay Unity để chạy Custom hoặc Unity giả lập. Bộ cài dành cho tài khoản Windows hiện tại, chưa có chữ ký số thương mại.
+Tải **GD-Toolkit-Setup-0.6.0-x64.exe** từ [GitHub Releases](https://github.com/longnguy3n/GD-Toolkit/releases/latest). Windows x64, không cần Node.js hay Unity để chạy Custom hoặc Unity giả lập. Bộ cài dành cho tài khoản Windows hiện tại, chưa có chữ ký số thương mại.
 
 Nếu đã cài v0.2 trở lên: **Cập nhật → Kiểm tra ngay → Tải bản mới → Cài và mở lại**. Bản portable v0.1 cần chạy bộ cài mới một lần. App tự kiểm tra khi mở nhưng chỉ tải/cài khi bạn chọn; mất mạng vẫn dùng gacha bình thường. Nguồn cập nhật là repository public longnguy3n/GD-Toolkit, không cần token. Updater kiểm tra SHA-512 của bộ cài và không tự hạ phiên bản.
 
@@ -65,23 +65,23 @@ Khi nhiều hard pity đến hạn, quy tắc đứng trước được ưu tiê
 
 Mẫu 90 pity + 50/50 minh họa hệ thống gacha, không phải thông số chính thức hoặc bản sao đầy đủ của game HoYoverse. Chưa có nhiều pity trên cùng pool con, chuyển pity giữa banner, hay Epitomized Path/Capturing Radiance.
 
-## Calculate và horizon
+## Calculate và dự báo số lượt
 
-Chọn item cuối, số bản sao K, số lượt N và horizon.
+Chọn item cuối, số bản sao K và số lượt N dự định quay. App chỉ tính mục tiêu **ít nhất K bản sao**, nhận nhiều hơn vẫn đạt. Không cần nhập horizon.
 
-**Horizon** là số lượt tối đa để tìm các mốc 50%, 90%, 95%, 99% cơ hội có **ít nhất K bản sao**. Mốc 95% = số lượt đầu tiên xác suất tích lũy đạt 95%, không phải bảo đảm chắc chắn và không phải khoảng tin cậy của một phép ước lượng Monte Carlo. Ví dụ horizon 1.000, mốc 99% báo >1.000 nghĩa là chưa đạt trong phạm vi đã xét, không phải không thể đạt.
+App tự tìm số lượt đầu tiên đạt hoặc vượt **50%, 90%, 95%, 99% cơ hội nhận ít nhất K bản sao**, có xét pity và counter khởi đầu. Ví dụ 50% tại 1.320 lượt nghĩa là quay 1.320 lượt có ít nhất 50% cơ hội nhận đủ K bản sao. Mốc 99% không phải bảo đảm tuyệt đối. Các mốc này không phải khoảng tin cậy thống kê.
 
-Horizon phải ≥ N, tối đa 10.000. Tăng horizon tốn thêm thời gian, không thay đổi pity hay kết quả tại N. Các thống kê pity/chi phí của N lượt được tính trên **N**, không phải horizon.
+N từ 1 đến 10.000 chỉ dùng để xem xác suất, thống kê pity và chi phí tại số lượt dự định quay. Các mốc dự báo được tìm độc lập và có thể lớn hơn N; chi phí tại từng mốc cũng hiển thị riêng.
 
-- Tính riêng `P(X_N = K)` và `P(X_N ≥ K)` theo Markov, gồm counter trên đường tới item.
+- Tính xác suất nhận ít nhất K bản sao theo Markov; dừng theo dõi nhánh đã đủ K bản sao khi tìm các mốc. Mô hình nhiều pity tính cả các counter cạnh tranh ưu tiên.
 - So sánh **có pity** với **tắt tất cả pity**: rate dài hạn, rate trung bình trong N lượt từ counter khởi đầu, số item mục tiêu kỳ vọng.
 - Đếm **số lần hard pity kỳ vọng toàn banner**, số lượt có ít nhất một hard pity, và thống kê từng pool: số lần gọi, hard pity, lần tăng rate soft, trúng vùng soft, reset và chờ ưu tiên. Các số kỳ vọng có thể là số thập phân, khác số lần thực tế của từng lần mô phỏng. Vẫn đếm sự kiện sau khi đã đủ K bản sao.
 - Một lượt gacha có thể kích hoạt nhiều pool pity, nên tổng số sự kiện có thể lớn hơn số lượt có pity.
 - Rate không pity là tích weight/tổng weight trên đường đi. Rate dài hạn có pity dùng phân phối dừng của counter tại mỗi pool. Với một pity và tắt reset trúng sớm, chu kỳ dài H lần gọi. Với nhiều pity, giải phân phối dừng bằng số: tối đa 4.096 trạng thái, 20.000 vòng lặp, 8 triệu bước chuyển; sai số thay đổi phân phối dưới 1e-12. Đây là giá trị xấp xỉ số, không phải chứng minh sai số tuyệt đối; không hội tụ trong giới hạn thì hiện —.
-- Mean chính xác hiển thị khi mô hình chu kỳ cho phép tính, hoặc khi horizon bao phủ một cận bảo đảm hữu hạn để tổng xác suất chờ cho kết quả đầy đủ. Luôn hiển thị `E[min(T,horizon)]` như cận dưới và phần xác suất chưa đạt mục tiêu; không coi cận dưới là mean đầy đủ.
 - Chi phí trung bình = E[T] × giá mỗi lượt. Không suy diễn tiền nạp trung bình bằng cách trừ số dư khỏi E[T].
+- Thời gian chờ trung bình chỉ hiển thị khi mô hình chu kỳ cho phép tính, hoặc khi đã xét đầy đủ đến một cận bảo đảm hữu hạn. Không dùng số lượt đã xét làm thời gian chờ trung bình.
 
-Giới hạn phép tính mục tiêu: K≤50, N/horizon≤10.000, 250.000 trạng thái và 40 triệu bước. Thống kê pity toàn banner dùng bộ đếm riêng, tối đa 50.000 trạng thái, 250.000 nhánh được lưu và 40 triệu bước. Mô hình nhiều pity xét toàn bộ counter liên quan; nếu phần tính mục tiêu vượt giới hạn sẽ báo lỗi rõ ràng để giảm horizon hoặc chuyển Simulate. Nếu chỉ phần thống kê toàn banner vượt giới hạn, xác suất mục tiêu vẫn hiển thị và phần pity báo không khả dụng, hướng dẫn dùng Simulate. Worker có thể hủy.
+Giới hạn phép tính mục tiêu: K≤50, N≤10.000; tự tìm đến tối đa 1.000.000 lượt, 250.000 trạng thái, 50.000 trạng thái counter được lưu, 250.000 nhánh và 40 triệu bước. Khi chạm giới hạn, giữ các mốc đã tìm được và ghi **Chưa tìm được** cho mốc còn lại; không suy diễn thành không thể đạt. Nếu chứng minh item không thể xuất hiện từ trạng thái khởi đầu, ghi **Không thể đạt**. Thống kê pity toàn banner dùng bộ đếm riêng, tối đa 50.000 trạng thái, 250.000 nhánh và 40 triệu bước; vượt giới hạn thì phần pity báo không khả dụng và hướng dẫn dùng Simulate. Worker có thể hủy.
 
 **Rate ↔ Hard pity** là bộ tính độc lập cho rate cố định trước hard pity và reset sau mỗi hit: rate thực = p / (1 − (1 − p)^H), p=0 thì 1/H. Không áp dụng công thức này cho soft pity hay chế độ không reset khi trúng sớm.
 

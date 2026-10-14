@@ -1,9 +1,9 @@
 import {clone,walk,customRandom,unityEmulated,validateTape,leafRates} from './engine.mjs';
 import {rulesFor,ruleProbabilities,ruleTransition,allRuleEntries} from './pity-rules.mjs';
 
-function machine(config){
+export function machine(config,maxOperations=40000000){
   const entries=allRuleEntries(config),positions=new Map(entries.map((e,i)=>[e.id,i])),initial=entries.map(e=>e.rule.start),cache=new Map();let operations=0,branches=0;
-  function limit(){if(++operations>40000000||cache.size>50000||branches>250000){const e=Error('Nhiều pity vượt giới hạn tính chính xác: 50.000 trạng thái / 250.000 nhánh / 40 triệu bước. Giảm horizon hoặc dùng Simulate.');e.code='PITY_LIMIT';throw e;}}
+  function limit(){if(++operations>maxOperations||cache.size>50000||branches>250000){const e=Error('Nhiều pity vượt giới hạn tính chính xác: 50.000 trạng thái / 250.000 nhánh / 40 triệu bước. Giảm độ phức tạp hoặc dùng Simulate.');e.code='PITY_LIMIT';throw e;}}
   function edges(state){const key=state.join(',');if(cache.has(key))return cache.get(key);const out=[];
     const counters=Object.fromEntries(entries.map((e,i)=>[e.id,state[i]]));
     function visit(node,mass,next,events){limit();if(!node.children){branches++;out.push({state:next,key:next.join(','),mass,leaf:node.id,events});return;}
