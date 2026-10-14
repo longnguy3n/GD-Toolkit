@@ -16,7 +16,10 @@ export function preset() {
 export function walk(root, fn, path=[]) {fn(root,path); for(const child of root.children||[]) walk(child,fn,[...path,root]);}
 export function findNode(root,id) {let result; walk(root,n=>{if(n.id===id) result=n;}); return result;}
 export function leaves(root) {let out=[];walk(root,(n,path)=>{if(!n.children)out.push({...n,path:path.map(p=>p.name).concat(n.name).join(' / ')});});return out;}
-export function validate(config) {
+export function emptyBanner() {
+  return {version:VERSION,name:'Banner mới',rng:'custom',seed:2026,root:{id:'root',name:'Banner',weight:1,children:[]}};
+}
+export function validate(config,{allowEmpty=false}={}) {
   if(!config || ![1,2].includes(config.version) || !config.root)throw Error('Định dạng cấu hình không được hỗ trợ.');
   if(typeof config.name!=='string'||config.name.length>120)throw Error('Tên cấu hình tối đa 120 ký tự.');
   if(!['custom','unity-emulated','unity'].includes(config.rng))throw Error('Nguồn random không hợp lệ.');
@@ -31,7 +34,11 @@ export function validate(config) {
     if(typeof n.name!=='string'||!n.name.trim()||n.name.length>120)throw Error('Tên item phải có 1–120 ký tự.');
     if(!Number.isFinite(n.weight)||n.weight<0||n.weight>1e9)throw Error('Weight phải từ 0 đến 1 tỷ.');
     if(n.children!==undefined) {
-      if(!Array.isArray(n.children)||!n.children.length)throw Error(`Pool “${n.name}” cần ít nhất một item.`);
+      if(!Array.isArray(n.children))throw Error(`Pool “${n.name}” cần danh sách item.`);
+      if(!n.children.length){
+        if(depth===0&&allowEmpty&&!n.pity?.enabled)return;
+        throw Error(depth===0?'Banner đang trống. Thêm item hoặc pool trước khi tính toán/mô phỏng.':`Pool “${n.name}” cần ít nhất một item.`);
+      }
       n.children.forEach(c=>visit(c,depth+1));
       if(!(n.children.reduce((s,c)=>s+c.weight,0)>0))throw Error(`Tổng weight của “${n.name}” phải lớn hơn 0.`);
       let p=n.pity;

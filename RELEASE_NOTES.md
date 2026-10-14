@@ -1,11 +1,12 @@
-# GD Toolkit v0.4.1
+# GD Toolkit v0.4.2
 
-- Bỏ dòng ROOT khỏi cây Setup; các pool/item của banner hiển thị trực tiếp từ cấp đầu tiên.
-- Giữ nguyên hai hàng quản lý Profile và Banner cùng các thao tác tạo, nhân bản, đổi tên và xóa.
-- Nút **Pity banner** mở thiết lập pity chung và chọn banner làm nơi thêm pool/item trực tiếp.
-- Thu gọn tất cả chỉ thu gọn các pool; dữ liệu cũ đã thu gọn ROOT vẫn hiển thị được các pool của banner.
-- Giữ nguyên cấu hình, xác suất, counter, currency và history đã lưu.
+- Banner mới bắt đầu trống; cho phép xóa toàn bộ pool/item trong banner, lưu và mở lại bình thường.
+- Thêm hàng **Tổng banner**: tổng weight cấp banner và tổng rate của item cuối cùng, không cộng trùng các pool lồng nhau.
+- Thêm cột **Rate toàn banner** cho từng item/pool, với rate gốc và rate dài hạn có pity.
+- Bỏ ô ID khỏi giao diện; giữ mã nội bộ để bảo toàn liên kết pity và history.
+- Nút **+ Item vào banner / + Pool vào banner** luôn thêm trực tiếp vào banner. Trong thiết lập pool/item có thao tác thêm con và thêm ngang hàng, ghi rõ nơi nhận.
+- Banner trống hiển thị hướng dẫn và tạm khóa tính toán/mô phỏng cho đến khi thêm item/pool.
 
 **Cập nhật:** Cập nhật → Kiểm tra ngay → Tải bản mới → Cài và mở lại.
 
-**Cài lần đầu:** tải GD-Toolkit-Setup-0.4.1-x64.exe. File blockmap/latest.yml phục vụ updater.
+**Cài lần đầu:** tải GD-Toolkit-Setup-0.4.2-x64.exe. File blockmap/latest.yml phục vụ updater.

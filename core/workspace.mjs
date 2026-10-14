@@ -1,4 +1,4 @@
-import {preset,validate,clone,walk} from './engine.mjs';
+import {emptyBanner,validate,clone,walk} from './engine.mjs';
 import {defaultEconomy,validateEconomy} from './economy.mjs';
 
 export function profileConfig(config) {
@@ -13,10 +13,10 @@ export function attachConfig(d) {
   return d;
 }
 export function upgradeWorkspace(input) {
-  if(!input)input={version:1,config:preset(),history:[]};
+  if(!input)input={version:1,config:emptyBanner(),history:[]};
   let d=clone(input);
   if(d.version===1){
-    validate(d.config);const id=crypto.randomUUID();
+    validate(d.config,{allowEmpty:true});const id=crypto.randomUUID();
     d={version:2,settings:{theme:d.settings?.theme||'dark',rng:d.config.rng,seed:d.config.seed},activeProfileId:id,profiles:[{id,config:d.config,collapsed:[]}],history:Array.isArray(d.history)?d.history.map(h=>({...h,profileId:id})):d.history};
   }
   if(d.version===2){
@@ -34,7 +34,7 @@ export function validateWorkspace(d) {
     checkId(p.id);validName(p.name,'profile');
     if(!Array.isArray(p.banners)||!p.banners.length||p.banners.length>50)throw Error('Mỗi profile cần 1–50 banner.');
     for(const b of p.banners){
-      checkId(b.id);validate({...b.config,rng:d.settings.rng,seed:d.settings.seed});validateEconomy(b.config.economy);
+      checkId(b.id);validate({...b.config,rng:d.settings.rng,seed:d.settings.seed},{allowEmpty:true});validateEconomy(b.config.economy);
       if(!Array.isArray(b.collapsed)||b.collapsed.length>200||b.collapsed.some(id=>typeof id!=='string'))throw Error('Trạng thái thu gọn pool không hợp lệ.');
     }
     if(!p.banners.some(b=>b.id===p.activeBannerId))throw Error('Banner hiện tại không tồn tại.');
@@ -56,8 +56,8 @@ export function validateWorkspace(d) {
   if(JSON.stringify(d).length>100000000)throw Error('Workspace vượt 100 MB. Hãy xuất và xóa bớt lịch sử.');return d;
 }
 function validName(name,label){if(typeof name!=='string'||!name.trim()||name.length>120)throw Error(`Tên ${label} phải có 1–120 ký tự.`);}
-function newBanner(d,name,source){validName(name,'banner');const b={id:crypto.randomUUID(),config:profileConfig(source),collapsed:[]};b.config.name=name.trim();validate({...b.config,rng:d.settings.rng,seed:d.settings.seed});return b;}
-export function addBanner(d,name,source=preset()) {
+function newBanner(d,name,source){validName(name,'banner');const b={id:crypto.randomUUID(),config:profileConfig(source),collapsed:[]};b.config.name=name.trim();validate({...b.config,rng:d.settings.rng,seed:d.settings.seed},{allowEmpty:true});return b;}
+export function addBanner(d,name,source=emptyBanner()) {
   const p=activeProfile(d);if(p.banners.length>=50)throw Error('Tối đa 50 banner mỗi profile.');
   const b=newBanner(d,name,source);p.banners.push(b);return b;
 }
@@ -68,7 +68,7 @@ export function removeBanner(d,id) {
 }
 export function addProfile(d,name,source=null) {
   if(d.profiles.length>=50)throw Error('Tối đa 50 profile.');validName(name,'profile');
-  const banners=source?source.banners.map(b=>({...newBanner(d,b.config.name||'Banner',b.config),collapsed:[...b.collapsed]})):[newBanner(d,'Banner đầu tiên',preset())];
+  const banners=source?source.banners.map(b=>({...newBanner(d,b.config.name||'Banner',b.config),collapsed:[...b.collapsed]})):[newBanner(d,'Banner đầu tiên',emptyBanner())];
   const p={id:crypto.randomUUID(),name:name.trim(),activeBannerId:banners[0].id,banners};d.profiles.push(p);return p;
 }
 export function removeProfile(d,id) {
@@ -84,5 +84,5 @@ export function deleteNodes(config,selected) {
     if(n.pity?.target&&!n.children.some(c=>c.id===n.pity.target)){if(n.pity.enabled)disabledPity++;n.pity={...n.pity,target:n.children[0]?.id,enabled:false};}
     n.children.forEach(visit);
   }
-  visit(next.root);validate(next);return {config:next,removed,disabledPity};
+  visit(next.root);validate(next,{allowEmpty:true});return {config:next,removed,disabledPity};
 }

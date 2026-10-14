@@ -18,7 +18,7 @@ test('v1 migration preserves config, theme, actual Unity mode and history snapsh
   assert.equal(upgradeWorkspace(unnamed).config.name,''); // v0.2 permitted this value.
 });
 test('banners isolate trees, economy and collapsed pools; RNG is global',()=>{
-  const d=upgradeWorkspace(null),first=activeBanner(d),p=addBanner(d,'Weapon banner',d.config);
+  const d=upgradeWorkspace({version:1,config:preset(),history:[]}),first=activeBanner(d),p=addBanner(d,'Weapon banner',d.config);
   activeProfile(d).activeBannerId=p.id;d.config.root.children[0].weight=99;d.config.economy.balance=1600;p.collapsed=['root','standard'];
   assert.equal(first.config.root.children[0].weight,6);assert.equal(first.config.economy.balance,0);assert.deepEqual(first.collapsed,[]);
   d.settings.rng='unity-emulated';d.settings.seed=9;
@@ -31,7 +31,7 @@ test('bulk deletion deduplicates parent/descendant, disables affected pity and i
   const c=preset(),original=clone(c),d=deleteNodes(c,['legend','featured','epic']);
   assert.equal(d.removed,9);assert.equal(d.disabledPity,1);assert.equal(d.config.root.pity.enabled,false);
   assert.equal(leafRates(d.config.root).length,2);assert.deepEqual(c,original);
-  for(const ids of [['root'],['featured','standard'],['legend','epic','common']]){
+  for(const ids of [['root'],['featured','standard']]){
     assert.throws(()=>deleteNodes(c,ids));assert.deepEqual(c,original);
   }
 });
@@ -56,7 +56,7 @@ test('Unity-like xorshift reference recurrence and deterministic usable seeds',(
   assert.equal(a.unity,null);assert.notDeepEqual(a.sequence,simulate({...c,rng:'custom'},10000).sequence);
 });
 test('corrupt workspaces and global settings cannot be silently accepted',()=>{
-  const d=upgradeWorkspace(null);
+  const d=upgradeWorkspace({version:1,config:preset(),history:[]});
   for(const mutate of [x=>x.activeProfileId='missing',x=>x.settings.seed=-1,x=>x.settings.rng='fake',x=>x.profiles.push(clone(x.profiles[0])),x=>x.profiles[0].banners[0].config.economy.balance=NaN]){
     const invalid=clone(d);mutate(invalid);assert.throws(()=>upgradeWorkspace(invalid));
   }
@@ -72,7 +72,7 @@ test('v2 migration groups all old banners into one profile and preserves history
   assert.equal(old.version,2);assert.equal(old.profiles[0].config.pityReset,undefined);
 });
 test('profiles contain independent banners; duplicating a profile deep-copies every banner',()=>{
-  const d=upgradeWorkspace(null),first=activeProfile(d);addBanner(d,'Second banner');
+  const d=upgradeWorkspace({version:1,config:preset(),history:[]}),first=activeProfile(d);addBanner(d,'Second banner');
   first.banners[1].config.economy.balance=987;
   const copy=addProfile(d,'Project B',first);
   assert.equal(copy.banners.length,2);assert.notEqual(copy.banners[0].id,first.banners[0].id);
@@ -84,7 +84,7 @@ test('profiles contain independent banners; duplicating a profile deep-copies ev
   assert.throws(()=>removeProfile(d,first.id));validateWorkspace(d);
 });
 test('pity logs survive persistence and corrupt counters are rejected',()=>{
-  const d=upgradeWorkspace(null);d.history.push(simulate(runConfig(d),30));
+  const d=upgradeWorkspace({version:1,config:preset(),history:[]});d.history.push(simulate(runConfig(d),30));
   assert.deepEqual(upgradeWorkspace(JSON.parse(JSON.stringify(d))).history[0].pityLog,d.history[0].pityLog);
   d.history[0].pityLog.pools[0].after[0]=99999;assert.throws(()=>validateWorkspace(d),/Counter/);
 });

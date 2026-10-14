@@ -16,6 +16,19 @@
 .tree-name .child-count{font-size:10px;flex:none}
 .tree-name .badge{padding:2px 4px;font-size:8px}
 .tree-list{min-height:120px}
+.tree-header,.tree-row,.tree-totals{grid-template-columns:minmax(0,1fr) 64px 90px 112px;gap:8px}
+.tree-weight{width:64px}
+.tree-totals{display:grid;align-items:center;padding:14px 16px;border-top:1px solid var(--line);background:var(--panel2);font-size:11px}
+.tree-totals>span{text-align:right;font-variant-numeric:tabular-nums}
+.banner-rate{display:flex;flex-direction:column;gap:5px;min-width:0;overflow-wrap:anywhere}
+.banner-rate b{font-weight:600}.banner-rate small{font-size:9px;color:var(--muted)}
+.tree-empty{padding:28px 18px;text-align:center;font-size:12px;color:var(--muted)}
+.tree-empty p{margin-top:10px}.empty-banner{margin-bottom:18px}
+.tree-total-help{padding:10px 16px;font-size:10px;line-height:1.6;color:var(--muted);border-top:1px solid var(--line)}
+.setup-grid .panel-head{flex-wrap:wrap;gap:12px}
+.insert-controls{border-top:1px solid var(--line);margin-top:20px;padding-top:4px}
+.insert-controls p{font-size:11px;line-height:1.6;margin:14px 0 8px;overflow-wrap:anywhere}
+.insert-controls .actions{display:flex;gap:6px;flex-wrap:wrap}
 .settings-panel .radio-cards{grid-template-columns:repeat(3,minmax(0,1fr))}
 .settings-panel .radio-card{min-height:85px}
 .settings-panel .config-line{max-width:480px;margin-bottom:20px}
@@ -51,3 +64,5 @@ html[data-theme=light] .side-tool:not(.active){background:transparent;color:var(
 .pagination label{font-size:10px}.pagination input{width:95px;height:30px}
 html[data-theme=light] .profile-parent{background:#eeebf6}
 @media(max-width:1100px){.banner-settings-grid{grid-template-columns:1fr}.workspace-hierarchy .profile-bar>label{flex-basis:100%}.pagination{flex-wrap:wrap}.workspace-hierarchy .banner-child{padding-left:18px}}
+@media(max-width:1250px){.setup-grid{grid-template-columns:1fr}.tree-header,.tree-row,.tree-totals{grid-template-columns:minmax(0,1fr) 64px 90px 112px;gap:8px}.tree-weight{width:64px}}
+@media(max-width:600px){.tree-header,.tree-row,.tree-totals{grid-template-columns:minmax(0,1fr) 48px 64px 85px;gap:4px}.tree-weight{width:48px}.tree-header{font-size:8px}.tree-rate{font-size:10px}}

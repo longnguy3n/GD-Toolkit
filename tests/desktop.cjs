@@ -17,7 +17,7 @@ app.whenReady().then(async()=>{
     let errors=[];win.webContents.on('console-message',event=>{if(event.level==='error'||event.level>=3)errors.push(event.message);});
     const js=async code=>{try{return await win.webContents.executeJavaScript(code);}catch(e){throw Error(code+'\n'+e.message);}};
     async function waitFor(code){for(let i=0;i<200;i++){if(await js(code))return;await sleep(100);}console.log(await js("document.querySelector('#toast').textContent+' | '+document.querySelector('dialog').outerHTML"));throw Error('Timeout: '+code);}
-    await waitFor("!!document.querySelector('.tree-row')");
+    await waitFor("!!document.querySelector('.tree-list')");
     // Reset test config without interacting with any real user profile.
     await js("(async()=>window.desktop.save({version:1, config: (await import('../core/engine.mjs')).preset(),history:[]}))()");
     win.webContents.reload();await sleep(250);await waitFor("!!document.querySelector('.tree-row')");
@@ -91,6 +91,13 @@ app.whenReady().then(async()=>{
     await js("document.querySelector('.tree-row[data-id=legend]').click();document.querySelector('.tree-toolbar [data-action=select]').click()");
     assert.equal(await js("document.querySelector('[data-pity=hard]').value"),'90');
     assert.equal(await js("!!document.querySelector('[data-node=name]')"),false);
+    assert.equal(await js("document.querySelector('[data-total=weight]').textContent"),'1.000');
+    assert.equal(await js("document.querySelector('[data-total=banner] b').textContent"),'100%');
+    assert.equal(await js("Number(document.querySelector('.tree-row[data-id=featured] .banner-rate').dataset.base)"),0.003);
+    assert.equal(await js("document.querySelector('.tree-row[data-id=featured] .banner-rate b').textContent"),'0,3%');
+    await js("document.querySelector('.tree-row[data-id=legend]').click()");
+    assert.equal(await js("[...document.querySelectorAll('#content label')].some(el=>el.textContent.trim()==='ID')"),false);
+    await js("document.querySelector('.tree-toolbar [data-action=select]').click()");
     await js("document.querySelector('.tree-list').scrollIntoView({block:'center'})");await capture('banner-tree.png');
     const firstProfile=await js("document.querySelector('[data-banner]').value");
     await js("document.querySelector('[data-action=banner-copy]').click()");await waitFor("document.querySelector('dialog').open");
@@ -108,7 +115,8 @@ app.whenReady().then(async()=>{
     assert.ok((await js("document.querySelector('dialog').textContent")).includes('9 node'));
     await js("document.querySelector('dialog .primary').click()");await waitFor("document.querySelectorAll('.tree-row').length===3");
     await js("document.querySelector('[data-action=check-all]').click();document.querySelector('[data-action=delete-selected]').click()");
-    assert.equal(await js("document.querySelector('dialog').open"),false);
+    await waitFor("document.querySelector('dialog').open");
+    await js("document.querySelector('dialog button[value=cancel]').click()");
     assert.equal(await js("document.querySelectorAll('.tree-row').length"),3);
     await js("document.querySelector('[data-action=check-clear]').click();document.querySelector('.side-tool[data-tab=settings]').click()");
     assert.equal(await js("document.querySelector('#profile-bar').hidden"),true);
@@ -151,6 +159,9 @@ app.whenReady().then(async()=>{
     await waitFor("document.querySelectorAll('[data-profile] option').length===2 && !!document.querySelector('[data-economy=perPull]')");
     const project=await js("document.querySelector('[data-profile]').value");
     assert.equal(await js("document.querySelectorAll('[data-banner] option').length"),1);
+    assert.equal(await js("document.querySelectorAll('.tree-row').length"),0);
+    await js("document.querySelector('[data-action=preset]').click()");await waitFor("document.querySelector('dialog').open");
+    await js("document.querySelector('dialog .primary').click()");await waitFor("document.querySelectorAll('.tree-row').length===12");
     await change('[data-config=name]','Pity cycle QA');
     await js("document.querySelector('.banner-settings').open=true");
     assert.equal(await js("document.querySelectorAll('[data-reset=onHard]').length"),0);
@@ -192,6 +203,46 @@ app.whenReady().then(async()=>{
     win.setSize(1020,760);await sleep(200);await js("document.querySelector('.tabs [data-tab=setup]').click()");
     assert.equal(await js("document.documentElement.scrollWidth > window.innerWidth"),false);
     await capture('setup-small.png');
+    // New banners are empty, survive reload, and keep history usable.
+    await js("document.querySelector('[data-action=banner-new]').click()");await waitFor("document.querySelector('dialog').open");
+    await js("document.querySelector('dialog input[name=name]').value='Empty workflow';document.querySelector('dialog .primary').click()");await waitFor("!!document.querySelector('.tree-empty')");
+    assert.equal(await js("document.querySelectorAll('.tree-row').length"),0);
+    assert.equal(await js("document.querySelector('[data-total=weight]').textContent"),'0');
+    assert.equal(await js("document.querySelector('[data-total=banner] b').textContent"),'0%');
+    win.webContents.reload();await sleep(250);await waitFor("!!document.querySelector('.tree-empty')");
+    await js("document.querySelector('.tabs [data-tab=calculate]').click()");
+    assert.equal(await js("document.querySelector('[data-action=analyze]').disabled"),true);
+    await js("document.querySelector('.tabs [data-tab=simulate]').click()");
+    assert.equal(await js("document.querySelector('[data-action=simulate]').disabled"),true);
+    await js("document.querySelector('.tabs [data-tab=setup]').click();document.querySelector('[data-action=add-pool]').click()");await waitFor("document.querySelector('dialog').open");
+    await js("document.querySelector('dialog input[name=name]').value='Fresh pool';document.querySelector('dialog .primary').click()");await waitFor("document.querySelectorAll('.tree-row').length===2");
+    // Toolbar always adds directly to the banner, even with a pool selected.
+    await js("document.querySelector('[data-action=add-pool]').click()");await waitFor("document.querySelector('dialog').open");
+    assert.ok((await js("document.querySelector('dialog').textContent")).includes('Thêm vào banner “Empty workflow”'));
+    await js("document.querySelector('dialog input[name=name]').value='Second pool';document.querySelector('dialog .primary').click()");await waitFor("document.querySelectorAll('.tree-row').length===4");
+    await js("document.querySelector('.insert-controls [data-action=add-pool]:not([data-placement])').click()");await waitFor("document.querySelector('dialog').open");
+    assert.ok((await js("document.querySelector('dialog').textContent")).includes('Thêm vào pool “Second pool”'));
+    await js("document.querySelector('dialog input[name=name]').value='Nested pool';document.querySelector('dialog .primary').click()");await waitFor("document.querySelectorAll('.tree-row').length===6");
+    await js("document.querySelector('.insert-controls [data-action=add-pool][data-placement=sibling]').click()");await waitFor("document.querySelector('dialog').open");
+    assert.ok((await js("document.querySelector('dialog').textContent")).includes('Thêm vào pool “Second pool”'));
+    await js("document.querySelector('dialog input[name=name]').value='Sibling pool';document.querySelector('dialog .primary').click()");await waitFor("document.querySelectorAll('.tree-row').length===8");
+    await js("document.querySelector('.insert-controls [data-action=add-item]:not([data-placement])').click()");await waitFor("document.querySelector('dialog').open");
+    assert.ok((await js("document.querySelector('dialog').textContent")).includes('Thêm vào pool “Sibling pool”'));
+    await js("document.querySelector('dialog input[name=name]').value='Nested item';document.querySelector('dialog .primary').click()");await waitFor("document.querySelectorAll('.tree-row').length===9 && document.querySelector('#save-state').textContent.includes('Đã lưu')");
+    const structure=await js("(async()=>{const d=await window.desktop.load();return d.profiles.find(p=>p.id===d.activeProfileId).banners.find(b=>b.id===document.querySelector('[data-banner]').value).config.root.children})()");
+    assert.deepEqual(structure.map(n=>n.name),['Fresh pool','Second pool']);
+    assert.deepEqual(structure[1].children.map(n=>n.name),['Item mới','Nested pool','Sibling pool']);
+    assert.deepEqual(structure[1].children[2].children.map(n=>n.name),['Item mới','Nested item']);
+    await js("document.querySelector('.tree-list').scrollIntoView({block:'center'})");await capture('insertion-controls.png');
+    await js("document.querySelector('[data-action=check-all]').click();document.querySelector('[data-action=delete-selected]').click()");await waitFor("document.querySelector('dialog').open");
+    await js("document.querySelector('dialog .primary').click()");await waitFor("!!document.querySelector('.tree-empty') && document.querySelector('#save-state').textContent.includes('Đã lưu')");
+    await capture('empty-banner.png');
+    win.webContents.reload();await sleep(250);await waitFor("!!document.querySelector('.tree-empty')");
+    await js("document.querySelector('[data-action=add-item]').click()");await waitFor("document.querySelector('dialog').open");
+    await js("document.querySelector('dialog input[name=name]').value='Only item';document.querySelector('dialog .primary').click()");await waitFor("document.querySelectorAll('.tree-row').length===1");
+    assert.equal(await js("document.querySelector('[data-total=banner] b').textContent"),'100%');
+    await js("document.querySelector('[data-action=delete-node]').click()");await waitFor("document.querySelector('dialog').open");
+    await js("document.querySelector('dialog .primary').click()");await waitFor("!!document.querySelector('.tree-empty')");
     assert.deepEqual(errors,[]);
     console.log('PASS desktop: migration, themes, updater, math workers, history, profiles, currency, global Unity emulation, bulk deletion, collapse persistence, responsive layout, no console errors.');
     app.exit(0);

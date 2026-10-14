@@ -4,7 +4,7 @@
 
 ## Cài đặt và cập nhật
 
-Tải **GD-Toolkit-Setup-0.4.1-x64.exe** từ [GitHub Releases](https://github.com/longnguy3n/GD-Toolkit/releases/latest). Windows x64, không cần Node.js hay Unity để chạy Custom hoặc Unity giả lập. Bộ cài dành cho tài khoản Windows hiện tại, chưa có chữ ký số thương mại.
+Tải **GD-Toolkit-Setup-0.4.2-x64.exe** từ [GitHub Releases](https://github.com/longnguy3n/GD-Toolkit/releases/latest). Windows x64, không cần Node.js hay Unity để chạy Custom hoặc Unity giả lập. Bộ cài dành cho tài khoản Windows hiện tại, chưa có chữ ký số thương mại.
 
 Nếu đã cài v0.2 trở lên: **Cập nhật → Kiểm tra ngay → Tải bản mới → Cài và mở lại**. Bản portable v0.1 cần chạy bộ cài mới một lần. App tự kiểm tra khi mở nhưng chỉ tải/cài khi bạn chọn; mất mạng vẫn dùng gacha bình thường. Nguồn cập nhật là repository public longnguy3n/GD-Toolkit, không cần token. Updater kiểm tra SHA-512 của bộ cài và không tự hạ phiên bản.
 
@@ -13,11 +13,11 @@ Nút **Sáng / Tối** đổi theme và lưu lựa chọn. Dữ liệu nằm ở
 ## Profile → Banner → Pool → Item
 
 - **Profile** là cấp lớn nhất, có tên và chứa nhiều banner. Tạo, nhân bản toàn bộ, đổi tên, chuyển và xóa profile bằng hàng PROFILE.
-- Mỗi profile có **nhiều banner**. Hàng BANNER phía dưới dùng để tạo, nhân bản, đổi tên, chuyển và xóa banner trong profile đang chọn. Mỗi banner giữ cây pool/item, counter khởi đầu, quy tắc reset và currency riêng.
+- Mỗi profile có **nhiều banner**. Hàng BANNER phía dưới dùng để tạo, nhân bản, đổi tên, chuyển và xóa banner trong profile đang chọn. Mỗi banner giữ cây pool/item, counter khởi đầu, quy tắc reset và currency riêng. Banner mới bắt đầu trống; mẫu 90 pity chỉ được nạp khi chọn Nạp cấu hình mẫu.
 - Tối đa 50 profile, 50 banner/profile. Luôn giữ ít nhất một profile và một banner/profile để có chỗ làm việc.
 - Pool chứa các item cuối cùng hoặc pool con. Banner chọn nhánh đầu tiên; mỗi lượt tiếp tục random cho tới đúng một item cuối cùng. Tối đa 200 node/banner và 8 tầng pool.
 - Nút tam giác mở/thu gọn pool; **Mở tất cả / Thu gọn tất cả** áp dụng toàn cây, giữ trạng thái riêng theo banner. Thu gọn không loại item khỏi phép tính.
-- Checkbox chọn nhiều item/pool rồi **Xóa đã chọn**. Xóa cha gồm tất cả con, kể cả đang ẩn; chọn cha và con không đếm trùng. Xóa mục tiêu pity sẽ tắt pity tương ứng. Thao tác làm rỗng pool hoặc tổng weight bằng 0 bị từ chối toàn bộ.
+- Checkbox chọn nhiều item/pool rồi **Xóa đã chọn**. Xóa cha gồm tất cả con, kể cả đang ẩn; chọn cha và con không đếm trùng. Xóa mục tiêu pity sẽ tắt pity tương ứng. Có thể xóa toàn bộ pool/item để làm trống banner. Pool con còn tồn tại phải có ít nhất một item và tổng weight dương; xóa pool đó nếu không cần nữa. Banner trống vẫn lưu/mở lại được, nhưng chưa chạy Calculate/Simulate.
 - **Nhập cấu hình** tạo banner mới trong profile hiện tại. **Xuất JSON** xuất banner hiện tại, kèm currency và quy tắc pity. Random engine chung không bị thay bởi import/history.
 - Xóa banner/profile không xóa history đã lưu. Kết quả chưa lưu được giữ trong bộ nhớ khi chuyển banner/profile; bấm **Lưu history** trước khi thoát nếu muốn giữ.
 
@@ -25,7 +25,7 @@ Dữ liệu v0.2/v0.3 tự chuyển sang schema workspace v3: mọi banner cũ �
 
 ## Setup và currency
 
-Cây hiển thị trực tiếp các pool/item của banner, không có dòng ROOT. Chọn node để đổi tên, weight hoặc cấu hình pity. Nút **Pity banner** mở thiết lập pity chung của banner; khi chọn nút này, **+ Item / + Pool** thêm trực tiếp vào banner. **+ Item / + Pool** thêm vào pool đang chọn; chọn item cuối thì thêm cạnh item đó. Weight không âm; mỗi pool phải có ít nhất một con và tổng weight lớn hơn 0.
+Cây hiển thị trực tiếp các pool/item của banner, không có dòng ROOT. Chọn node để đổi tên, weight hoặc cấu hình pity. Nút **Pity banner** mở thiết lập pity chung. **+ Item vào banner / + Pool vào banner** luôn thêm trực tiếp vào banner, không phụ thuộc node đang chọn. Trong thiết lập pool, **+ Item vào pool này / + Pool con** thêm bên trong pool; **+ Item ngang hàng / + Pool ngang hàng** thêm vào cùng cha với node đang chọn. Hộp thoại luôn ghi tên nơi nhận. ID vẫn lưu nội bộ để nối pity/history nhưng không hiển thị trong form.
 
 Mở **Thiết lập banner · Currency & reset pity** để nhập:
 
@@ -34,6 +34,10 @@ Mở **Thiết lập banner · Currency & reset pity** để nhập:
 - Chi phí chỉ đặt ở banner, không nhập ở pool hoặc item. Giá tuyến tính, chưa mô hình hóa gói nạp/khuyến mãi.
 
 Calculate/Simulate hiển thị tổng currency, tổng giá trị và số tiền cần nạp thêm sau khi trừ số dư. Mô phỏng không tự trừ currency. History giữ chi phí theo cấu hình lúc chạy.
+
+## Tổng weight và rate toàn banner
+
+Hàng **Tổng banner** cộng weight của các item/pool trực tiếp trong banner, không cộng lẫn weight từ pool con. **Rate trong pool** là weight chia tổng weight cùng cha. **Rate toàn banner** nhân tất cả rate trên đường đi; ví dụ pool có 10% và item chiếm 20% trong pool thì item có 2% trên banner. Dòng **Pity** là rate dài hạn gồm pity của các pool cha. Tổng rate chỉ cộng các item cuối cùng (100% khi có item, 0% khi trống), không phụ thuộc thu gọn. Số hiển thị làm tròn tối đa 10 chữ số có nghĩa; di chuột cột rate toàn banner để xem giá trị chi tiết.
 
 ## Quy tắc pity
 
