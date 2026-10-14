@@ -408,6 +408,40 @@ app.whenReady().then(async()=>{
     assert.equal(await js("document.querySelector('[data-view-key=simulation-counters]').open"),true);
     await change('[data-log-jump]',100);await assertPosition(logScroll,'jump log page');
     await js("document.querySelector('#theme-toggle').click()");await assertPosition(logScroll,'theme on simulation');
+
+    // Tier colors are shared by name in a banner and snapshotted with each result.
+    await js("document.querySelector('.tabs [data-tab=setup]').click();document.querySelector('.tree-row[data-id=c]').click()");await change('[data-node=tier]','SSR');
+    await js("document.querySelector('.tree-row[data-id=a]').click()");await change('[data-tier-colors]','#ff0055');
+    assert.equal(await js("document.querySelector('.tree-row[data-id=c] .item-tier').style.backgroundColor"),'rgb(255, 0, 85)');
+    await js("document.querySelector('[aria-label=\"Màu tier Vàng\"]').click()");
+    await waitFor("document.querySelector('[data-tier-colors]').value==='#fbbf24'");
+    await js("document.querySelector('.tree-row[data-id=b]').click();document.querySelector('[aria-label=\"Màu tier Xanh dương\"]').click()");
+    await waitFor("document.querySelector('[data-tier-colors]').value==='#60a5fa'");
+    await js("document.querySelector('.tier-color-editor').scrollIntoView({block:'center'})");await capture('tier-color-editor.png');
+    await js("document.querySelector('.tabs [data-tab=simulate]').click()");await change('[data-sim=pulls]',4);
+    await js("document.querySelector('[data-action=simulate]').click()");await waitFor("!!document.querySelector('[data-action=save-result]')");
+    assert.equal(await js("document.querySelector('.pull .item-tier').style.backgroundColor"),'rgb(251, 191, 36)');
+    assert.equal(await js("document.querySelectorAll('.pull .item-tier')[1].style.backgroundColor"),'rgb(96, 165, 250)');
+    assert.ok((await js("document.querySelector('.pull').textContent")).includes('ĐÃ NHẬN BẢO ĐẢM'));
+    assert.equal(await js("getComputedStyle(document.querySelector('.pull .pity-hard')).backgroundColor"),'rgb(255, 209, 102)');
+    await js("document.querySelector('[data-action=save-result]').click()");await waitFor("document.querySelector('[data-action=save-result]').disabled");
+    await js("document.querySelector('.tabs [data-tab=setup]').click();document.querySelector('[data-check=a]').click();document.querySelector('[data-check=b]').click();document.querySelector('[aria-label=\"Màu tier Hồng\"]').click()");
+    await waitFor("document.querySelector('[data-tier-colors]').value==='#f472b6' && document.querySelector('#save-state').textContent.includes('Đã lưu')");
+    assert.equal(await js("document.querySelector('.tree-row[data-id=c] .item-tier').style.backgroundColor"),'rgb(244, 114, 182)');
+    win.webContents.reload();await sleep(250);await waitFor("document.querySelectorAll('.tree-row').length===3");
+    await js("document.querySelector('.tree-row[data-id=a]').click()");assert.equal(await js("document.querySelector('[data-tier-colors]').value"),'#f472b6');
+    await js("document.querySelector('.tabs [data-tab=simulate]').click();document.querySelector('[data-action=sim-tab][data-value=history]').click();document.querySelector('.history-card [data-action=view-history]').click()");
+    assert.equal(await js("document.querySelector('.pull .item-tier').style.backgroundColor"),'rgb(251, 191, 36)');
+    // Deterministic QA history shows ordinary rolls, soft wins and hard guarantees together.
+    await js("(async()=>{const d=await window.desktop.load(),p=d.profiles.find(p=>p.id===d.activeProfileId),c=structuredClone(p.banners.find(b=>b.id===p.activeBannerId).config);c.name='Pity color QA';c.rng='unity';c.seed=1;c.tierColors={SSR:'#fbbf24',SR:'#60a5fa',Common:'#94a3b8'};c.root.children[0].weight=1;c.root.children[1].weight=1;c.root.children[2].weight=8;c.root.children[2].tier='Common';c.root.pities[0]={...c.root.pities[0],hard:3,soft:2,step:.2,start:0};c.root.pities[1].enabled=false;const r=(await import('../core/engine.mjs')).simulate(c,9,{tape:{source:'UnityEngine.Random.value',unityVersion:'QA',seed:1,values:[.9,.9,.9,.9,.1,.9,.9,.9,.9]}});d.history.push(r);await window.desktop.save(d)})()");
+    win.webContents.reload();await sleep(250);await waitFor("!!document.querySelector('.tree-list')");
+    await js("document.querySelector('.tabs [data-tab=simulate]').click();document.querySelector('[data-action=sim-tab][data-value=history]').click();document.querySelector('.history-card [data-action=view-history]').click()");
+    assert.equal(await js("document.querySelectorAll('.hard-pull').length"),2);assert.equal(await js("document.querySelectorAll('.soft-pull').length"),1);
+    if(await js("document.documentElement.dataset.theme!=='dark'"))await js("document.querySelector('#theme-toggle').click()");
+    await js("document.querySelector('.pity-legend').scrollIntoView({block:'start'})");await capture('pity-contrast-dark.png');
+    await js("document.querySelector('#theme-toggle').click()");await capture('pity-contrast-light.png');
+    assert.equal(await js("getComputedStyle(document.querySelector('.hard-pull>summary')).backgroundColor"),'rgb(255, 240, 191)');
+    win.setSize(1020,760);await sleep(150);assert.equal(await js("document.documentElement.scrollWidth>innerWidth"),false);
     assert.deepEqual(errors,[]);
     console.log('PASS desktop: migration, themes, updater, math workers, history, profiles, currency, global Unity emulation, bulk deletion, collapse persistence, responsive layout, no console errors.');
     app.exit(0);

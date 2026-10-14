@@ -1,6 +1,6 @@
 {
   "name": "gd-toolkit",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Gacha design laboratory for Windows",
   "main": "desktop/main.cjs",
   "type": "module",

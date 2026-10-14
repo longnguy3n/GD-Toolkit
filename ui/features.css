@@ -80,3 +80,39 @@ html[data-theme=light] .profile-parent{background:#eeebf6}
 
 /* DOM updates restore scroll explicitly; browser anchoring must not move it again. */
 html,.tree-list,.table-wrap,dialog{overflow-anchor:none;scroll-behavior:auto}
+/* Tier colors are stored by tier name in each banner. Inline colors are validated hex. */
+.tier-color-editor{padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--panel2)}
+.tier-color-editor>h3{margin-bottom:12px}.tier-color-editor>small{display:block;line-height:1.6;margin-top:12px}
+.tier-color-preview,.tier-swatches{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tier-color-editor .tier-color-input{margin:14px 0;gap:12px}.tier-color-input input[type=color]{width:56px;height:36px;padding:3px;cursor:pointer}
+.tier-swatch{width:32px;min-height:32px;padding:0;border:2px solid transparent;font-size:18px;font-weight:700;border-radius:7px}
+.tier-swatch[aria-pressed=true]{outline:2px solid var(--text);outline-offset:2px}
+.badge.item-tier.colored-tier{font-weight:700;letter-spacing:.2px}
+.tree-tier{flex:none;max-width:105px}.tree-name .tree-tier .item-tier{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:9px;max-width:105px;padding:3px 5px}
+.tree-name>button[data-action=select]{min-width:0;flex:1}
+.pity-legend{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:16px 16px 0}.pity-legend>small{flex-basis:100%;line-height:1.6}
+.pity-legend .pity-hard,.pity-sequence .pull .pity-hard{background:#ffd166;color:#302000;border-color:#ffd166;font-size:11px;font-weight:800;padding:7px 10px;letter-spacing:.4px}
+.pity-legend .pity-soft,.pity-sequence .pull .pity-soft{background:#99f6e4;color:#063e35;border-color:#5eead4;font-size:10px;font-weight:750;padding:6px 9px}
+.pity-sequence .hard-pull{border:2px solid #f3b63f;border-left-width:7px;background:#302719}
+.pity-sequence .hard-pull>summary{background:#40331d}
+.pity-sequence .hard-pull>summary>b{font-size:14px;color:#fff1c6}
+.pity-sequence .hard-pull>summary .pull-number{color:#ffe4a3;font-weight:700;font-size:12px}
+.pity-sequence .hard-pull .remaining-line{color:#e6d3ad}
+.pity-triggered{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px;width:100%;white-space:normal;line-height:1.6}
+.pity-triggered>strong{font-size:10px;letter-spacing:.6px;color:#ffd166}
+.pity-sequence .pull .pity-triggered>span{font-size:11px;color:#fff1ce;overflow-wrap:anywhere;margin:0}
+.pity-sequence .soft-pull{border:1px solid #48a99b;border-left-width:5px}
+.pity-sequence .soft-pull>summary{background:#183631}
+.pity-sequence .soft-pull .remaining-line{color:#b3dbd3}
+.pity-sequence tr.pity-event-hard>td{background:#40331d}.pity-sequence tr.pity-event-hard>td:first-child{font-weight:700;color:#ffe4a3}
+.pity-sequence tr.pity-event-soft>td{background:#183631}
+.pity-summary .cost-summary>div:first-child{background:#40331d;border:1px solid #b88225;border-radius:8px;padding:14px}
+.pity-summary .cost-summary>div:first-child small{color:#ffe4a3}.pity-summary .cost-summary>div:first-child strong{color:#ffd166;font-size:26px}
+html[data-theme=light] .pity-sequence .hard-pull{background:#fff8e5;border-color:#b87800}
+html[data-theme=light] .pity-sequence .hard-pull>summary,html[data-theme=light] .pity-sequence tr.pity-event-hard>td{background:#fff0bf}
+html[data-theme=light] .pity-sequence .hard-pull>summary>b,html[data-theme=light] .pity-sequence .hard-pull>summary .pull-number,html[data-theme=light] .pity-sequence tr.pity-event-hard>td:first-child{color:#603600}
+html[data-theme=light] .pity-sequence .hard-pull .remaining-line,html[data-theme=light] .pity-triggered>strong,html[data-theme=light] .pity-sequence .pull .pity-triggered>span{color:#755013}
+html[data-theme=light] .pity-sequence .soft-pull>summary,html[data-theme=light] .pity-sequence tr.pity-event-soft>td{background:#dcf9f2}
+html[data-theme=light] .pity-sequence .soft-pull .remaining-line{color:#285c51}
+html[data-theme=light] .pity-summary .cost-summary>div:first-child{background:#fff0bf;border-color:#b87800}
+html[data-theme=light] .pity-summary .cost-summary>div:first-child small,html[data-theme=light] .pity-summary .cost-summary>div:first-child strong{color:#603600}

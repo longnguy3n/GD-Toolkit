@@ -1,3 +1,4 @@
+import {validateTierColors} from './tiers.mjs';
 import {validateEconomy} from './economy.mjs';
 import {ruleProbabilities,multiEffective} from './pity-rules.mjs';
 import {simulateMulti,analyzeMulti,expectedMulti} from './multi-pity.mjs';
@@ -25,6 +26,7 @@ export function validate(config,{allowEmpty=false}={}) {
   if(!config || ![1,2,3].includes(config.version) || !config.root)throw Error('Định dạng cấu hình không được hỗ trợ.');
   if(typeof config.name!=='string'||config.name.length>120)throw Error('Tên cấu hình tối đa 120 ký tự.');
   if(!['custom','unity-emulated','unity'].includes(config.rng))throw Error('Nguồn random không hợp lệ.');
+  validateTierColors(config.tierColors);
   if(config.economy!==undefined)validateEconomy(config.economy);
   if(config.pityReset!==undefined&&(!config.pityReset||typeof config.pityReset.onTarget!=='boolean'||config.pityReset.onHard===false))throw Error('Reset khi trúng sớm phải là bật/tắt; hard pity luôn reset.');
   if(!Number.isInteger(config.seed)||config.seed<0||config.seed>4294967295)throw Error('Seed phải là số nguyên từ 0 đến 4.294.967.295.');

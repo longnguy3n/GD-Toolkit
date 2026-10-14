@@ -4,7 +4,7 @@
 
 ## Cài đặt và cập nhật
 
-Tải **GD-Toolkit-Setup-0.5.1-x64.exe** từ [GitHub Releases](https://github.com/longnguy3n/GD-Toolkit/releases/latest). Windows x64, không cần Node.js hay Unity để chạy Custom hoặc Unity giả lập. Bộ cài dành cho tài khoản Windows hiện tại, chưa có chữ ký số thương mại.
+Tải **GD-Toolkit-Setup-0.5.2-x64.exe** từ [GitHub Releases](https://github.com/longnguy3n/GD-Toolkit/releases/latest). Windows x64, không cần Node.js hay Unity để chạy Custom hoặc Unity giả lập. Bộ cài dành cho tài khoản Windows hiện tại, chưa có chữ ký số thương mại.
 
 Nếu đã cài v0.2 trở lên: **Cập nhật → Kiểm tra ngay → Tải bản mới → Cài và mở lại**. Bản portable v0.1 cần chạy bộ cài mới một lần. App tự kiểm tra khi mở nhưng chỉ tải/cài khi bạn chọn; mất mạng vẫn dùng gacha bình thường. Nguồn cập nhật là repository public longnguy3n/GD-Toolkit, không cần token. Updater kiểm tra SHA-512 của bộ cài và không tự hạ phiên bản.
 
@@ -124,3 +124,11 @@ Node 22.12+ (CI dùng 24), Electron 42, electron-builder tạo NSIS x64. Source:
 Tests kiểm tra xác suất bằng liệt kê nhánh độc lập, Monte Carlo, pity/reset, reward Markov sau K bản sao, log các pool không được gọi, seed, migration v1/v2 → v3, profile/banner độc lập, currency và updater. Test Electron dùng test-output/profile, không dùng dữ liệu người dùng, và chụp ảnh QA ở test-output/.
 
 Tăng version bằng npm version --no-git-tag-version, cập nhật RELEASE_NOTES.md, chạy tests/build, commit/push main rồi push tag vX.Y.Z. Workflow Windows kiểm thử, đóng gói, phát hành exe/blockmap/latest.yml. Commit chưa phải cập nhật; chỉ stable release mới được updater nhận. Helper tools/github-release.cjs dùng Git Credential Manager trong bộ nhớ; không ghi token vào source/installer. Test live-update kiểm tra feed, tải bộ cài và SHA-512, không chạy installer.
+
+## Màu tier và nhận diện pity
+
+Chọn item trong Setup → nhập tên Tier → **Màu tier**. Chọn một trong sáu màu nhanh hoặc mở bộ chọn màu tùy ý; **Màu mặc định** bỏ màu tùy chỉnh. Các item có cùng tên tier trong một banner dùng chung màu, các banner độc lập. Khi chọn nhiều item, có thể đổi màu chung cho các tier xuất hiện trong nhóm; việc đổi màu cũng áp dụng cho item cùng tier ngoài nhóm đó.
+
+Màu hiển thị trong cây Setup, bảng kết quả và pull log. Chữ tự chọn đen/trắng theo màu nền để dễ đọc. History, export/import và nhân bản banner giữ bảng màu; thay màu hiện tại không đổi history đã lưu hoặc xác suất/chuỗi gacha. History cũ chưa có màu dùng giao diện mặc định.
+
+**Hard pity** có nền vàng, dải màu dày, nhãn ★ TRÚNG HARD PITY và tên quy tắc đã kích hoạt. Lượt trúng trong vùng **soft pity** có nền xanh ngọc và nhãn riêng; đây là trúng khi rate đã tăng, không phải bảo đảm chắc chắn. Chi tiết quy tắc hard/soft cũng được tô màu khi mở từng lượt. Áp dụng cho cả theme sáng và tối.
