@@ -32,6 +32,7 @@ export function validate(config,{allowEmpty=false}={}) {
     if(!n || typeof n.id!=='string'||!/^[-\w]{1,80}$/.test(n.id)||['__proto__','constructor','prototype'].includes(n.id)||ids.has(n.id))throw Error('ID item không hợp lệ hoặc trùng nhau.');
     ids.add(n.id);
     if(typeof n.name!=='string'||!n.name.trim()||n.name.length>120)throw Error('Tên item phải có 1–120 ký tự.');
+    if(n.tier!==undefined&&(typeof n.tier!=='string'||n.tier.length>40))throw Error('Tier phải là tên tối đa 40 ký tự.');
     if(!Number.isFinite(n.weight)||n.weight<0||n.weight>1e9)throw Error('Weight phải từ 0 đến 1 tỷ.');
     if(n.children!==undefined) {
       if(!Array.isArray(n.children))throw Error(`Pool “${n.name}” cần danh sách item.`);

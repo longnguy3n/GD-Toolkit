@@ -4,7 +4,7 @@
 
 ## Cài đặt và cập nhật
 
-Tải **GD-Toolkit-Setup-0.4.2-x64.exe** từ [GitHub Releases](https://github.com/longnguy3n/GD-Toolkit/releases/latest). Windows x64, không cần Node.js hay Unity để chạy Custom hoặc Unity giả lập. Bộ cài dành cho tài khoản Windows hiện tại, chưa có chữ ký số thương mại.
+Tải **GD-Toolkit-Setup-0.4.3-x64.exe** từ [GitHub Releases](https://github.com/longnguy3n/GD-Toolkit/releases/latest). Windows x64, không cần Node.js hay Unity để chạy Custom hoặc Unity giả lập. Bộ cài dành cho tài khoản Windows hiện tại, chưa có chữ ký số thương mại.
 
 Nếu đã cài v0.2 trở lên: **Cập nhật → Kiểm tra ngay → Tải bản mới → Cài và mở lại**. Bản portable v0.1 cần chạy bộ cài mới một lần. App tự kiểm tra khi mở nhưng chỉ tải/cài khi bạn chọn; mất mạng vẫn dùng gacha bình thường. Nguồn cập nhật là repository public longnguy3n/GD-Toolkit, không cần token. Updater kiểm tra SHA-512 của bộ cài và không tự hạ phiên bản.
 
@@ -34,6 +34,10 @@ Mở **Thiết lập banner · Currency & reset pity** để nhập:
 - Chi phí chỉ đặt ở banner, không nhập ở pool hoặc item. Giá tuyến tính, chưa mô hình hóa gói nạp/khuyến mãi.
 
 Calculate/Simulate hiển thị tổng currency, tổng giá trị và số tiền cần nạp thêm sau khi trừ số dư. Mô phỏng không tự trừ currency. History giữ chi phí theo cấu hình lúc chạy.
+
+## Tier của item
+
+Mỗi item cuối cùng có trường **Tier** tùy chọn, tối đa 40 ký tự, ví dụ Common, Rare, Epic hoặc SSR. Nhập khi tạo item hoặc chỉnh trong thiết lập item. Tier là nhãn phân loại, không tự đổi weight/rate. Bảng kết quả và từng lượt trong Pull log ghi rõ tier. History và JSON giữ tier tại thời điểm chạy; đổi tier hiện tại không sửa history. Item/history chưa có tier hiển thị **Chưa gán tier**.
 
 ## Tổng weight và rate toàn banner
 

@@ -29,6 +29,7 @@
 .insert-controls{border-top:1px solid var(--line);margin-top:20px;padding-top:4px}
 .insert-controls p{font-size:11px;line-height:1.6;margin:14px 0 8px;overflow-wrap:anywhere}
 .insert-controls .actions{display:flex;gap:6px;flex-wrap:wrap}
+.item-tier{max-width:240px;white-space:normal;overflow-wrap:anywhere;line-height:1.5}
 .settings-panel .radio-cards{grid-template-columns:repeat(3,minmax(0,1fr))}
 .settings-panel .radio-card{min-height:85px}
 .settings-panel .config-line{max-width:480px;margin-bottom:20px}
