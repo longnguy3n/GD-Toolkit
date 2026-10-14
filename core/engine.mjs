@@ -1,4 +1,6 @@
 import {validateEconomy} from './economy.mjs';
+import {ruleProbabilities,multiEffective} from './pity-rules.mjs';
+import {simulateMulti,analyzeMulti,expectedMulti} from './multi-pity.mjs';
 export const VERSION = 2;
 export const clone = x => structuredClone(x);
 export function preset() {
@@ -20,7 +22,7 @@ export function emptyBanner() {
   return {version:VERSION,name:'Banner mới',rng:'custom',seed:2026,root:{id:'root',name:'Banner',weight:1,children:[]}};
 }
 export function validate(config,{allowEmpty=false}={}) {
-  if(!config || ![1,2].includes(config.version) || !config.root)throw Error('Định dạng cấu hình không được hỗ trợ.');
+  if(!config || ![1,2,3].includes(config.version) || !config.root)throw Error('Định dạng cấu hình không được hỗ trợ.');
   if(typeof config.name!=='string'||config.name.length>120)throw Error('Tên cấu hình tối đa 120 ký tự.');
   if(!['custom','unity-emulated','unity'].includes(config.rng))throw Error('Nguồn random không hợp lệ.');
   if(config.economy!==undefined)validateEconomy(config.economy);
@@ -37,7 +39,7 @@ export function validate(config,{allowEmpty=false}={}) {
     if(n.children!==undefined) {
       if(!Array.isArray(n.children))throw Error(`Pool “${n.name}” cần danh sách item.`);
       if(!n.children.length){
-        if(depth===0&&allowEmpty&&!n.pity?.enabled)return;
+        if(depth===0&&allowEmpty&&!n.pity?.enabled&&!n.pities?.some(p=>p.enabled))return;
         throw Error(depth===0?'Banner đang trống. Thêm item hoặc pool trước khi tính toán/mô phỏng.':`Pool “${n.name}” cần ít nhất một item.`);
       }
       n.children.forEach(c=>visit(c,depth+1));
@@ -54,9 +56,20 @@ export function validate(config,{allowEmpty=false}={}) {
   }
   visit(config.root,0);
   if(!config.root.children)throw Error('Node gốc phải là pool.');
+  walk(config.root,n=>{
+    if(n.pities===undefined)return;
+    if(n!==config.root||config.version!==3||!Array.isArray(n.pities)||n.pities.length>8||n.pity)throw Error('Tối đa 8 pity tại banner; cần cấu hình phiên bản 3.');
+    for(const p of n.pities){
+      if(!p||typeof p.id!=='string'||!/^[-\w]{1,80}$/.test(p.id)||['__proto__','constructor','prototype'].includes(p.id)||ids.has(p.id))throw Error('ID pity không hợp lệ hoặc trùng.');ids.add(p.id);
+      if(typeof p.name!=='string'||!p.name.trim()||p.name.length>120||typeof p.enabled!=='boolean')throw Error('Tên hoặc trạng thái pity không hợp lệ.');
+      if(!Number.isInteger(p.hard)||p.hard<1||p.hard>1000||!Number.isInteger(p.soft)||p.soft<0||p.soft>p.hard||!Number.isFinite(p.step)||p.step<0||p.step>1||!Number.isInteger(p.start)||p.start<0||p.start>=p.hard)throw Error('Hard/soft pity hoặc counter không hợp lệ.');
+      if(p.enabled&&!n.children.some(c=>c.id===p.target))throw Error('Chọn item/pool mục tiêu cho mỗi pity.');
+    }
+  });
   return config;
 }
 export function probabilities(pool,counter=0) {
+  if(Array.isArray(pool.pities))return ruleProbabilities(pool,counter);
   let sum=pool.children.reduce((s,c)=>s+c.weight,0), out=pool.children.map(c=>c.weight/sum), p=pool.pity;
   if(!p?.enabled)return out;
   let i=pool.children.findIndex(c=>c.id===p.target), base=out[i], roll=counter+1;
@@ -75,6 +88,7 @@ export function pityFlags(pool,counter,childId,policy={}) {
   return (hard?1:0)|(soft?2:0)|(childId===pool.pity.target?4:0)|(resetsOnHit(pool,counter,childId,policy)?8:0);
 }
 export function effective(pool,policy={}) {
+  if(Array.isArray(pool.pities))return multiEffective(pool,policy);
   let sum=pool.children.reduce((s,c)=>s+c.weight,0), base=pool.children.map(c=>c.weight/sum);
   if(!pool.pity?.enabled)return base;
   let idx=pool.children.findIndex(c=>c.id===pool.pity.target), survival=1, mean=0,hits=0;
@@ -119,6 +133,7 @@ export function xorshiftState(state) {
 }
 export function simulate(config,pulls,{tape,onProgress=()=>{}}={}) {
   validate(config);
+  if(config.root.pities)return simulateMulti(config,pulls,{tape,onProgress});
   if(!Number.isInteger(pulls)||pulls<1||pulls>1000000)throw Error('Mô phỏng từ 1 đến 1.000.000 lượt.');
   let used=0, rng=config.rng==='custom'?customRandom(config.seed):config.rng==='unity-emulated'?unityEmulated(config.seed):(()=>{validateTape(tape);return ()=>{if(used>=tape.values.length)throw Error('Đã dùng hết mẫu Unity. Xuất file nhiều mẫu hơn; lượt chạy này chưa được lưu.');return Math.min(tape.values[used++],1-Number.EPSILON);};})();
   const counters={},counts={},sequence=[],poolStats={},logs=new Map(),pitySummary={hardTriggers:0,hardPulls:0,softWins:0,resets:0};
@@ -167,6 +182,7 @@ function waitingSummary(path,copies) {
 // Other pools retain their own counters during simulation but are irrelevant to this calculation.
 export function analyze(config,id,copies,pulls,horizon=2000,onProgress=()=>{}) {
   validate(config);
+  if(config.root.pities)return analyzeMulti(config,id,copies,pulls,horizon,onProgress);
   if(!Number.isInteger(copies)||copies<1||copies>50)throw Error('Số bản sao từ 1 đến 50.');
   if(!Number.isInteger(pulls)||pulls<1||pulls>10000||!Number.isInteger(horizon)||horizon<pulls||horizon>10000)throw Error('Số lượt/horizon phải từ 1–10.000 và horizon ≥ số lượt.');
   const path=targetPath(config.root,id);if(!path)throw Error('Hãy chọn một item cuối cùng.');
@@ -217,6 +233,7 @@ export function analyze(config,id,copies,pulls,horizon=2000,onProgress=()=>{}) {
 // This keeps counting pity events after K copies have already been acquired.
 export function expectedPity(config,pulls,targetId) {
   validate(config);
+  if(config.root.pities)return expectedMulti(config,pulls,targetId);
   if(!Number.isInteger(pulls)||pulls<1||pulls>10000)throw Error('Số lượt tính pity từ 1–10.000.');
   const pools=[];walk(config.root,n=>{if(n.children&&n.pity?.enabled)pools.push(n);});
   const target=leafRates(config.root,config.pityReset).find(n=>n.id===targetId);

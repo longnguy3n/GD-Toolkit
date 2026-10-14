@@ -1,8 +1,9 @@
 import {emptyBanner,validate,clone,walk} from './engine.mjs';
 import {defaultEconomy,validateEconomy} from './economy.mjs';
+import {allRuleEntries} from './pity-rules.mjs';
 
 export function profileConfig(config) {
-  const c=clone(config);delete c.rng;delete c.seed;c.version=2;
+  const c=clone(config);delete c.rng;delete c.seed;c.version=c.root.pities?3:2;
   c.economy??=defaultEconomy();c.pityReset??={onTarget:true};return c;
 }
 export const activeProfile = d => d.profiles.find(p=>p.id===d.activeProfileId);
@@ -44,10 +45,10 @@ export function validateWorkspace(d) {
     validate(h.config);
     if(!Number.isInteger(h.pulls)||h.pulls<1||h.pulls>1000000||!Array.isArray(h.sequence)||h.sequence.length!==h.pulls)throw Error('Lịch sử không hợp lệ.');
     if(h.pityLog){
-      if(h.pityLog.version!==1||!Array.isArray(h.pityLog.pools)||h.pityLog.pools.length>200)throw Error('Log pity không hợp lệ.');
-      const pools=new Map();walk(h.config.root,n=>{if(n.children&&n.pity?.enabled)pools.set(n.id,n);});
+      if(![1,2].includes(h.pityLog.version)||!Array.isArray(h.pityLog.pools)||h.pityLog.pools.length>208)throw Error('Log pity không hợp lệ.');
+      const pools=new Map(allRuleEntries(h.config).map(e=>[e.id,{pity:e.rule}]));
       for(const l of h.pityLog.pools){const p=pools.get(l.id);if(!p||!Array.isArray(l.rolls)||!Array.isArray(l.after)||!Array.isArray(l.flags)||l.rolls.length!==l.after.length||l.rolls.length!==l.flags.length||l.rolls.length>h.pulls)throw Error('Log pity không hợp lệ.');
-        for(let i=0;i<l.rolls.length;i++)if(!Number.isInteger(l.rolls[i])||l.rolls[i]<1||l.rolls[i]>h.pulls||(i>0&&l.rolls[i]<=l.rolls[i-1])||!Number.isInteger(l.after[i])||l.after[i]<0||l.after[i]>=p.pity.hard||!Number.isInteger(l.flags[i])||l.flags[i]<0||l.flags[i]>15)throw Error('Counter trong log pity không hợp lệ.');
+        for(let i=0;i<l.rolls.length;i++)if(!Number.isInteger(l.rolls[i])||l.rolls[i]<1||l.rolls[i]>h.pulls||(i>0&&l.rolls[i]<=l.rolls[i-1])||!Number.isInteger(l.after[i])||l.after[i]<0||l.after[i]>=p.pity.hard||!Number.isInteger(l.flags[i])||l.flags[i]<0||l.flags[i]>(h.pityLog.version===2?31:15))throw Error('Counter trong log pity không hợp lệ.');
         pools.delete(l.id);
       }
       if(pools.size)throw Error('Log pity thiếu pool.');
@@ -82,6 +83,7 @@ export function deleteNodes(config,selected) {
   function visit(n){if(!n.children)return;
     n.children=n.children.filter(c=>{if(!ids.has(c.id))return true;walk(c,()=>removed++);return false;});
     if(n.pity?.target&&!n.children.some(c=>c.id===n.pity.target)){if(n.pity.enabled)disabledPity++;n.pity={...n.pity,target:n.children[0]?.id,enabled:false};}
+    for(const p of n.pities||[])if(!n.children.some(c=>c.id===p.target)){if(p.enabled)disabledPity++;p.enabled=false;p.target=n.children[0]?.id;}
     n.children.forEach(visit);
   }
   visit(next.root);validate(next,{allowEmpty:true});return {config:next,removed,disabledPity};

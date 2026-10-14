@@ -37,6 +37,9 @@ dialog textarea{width:100%;box-sizing:border-box;background:var(--panel2);color:
 .bulk-preview{font-size:12px}.bulk-preview>.table-wrap{max-height:200px;overflow:auto;margin-top:12px}
 .bulk-preview td{overflow-wrap:anywhere;max-width:280px}
 .multi-inspector label{margin:18px 0}.multi-inspector .rng-details{margin:18px 0}
+.pity-rule{padding:14px;border:1px solid var(--line);border-radius:8px;margin:16px 0;background:var(--panel2)}
+.pity-rule>.actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.pity-rule>.actions>b{margin-right:auto;font-size:12px}
+.pity-rule>label{margin:12px 0}.banner-pities{margin-top:20px}
 .settings-panel .radio-cards{grid-template-columns:repeat(3,minmax(0,1fr))}
 .settings-panel .radio-card{min-height:85px}
 .settings-panel .config-line{max-width:480px;margin-bottom:20px}

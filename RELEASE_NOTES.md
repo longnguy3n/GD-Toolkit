@@ -1,13 +1,12 @@
-# GD Toolkit v0.4.5
+# GD Toolkit v0.5.0
 
-- **Nhân bản pool cùng cấp**, gồm toàn bộ cây con, tier, weight, pity và counter khởi đầu. Bản sao độc lập, các mục tiêu pity tự nối sang item/pool mới.
-- **Nhập nhiều item** bằng danh sách mỗi dòng một tên, hoặc dán cột Tên / Weight / Tier từ bảng tính. Có weight/tier mặc định, xem trước số lượng và nơi nhận; hủy không thay đổi dữ liệu.
-- Dán nhiều dòng vào ô tên trong **Thêm item** tự chuyển sang bản xem trước nhập hàng loạt.
-- **Inspector chỉnh nhiều mục**: tick nhiều item/pool, xem giá trị chung hoặc “Nhiều giá trị”, sửa weight hoặc tier cùng lúc. Chỉ trường được sửa và các mục được tick mới thay đổi.
-- Kiểm tra giới hạn node, weight, tier và cấu hình trước khi áp dụng; lỗi không gây nhập/sửa một phần. History giữ nguyên.
-
-- Sửa lỗi đóng rồi mở lại hộp nhập quá nhanh, bảo đảm kết quả và thao tác hủy thuộc đúng hộp thoại.
+- **Shift + click checkbox** chọn hoặc bỏ chọn một dải item/pool đang hiển thị, hỗ trợ cả hai chiều. Pool thu gọn không tự chọn các item ẩn.
+- Giữ nguyên vị trí cuộn trang và danh sách khi tick chọn, chọn dải hoặc bỏ chọn.
+- **Nhiều pity trong một banner**: tối đa 8 quy tắc, tên và counter riêng, bật/tắt, xóa và đổi thứ tự ưu tiên.
+- Hard pity ưu tiên từ trên xuống; pity khác mục tiêu đến hạn giữ ở ngưỡng để xử lý lượt sau. Các pity cùng mục tiêu có thể hoàn thành cùng lượt. Hard pity đã nhận luôn reset.
+- Calculate xét đầy đủ trạng thái nhiều pity, so sánh rate có/không pity và số lần hard pity/chờ ưu tiên kỳ vọng. Rate dài hạn nhiều pity dùng giải số; không hội tụ trong giới hạn sẽ hiện —.
+- Simulate và History ghi riêng từng pity: sự kiện hard/soft, chờ ưu tiên, counter trước/sau và số lần gọi còn đến ngưỡng. Giữ tương thích banner một pity và history cũ.
 
 **Cập nhật:** Cập nhật → Kiểm tra ngay → Tải bản mới → Cài và mở lại.
 
-**Cài lần đầu:** tải GD-Toolkit-Setup-0.4.5-x64.exe. File blockmap/latest.yml phục vụ updater.
+**Cài lần đầu:** tải GD-Toolkit-Setup-0.5.0-x64.exe. File blockmap/latest.yml phục vụ updater.
