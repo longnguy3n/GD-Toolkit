@@ -294,6 +294,47 @@ app.whenReady().then(async()=>{
     assert.equal(copied.id,copyId);assert.equal(copied.pity.target,copied.children[0].id);
     assert.deepEqual(copied.children.slice(-2).map(n=>n.name),['Pool item A','Pool item B']);
 
+    // Every full render preserves viewport state, not only checkbox changes.
+    const scrollPosition=()=>js("[window.scrollX,window.scrollY,document.querySelector('.tree-list')?.scrollLeft||0,document.querySelector('.tree-list')?.scrollTop||0]");
+    async function assertPosition(expected,label){await sleep(120);assert.deepEqual(await scrollPosition(),expected,label);}
+    win.setSize(1440,960);
+    await js("document.querySelector('.help-details[data-view-key=setup-help]').open=true;window.scrollTo(0,500);document.querySelector('.tree-list').scrollTop=160");
+    const nodeScroll=await scrollPosition();assert.ok(nodeScroll[1]>0&&nodeScroll[3]>0);
+    // Native mouse input on a visible leaf name reproduces the reported click.
+    const point=await js("(()=>{const list=document.querySelector('.tree-list').getBoundingClientRect();for(const r of document.querySelectorAll('.tree-row')){const b=r.querySelector('button[data-action=select]'),v=b.getBoundingClientRect();if(r.querySelector('.tree-symbol')&&v.top>Math.max(0,list.top)&&v.bottom<Math.min(innerHeight,list.bottom))return {x:Math.round(v.left+v.width/2),y:Math.round(v.top+v.height/2),id:r.dataset.id};}throw Error('No visible leaf')})()");
+    win.webContents.sendInputEvent({type:'mouseDown',x:point.x,y:point.y,button:'left',clickCount:1});
+    win.webContents.sendInputEvent({type:'mouseUp',x:point.x,y:point.y,button:'left',clickCount:1});
+    await waitFor("document.querySelector('.tree-row.selected')?.dataset.id==="+JSON.stringify(point.id));
+    await assertPosition(nodeScroll,'native click on item name');
+    assert.equal(await js("document.querySelector('[data-view-key=setup-help]').open"),true);
+    await js("document.querySelector('.tree-row[data-id=dust]').click()");await assertPosition(nodeScroll,'select entire row');
+    await js("document.querySelector('[data-node=name]').focus({preventScroll:true});document.querySelector('[data-node=name]').setSelectionRange(2,2)");
+    await change('[data-node=name]','Stardust edited');await assertPosition(nodeScroll,'edit item inspector');
+    assert.equal(await js("document.activeElement.dataset.node"),'name');
+    await change('[data-weight=dust]',4);await assertPosition(nodeScroll,'edit inline weight');
+    await change('[data-weight=dust]',-1);await assertPosition(nodeScroll,'validation rollback');
+    assert.equal(await js("document.querySelector('[data-weight=dust]').value"),'4');
+    await js("document.querySelector('[data-action=pool-toggle][data-id=common]').click()");await assertPosition(nodeScroll,'collapse pool');
+    await js("document.querySelector('[data-action=pool-toggle][data-id=common]').click()");await assertPosition(nodeScroll,'expand pool');
+    await js("document.querySelector('#theme-toggle').click()");await assertPosition(nodeScroll,'change theme');
+    await js("document.querySelector('.brand').click()");await assertPosition(nodeScroll,'brand does not navigate to #');
+    await js("document.querySelector('[data-action=add-item]').click()");await waitFor("document.querySelector('dialog').open");
+    await assertPosition(nodeScroll,'open item dialog');
+    await js("document.querySelector('dialog button[value=cancel]').click()");await waitFor("!document.querySelector('dialog').open");await assertPosition(nodeScroll,'cancel item dialog');
+    await js("document.querySelector('#update-button').click()");await waitFor("document.querySelector('#update-dialog').open");
+    await assertPosition(nodeScroll,'open updater dialog');
+    await js("document.querySelector('[data-action=update-close]').click()");await waitFor("!document.querySelector('#update-dialog').open");await assertPosition(nodeScroll,'close updater dialog');
+    await js("document.querySelector('[data-action=add-item]').click()");await waitFor("document.querySelector('dialog').open");
+    await js("document.querySelector('dialog input[name=name]').value='Scroll QA';document.querySelector('dialog .primary').click()");await waitFor("document.querySelectorAll('.tree-row').length===21");await assertPosition(nodeScroll,'create item');
+    await js("document.querySelector('[data-action=delete-node]').click()");await waitFor("document.querySelector('dialog').open");
+    await js("document.querySelector('dialog .primary').click()");await waitFor("document.querySelectorAll('.tree-row').length===20");await assertPosition(nodeScroll,'delete item');
+    await js("document.querySelector('[data-action=bulk-items]').click()");await waitFor("document.querySelector('dialog').classList.contains('bulk-dialog') && document.querySelector('textarea[name=items]')");
+    await js("document.querySelector('textarea[name=items]').value=Array.from({length:30},(_,i)=>'Scroll item '+i).join('\\n');document.querySelector('textarea[name=items]').dispatchEvent(new Event('input',{bubbles:true}));document.querySelector('.bulk-preview .table-wrap').scrollTop=100");
+    assert.equal(await js("document.querySelector('.bulk-preview .table-wrap').scrollTop"),100);
+    await js("document.querySelector('dialog input[name=weight]').value='2';document.querySelector('dialog input[name=weight]').dispatchEvent(new Event('input',{bubbles:true}))");
+    assert.equal(await js("document.querySelector('.bulk-preview .table-wrap').scrollTop"),100);
+    await js("document.querySelector('dialog button[value=cancel]').click()");await waitFor("!document.querySelector('dialog').open");await assertPosition(nodeScroll,'bulk preview and cancellation');
+    await capture('stable-selection-scroll.png');
     // Range selection uses displayed order, preserves both scroll containers, and skips collapsed children.
     await js("document.querySelector('[data-action=check-clear]').click();window.scrollTo(0,500);document.querySelector('.tree-list').scrollTop=220");
     const beforeScroll=await js("[window.scrollY,document.querySelector('.tree-list').scrollTop]");
@@ -355,6 +396,18 @@ app.whenReady().then(async()=>{
     win.webContents.reload();await sleep(250);await waitFor("document.querySelectorAll('.pity-rule').length===2");
     await js("document.querySelector('.tabs [data-tab=simulate]').click();document.querySelector('[data-action=sim-tab][data-value=history]').click();[...document.querySelectorAll('.history-card')].find(c=>c.textContent.includes('Multi pity QA')).querySelector('[data-action=view-history]').click()");
     assert.ok((await js("document.querySelector('.pull').textContent")).includes('Chờ ưu tiên · giữ ngưỡng hard'));
+    // Saving results and pagination preserve the page and expanded counter/log details.
+    await js("document.querySelector('[data-action=sim-tab][data-value=run]').click()");await change('[data-sim=pulls]',144);
+    await js("document.querySelector('[data-action=simulate]').click()");await waitFor("!!document.querySelector('[data-action=save-result]')");
+    await js("document.querySelector('[data-view-key=simulation-counters]').open=true;document.querySelector('.pull').open=true;window.scrollTo(0,1200)");
+    const logScroll=await scrollPosition();assert.ok(logScroll[1]>0);
+    await js("document.querySelector('[data-action=save-result]').click()");await waitFor("document.querySelector('[data-action=save-result]').disabled");await assertPosition(logScroll,'save history');
+    assert.equal(await js("document.querySelector('.pull').open"),true);
+    assert.equal(await js("document.querySelector('[data-view-key=simulation-counters]').open"),true);
+    await js("document.querySelector('.pagination button:last-child').click()");await assertPosition(logScroll,'next log page');
+    assert.equal(await js("document.querySelector('[data-view-key=simulation-counters]').open"),true);
+    await change('[data-log-jump]',100);await assertPosition(logScroll,'jump log page');
+    await js("document.querySelector('#theme-toggle').click()");await assertPosition(logScroll,'theme on simulation');
     assert.deepEqual(errors,[]);
     console.log('PASS desktop: migration, themes, updater, math workers, history, profiles, currency, global Unity emulation, bulk deletion, collapse persistence, responsive layout, no console errors.');
     app.exit(0);

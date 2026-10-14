@@ -1,12 +1,13 @@
-# GD Toolkit v0.5.0
+# GD Toolkit v0.5.1
 
-- **Shift + click checkbox** chọn hoặc bỏ chọn một dải item/pool đang hiển thị, hỗ trợ cả hai chiều. Pool thu gọn không tự chọn các item ẩn.
-- Giữ nguyên vị trí cuộn trang và danh sách khi tick chọn, chọn dải hoặc bỏ chọn.
-- **Nhiều pity trong một banner**: tối đa 8 quy tắc, tên và counter riêng, bật/tắt, xóa và đổi thứ tự ưu tiên.
-- Hard pity ưu tiên từ trên xuống; pity khác mục tiêu đến hạn giữ ở ngưỡng để xử lý lượt sau. Các pity cùng mục tiêu có thể hoàn thành cùng lượt. Hard pity đã nhận luôn reset.
-- Calculate xét đầy đủ trạng thái nhiều pity, so sánh rate có/không pity và số lần hard pity/chờ ưu tiên kỳ vọng. Rate dài hạn nhiều pity dùng giải số; không hội tụ trong giới hạn sẽ hiện —.
-- Simulate và History ghi riêng từng pity: sự kiện hard/soft, chờ ưu tiên, counter trước/sau và số lần gọi còn đến ngưỡng. Giữ tương thích banner một pity và history cũ.
+- Sửa lỗi chọn tên hoặc dòng item/pool khiến danh sách tự cuộn về đầu.
+- Giữ vị trí cuộn qua cơ chế cập nhật chung: chọn/Shift chọn, sửa thông số, lỗi nhập liệu, mở/thu gọn pool, thêm/xóa item và đổi theme.
+- Giữ các phần chi tiết đang mở; trả focus vào ô đang sửa mà không kéo trang theo focus.
+- Giữ vị trí khi lưu history, phân trang/jump log, mở/đóng hộp thoại và cập nhật bản xem trước nhập nhiều item.
+- Bỏ liên kết logo tới đầu trang; tránh trình duyệt tự điều chỉnh vị trí sau khi nội dung được dựng lại.
+
+Nếu nội dung bị xóa/thu gọn làm vùng cuộn ngắn lại, vị trí được giới hạn tại phần nội dung còn lại.
 
 **Cập nhật:** Cập nhật → Kiểm tra ngay → Tải bản mới → Cài và mở lại.
 
-**Cài lần đầu:** tải GD-Toolkit-Setup-0.5.0-x64.exe. File blockmap/latest.yml phục vụ updater.
+**Cài lần đầu:** tải GD-Toolkit-Setup-0.5.1-x64.exe.

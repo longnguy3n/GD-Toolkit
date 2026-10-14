@@ -4,7 +4,7 @@
 
 ## Cài đặt và cập nhật
 
-Tải **GD-Toolkit-Setup-0.5.0-x64.exe** từ [GitHub Releases](https://github.com/longnguy3n/GD-Toolkit/releases/latest). Windows x64, không cần Node.js hay Unity để chạy Custom hoặc Unity giả lập. Bộ cài dành cho tài khoản Windows hiện tại, chưa có chữ ký số thương mại.
+Tải **GD-Toolkit-Setup-0.5.1-x64.exe** từ [GitHub Releases](https://github.com/longnguy3n/GD-Toolkit/releases/latest). Windows x64, không cần Node.js hay Unity để chạy Custom hoặc Unity giả lập. Bộ cài dành cho tài khoản Windows hiện tại, chưa có chữ ký số thương mại.
 
 Nếu đã cài v0.2 trở lên: **Cập nhật → Kiểm tra ngay → Tải bản mới → Cài và mở lại**. Bản portable v0.1 cần chạy bộ cài mới một lần. App tự kiểm tra khi mở nhưng chỉ tải/cài khi bạn chọn; mất mạng vẫn dùng gacha bình thường. Nguồn cập nhật là repository public longnguy3n/GD-Toolkit, không cần token. Updater kiểm tra SHA-512 của bộ cài và không tự hạ phiên bản.
 
@@ -17,7 +17,7 @@ Nút **Sáng / Tối** đổi theme và lưu lựa chọn. Dữ liệu nằm ở
 - Tối đa 50 profile, 50 banner/profile. Luôn giữ ít nhất một profile và một banner/profile để có chỗ làm việc.
 - Pool chứa các item cuối cùng hoặc pool con. Banner chọn nhánh đầu tiên; mỗi lượt tiếp tục random cho tới đúng một item cuối cùng. Tối đa 200 node/banner và 8 tầng pool.
 - Nút tam giác mở/thu gọn pool; **Mở tất cả / Thu gọn tất cả** áp dụng toàn cây, giữ trạng thái riêng theo banner. Thu gọn không loại item khỏi phép tính.
-- **Shift + click checkbox** chọn/bỏ chọn dải giữa mục neo và mục vừa bấm, theo thứ tự đang hiển thị. Bấm thường đặt lại neo; các mục trong pool thu gọn không tự được chọn. Tick giữ nguyên vị trí cuộn trang và danh sách.
+- **Shift + click checkbox** chọn/bỏ chọn dải giữa mục neo và mục vừa bấm, theo thứ tự đang hiển thị. Bấm thường đặt lại neo; các mục trong pool thu gọn không tự được chọn. Mọi cập nhật giao diện giữ vị trí cuộn trang và danh sách: chọn item, tick, sửa thông số, mở/thu gọn pool, đổi theme, thêm/xóa, lưu history và phân trang. Giữ các chi tiết đang mở và không cuộn theo focus khi dựng lại form. Nếu nội dung bị xóa/thu gọn ngắn hơn vị trí đang xem, trình duyệt giữ vị trí gần nhất còn hợp lệ.
 - Checkbox chọn nhiều item/pool rồi **Xóa đã chọn**. Xóa cha gồm tất cả con, kể cả đang ẩn; chọn cha và con không đếm trùng. Xóa mục tiêu pity sẽ tắt pity tương ứng. Có thể xóa toàn bộ pool/item để làm trống banner. Pool con còn tồn tại phải có ít nhất một item và tổng weight dương; xóa pool đó nếu không cần nữa. Banner trống vẫn lưu/mở lại được, nhưng chưa chạy Calculate/Simulate.
 - **Nhập cấu hình** tạo banner mới trong profile hiện tại. **Xuất JSON** xuất banner hiện tại, kèm currency và quy tắc pity. Random engine chung không bị thay bởi import/history.
 - Xóa banner/profile không xóa history đã lưu. Kết quả chưa lưu được giữ trong bộ nhớ khi chuyển banner/profile; bấm **Lưu history** trước khi thoát nếu muốn giữ.
