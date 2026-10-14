@@ -1,0 +1,77 @@
+/* Explicit light surfaces keep the hierarchy, input states and chart contrast consistent. */
+:root[data-theme=light]{color-scheme:light;--bg:#f4f5fa;--panel:#fff;--panel2:#f1f0f8;--line:#dfe1ec;--muted:#61687c;--text:#242639;--purple:#7050bb;--green:#197858;--gold:#8a631c;--red:#b53551}
+[data-theme=light] .sidebar{background:#fdfdff}
+[data-theme=light] .brand-mark{background:#ede7fc;color:#6b479d;border-color:#b4a2d4}
+[data-theme=light] .brand-mark span{color:#413354}
+[data-theme=light] .side-tool{background:#eee7fb;color:#664392;border-color:#d4c4ee}
+[data-theme=light] .side-tool i{color:#765993}
+[data-theme=light] .side-label,[data-theme=light] .side-bottom small,[data-theme=light] footer,[data-theme=light] .tab-caption{color:#71798e}
+[data-theme=light] .side-note strong{color:#514567}
+[data-theme=light] .side-bottom,[data-theme=light] .header-right,[data-theme=light] .breadcrumb{color:#5f667b}
+[data-theme=light] .breadcrumb b{color:#33394d}
+[data-theme=light] .stat{background:linear-gradient(115deg,#fff,#f8f6fd)}
+[data-theme=light] .stat-icon{background:#f0eafa;border-color:#e0d5f1}
+[data-theme=light] .stat:nth-child(2) .stat-icon{color:#89621c;background:#fcf3df;border-color:#ebdfbc}
+[data-theme=light] .stat:nth-child(3) .stat-icon{color:#1d7c5b;background:#e8f5ee;border-color:#c8e6d8}
+[data-theme=light] .stat label,[data-theme=light] .eyebrow{color:#61667c}
+[data-theme=light] .tabs button{color:#666f83}
+[data-theme=light] .tabs button.active{color:#7150aa;border-bottom-color:#8561bb}
+[data-theme=light] .tabs button.active span{color:#775895}
+[data-theme=light] button{background:#f4f3f9;border-color:#d8d9e5;color:#3e3a50}
+[data-theme=light] button:hover{background:#eae4f5;border-color:#aa97c9}
+[data-theme=light] button.primary{background:#8060b8;color:#fff;border-color:#8060b8}
+[data-theme=light] button.primary:hover{background:#6b4aa2}
+[data-theme=light] .tabs button,[data-theme=light] .heading-actions button,[data-theme=light] .tree-name button,[data-theme=light] .ghost,[data-theme=light] .subtle-button,[data-theme=light] .side-bottom button{background:transparent}
+[data-theme=light] .tabs button,[data-theme=light] .tree-name button,[data-theme=light] .ghost,[data-theme=light] .subtle-button{border-color:transparent}
+[data-theme=light] .tabs button.active{border-bottom-color:#8561bb}
+[data-theme=light] input,[data-theme=light] select{background:#fbfbfe;color:#30344a;border-color:#d4d7e4}
+[data-theme=light] label{color:#60677d}
+[data-theme=light] .badge{color:#745397;background:#f1ebfa;border-color:#d9ccea}
+[data-theme=light] .tree-toolbar{background:#f7f7fb}
+[data-theme=light] .tree-toolbar input{background:transparent;border-color:transparent}
+[data-theme=light] .tree-toolbar .badge{color:#68617b;background:#f0edf6;border-color:#dcd6e6}
+[data-theme=light] .tree-row:hover{background:#f7f5fc}
+[data-theme=light] .tree-row.selected{background:#f0eafa;border-color:#d6c9e7}
+[data-theme=light] .tree-weight{background:#fff;border-color:#dddce8}
+[data-theme=light] .tree-rate{color:#6b5886}
+[data-theme=light] .tree-symbol{color:#936abd}
+[data-theme=light] .tree-header,[data-theme=light] .tree-footer,[data-theme=light] .section-label{color:#687189}
+[data-theme=light] .note{background:#f6f2fc;color:#655978;border-color:#e2d7ef}
+[data-theme=light] .note strong{color:#604186}
+[data-theme=light] .pity-toggle label{color:#5e5073}
+[data-theme=light] .radio-card{background:#fcfbff;border-color:#ded8e9}
+[data-theme=light] .radio-card.active{background:#f0eafa;border-color:#b29acb}
+[data-theme=light] .rng-details,[data-theme=light] .chart-legend,[data-theme=light] .help-details{color:#60697d}
+[data-theme=light] .rng-details code,[data-theme=light] .help-details summary{color:#704c9c}
+[data-theme=light] .kpi strong,[data-theme=light] .history-card strong{color:#7654a9}
+[data-theme=light] .kpi:nth-child(2) strong{color:#21745a}
+[data-theme=light] .chart text{fill:#657088}
+[data-theme=light] .chart line{stroke:#d9d8e7}
+[data-theme=light] .chart polyline{stroke:#8a62c0}
+[data-theme=light] .chart polygon{fill:#a98be922}
+[data-theme=light] .quantile{border-color:#a88cc7}
+[data-theme=light] .rate-answer{color:#625177}
+[data-theme=light] .segmented{background:#efedf5}
+[data-theme=light] .segmented button{background:transparent;color:#687084}
+[data-theme=light] .segmented button.active{background:#fff;color:#67438c;box-shadow:0 1px 4px #39215412}
+[data-theme=light] .progress,[data-theme=light] .bar{background:#eee8f6}
+[data-theme=light] .progress div{background:#9372c4}
+[data-theme=light] .progress-label{color:#715b8d}
+[data-theme=light] th{background:#f7f6fb;color:#6b7287}
+[data-theme=light] .pull{background:#f8f5fc;border-color:#e0d7eb}
+[data-theme=light] .pull span{color:#887298}
+[data-theme=light] dialog{background:#fff;border-color:#d9c9e9;box-shadow:0 30px 100px #342a4940}
+[data-theme=light] dialog::backdrop{background:#27304260}
+[data-theme=light] .error{color:#972e46;background:#fff1f3;border-color:#edc6ce}
+[data-theme=light] .danger{color:#b53551}
+[data-theme=light] #toast{background:#fff;color:#5b3f7a;border-color:#bca4d5;box-shadow:0 6px 25px #39215425}
+[data-theme=light] ::-webkit-scrollbar-thumb{background:#c6bed5}
+.header-control{font-size:11px;white-space:nowrap;min-height:31px;padding:6px 10px}
+.header-right{gap:10px}
+#update-button.has-update{color:var(--purple);border-color:var(--purple)}
+#update-dialog{width:490px}
+.update-version{margin:0 0 16px;font-size:12px;color:var(--muted)}
+.update-message{min-height:45px;font-size:13px;line-height:1.7}
+.update-repo{font-size:11px;margin-top:16px;word-break:break-word;color:var(--muted)}
+#update-dialog .actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+@media(max-width:1150px){#save-state{font-size:10px}.header-right .version{display:none}}

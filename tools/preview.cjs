@@ -1,0 +1,3 @@
+const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
+const root=path.resolve(__dirname,'..');
+http.createServer((req,res)=>{try{const url=new URL(req.url,'http://127.0.0.1');const file=path.resolve(root,'.'+decodeURIComponent(url.pathname==='/'?'/ui/index.html':url.pathname));if(!file.startsWith(root+path.sep)){res.writeHead(403).end();return;}const mime={'.html':'text/html','.mjs':'text/javascript','.css':'text/css'}[path.extname(file)]||'application/octet-stream';res.writeHead(200,{'Content-Type':mime});fs.createReadStream(file).on('error',()=>res.end()).pipe(res);}catch{res.writeHead(400).end();}}).listen(47831,'127.0.0.1',()=>console.log('http://127.0.0.1:47831/ui/index.html'));

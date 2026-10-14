@@ -1,0 +1,8 @@
+node_modules/
+releases/
+test-output/
+*.log
+.env
+.env.*
+*.pfx
+*.pem
