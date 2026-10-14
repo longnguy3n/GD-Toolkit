@@ -4,7 +4,7 @@
 
 ## Cài đặt và cập nhật
 
-Tải **GD-Toolkit-Setup-0.4.3-x64.exe** từ [GitHub Releases](https://github.com/longnguy3n/GD-Toolkit/releases/latest). Windows x64, không cần Node.js hay Unity để chạy Custom hoặc Unity giả lập. Bộ cài dành cho tài khoản Windows hiện tại, chưa có chữ ký số thương mại.
+Tải **GD-Toolkit-Setup-0.4.4-x64.exe** từ [GitHub Releases](https://github.com/longnguy3n/GD-Toolkit/releases/latest). Windows x64, không cần Node.js hay Unity để chạy Custom hoặc Unity giả lập. Bộ cài dành cho tài khoản Windows hiện tại, chưa có chữ ký số thương mại.
 
 Nếu đã cài v0.2 trở lên: **Cập nhật → Kiểm tra ngay → Tải bản mới → Cài và mở lại**. Bản portable v0.1 cần chạy bộ cài mới một lần. App tự kiểm tra khi mở nhưng chỉ tải/cài khi bạn chọn; mất mạng vẫn dùng gacha bình thường. Nguồn cập nhật là repository public longnguy3n/GD-Toolkit, không cần token. Updater kiểm tra SHA-512 của bộ cài và không tự hạ phiên bản.
 
@@ -34,6 +34,14 @@ Mở **Thiết lập banner · Currency & reset pity** để nhập:
 - Chi phí chỉ đặt ở banner, không nhập ở pool hoặc item. Giá tuyến tính, chưa mô hình hóa gói nạp/khuyến mãi.
 
 Calculate/Simulate hiển thị tổng currency, tổng giá trị và số tiền cần nạp thêm sau khi trừ số dư. Mô phỏng không tự trừ currency. History giữ chi phí theo cấu hình lúc chạy.
+
+## Nhân bản, nhập nhiều và chỉnh sửa nhiều item
+
+Chọn pool rồi bấm **Nhân bản pool này · cùng cấp**. Bản sao được đặt ngay sau pool gốc trong cùng cha, giữ toàn bộ cây con, tier, weight, pity và counter khởi đầu. Mọi node trong bản sao có ID riêng; mục tiêu pity bên trong trỏ vào bản sao. Weight được giữ nguyên nên rate của các mục cùng cha sẽ thay đổi.
+
+Bấm **+ Nhiều item** tại banner, trong pool hoặc ngang hàng với mục đang chọn. Dán danh sách, mỗi dòng một item; hoặc dán 3 cột từ bảng tính: **Tên → Weight → Tier**, phân cách bằng Tab, không có dòng tiêu đề. Dòng trống được bỏ qua, tên trùng vẫn tạo item riêng. Weight trống dùng giá trị mặc định; dòng chỉ có tên dùng cả weight và tier mặc định. Cột tier trống có nghĩa không gán tier. Bản xem trước ghi rõ nơi nhận, số lượng và giá trị trước khi tạo. Dán nhiều dòng vào ô tên trong **Thêm item** cũng tự mở bản xem trước này. Giới hạn toàn banner vẫn là 200 node; lỗi sẽ chặn toàn bộ lần nhập.
+
+Tick từ hai mục để mở **Inspector chỉnh sửa nhiều mục**. Weight/tier giống nhau được hiển thị bình thường; khác nhau hiển thị **Nhiều giá trị**. Chỉ trường được sửa mới thay đổi. Weight áp dụng cho mọi mục đã chọn, tier chỉ áp dụng cho item cuối đã chọn; chọn pool không tự chọn các con. Có nút bỏ tier chung. Thay đổi không hợp lệ bị hủy toàn bộ; history đã lưu giữ nguyên. Bấm **Bỏ chọn** để trở lại chỉnh từng mục.
 
 ## Tier của item
 
