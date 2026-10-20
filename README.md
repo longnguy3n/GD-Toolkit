@@ -1,10 +1,10 @@
-# GD Toolkit · Windows v0.10
+# GD Toolkit · Windows v0.11
 
 Ứng dụng desktop offline dành cho game designer: **Gacha**, **Economy & Progression**, **Tìm thông số cân bằng**. Các công cụ dùng chung profile, giao diện sáng/tối và cài đặt random. Gacha gồm Thiết lập / Tính xác suất / Mô phỏng / So sánh / Người chơi.
 
 ## Cài đặt và cập nhật
 
-Tải **GD-Toolkit-Setup-0.10.0-x64.exe** từ [GitHub Releases](https://github.com/longnguy3n/GD-Toolkit/releases/latest). Windows x64, không cần Node.js hay Unity để chạy Custom hoặc Unity giả lập. Bộ cài dành cho tài khoản Windows hiện tại, chưa có chữ ký số thương mại.
+Tải **GD-Toolkit-Setup-0.11.0-x64.exe** từ [GitHub Releases](https://github.com/longnguy3n/GD-Toolkit/releases/latest). Windows x64, không cần Node.js hay Unity để chạy Custom hoặc Unity giả lập. Bộ cài dành cho tài khoản Windows hiện tại, chưa có chữ ký số thương mại.
 
 Từ v0.10, vào **Cài đặt chung → Cập nhật ứng dụng → Kiểm tra ngay → Tải bản mới → Cài và mở lại**. Ở các bản v0.2–v0.9, nút Cập nhật vẫn nằm trên thanh trên. Bản portable v0.1 cần chạy bộ cài mới một lần. App tự kiểm tra khi mở nhưng chỉ tải/cài khi bạn chọn; mất mạng vẫn dùng gacha bình thường. Nguồn cập nhật là repository public longnguy3n/GD-Toolkit, không cần token. Updater kiểm tra SHA-512 của bộ cài và không tự hạ phiên bản.
 
@@ -57,7 +57,7 @@ Bảng và biểu đồ đối chiếu cấu hình lúc chạy với các phươ
 
 Các công cụ vận dụng mô hình nguồn–kho–tiêu hao/chuyển đổi của [Machinations Framework Basics](https://machinations.io/docs/framework-basics), thao tác sơ đồ trong [Canvas Operations](https://machinations.io/docs/canvas-operations), và luồng đặt mục tiêu–thử tham số–áp dụng trong [Balancer](https://machinations.io/docs/ai-balancer-selecting-nodes-for-balancer). GD Toolkit triển khai riêng và hoạt động offline; chưa bao gồm biểu thức tùy ý, dịch vụ AI, cộng tác cloud hoặc đồng bộ live với Unity.
 
-Theme **Garden Workspace** tham khảo [Buffer](https://buffer.com/) và [giao diện Publish](https://buffer.com/publish): nền kem, chữ xanh đậm, nút xanh lá nhạt, các khối nội dung bo tròn và phân cấp chữ rõ. Dark mode dùng nền xanh rừng với cùng bố cục. Font **Inter Variable** được đóng gói trong ứng dụng, hỗ trợ tiếng Việt và hoạt động offline; giấy phép OFL đi kèm. Thiết kế được viết riêng cho GD Toolkit, giữ màu tier tùy chọn và dấu hiệu pity. Xem nguồn tham khảo và quyết định thiết kế trong [UI_DESIGN.md](docs/UI_DESIGN.md).
+Giao diện dùng cùng hướng thiết kế với dự án **LongVest**: font **Manrope**, nền giấy kem, nút cam, thẻ pastel, viền mực đậm và bóng lệch đặc. Dark mode dùng nền xám than, nút cam và các lớp màu tương ứng. Manrope được đóng gói trong ứng dụng, hỗ trợ tiếng Việt và hoạt động offline; giấy phép OFL đi kèm. Theme áp dụng cho sidebar, tab, biểu đồ, bảng, canvas, Inspector, Cài đặt và hộp thoại; giữ màu tier tùy chọn và dấu hiệu pity. Xem hệ thống giao diện trong [UI_DESIGN.md](docs/UI_DESIGN.md).
 
 ## Profile → Banner → Pool → Item
 

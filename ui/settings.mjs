@@ -16,7 +16,7 @@ export function updatePanel(s){
     unsupported:'Cập nhật trực tiếp khả dụng trong bản Windows đã đóng gói. Bạn có thể tải bộ cài từ GitHub Releases.',
     error:s.error||'Không thể kiểm tra cập nhật. Vui lòng thử lại.'
   };
-  return `<div class="panel-head"><div><h2>Cập nhật ứng dụng</h2><p>Luôn sẵn sàng cho phiên bản tiếp theo.</p></div><span class="badge update-status" data-update-status="${esc(s.status)}">${esc(labels[s.status]||labels.idle)}</span></div>
+  return `<div class="panel-head"><div><h2>Cập nhật ứng dụng</h2><p>Kiểm tra và cài bản phát hành mới.</p></div><span class="badge update-status" data-update-status="${esc(s.status)}">${esc(labels[s.status]||labels.idle)}</span></div>
     <div class="panel-body"><div class="update-version"><span>Phiên bản hiện tại</span><strong>v${esc(s.currentVersion)}</strong></div>
     <p class="update-message ${s.status==='error'?'error':''}" role="status">${esc(messages[s.status]||messages.idle)}</p>
     ${s.status==='downloading'?`<div class="progress" role="progressbar" aria-label="Tiến độ tải cập nhật" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(percent)}"><div style="width:${percent}%"></div></div>`:''}
@@ -26,7 +26,7 @@ export function updatePanel(s){
 }
 
 function appearance(s){
-  return `<section class="panel settings-panel" id="settings-appearance"><div class="panel-head"><div><h2>Giao diện</h2><p>Một không gian làm việc theo cách bạn thích.</p></div></div><div class="panel-body">
+  return `<section class="panel settings-panel" id="settings-appearance"><div class="panel-head"><div><h2>Giao diện</h2><p>Chọn chế độ sáng hoặc tối cho không gian thiết kế.</p></div></div><div class="panel-body">
     <div class="theme-previews" aria-hidden="true">${['light','dark'].map(theme=>`<div class="theme-preview ${theme} ${s.theme===theme?'selected':''}"><div class="theme-preview-window"><i></i><div><b></b><span></span><span></span></div></div><strong>${theme==='light'?'Sáng':'Tối'}${s.theme===theme?' · Đang dùng':''}</strong></div>`).join('')}</div>
     <label>Chế độ hiển thị<select data-setting="theme" aria-label="Chế độ giao diện"><option value="light" ${s.theme==='light'?'selected':''}>Sáng</option><option value="dark" ${s.theme==='dark'?'selected':''}>Tối</option></select></label><p class="rng-details">Áp dụng cho toàn bộ ứng dụng và lưu cho lần mở tiếp theo.</p></div></section>`;
 }

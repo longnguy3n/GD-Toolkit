@@ -28,9 +28,9 @@ app.whenReady().then(async()=>{
     }
     await waitFor("!!document.querySelector('.tree-list')");
     await js('document.fonts.ready');
-    assert.equal(await js("document.fonts.check('14px Inter','Tiếng Việt — Nguyễn, tỷ lệ, tài nguyên, chế tạo')"),true,'Bundled Inter renders Vietnamese');
-    assert.equal(await js("[...document.fonts].some(face=>face.family.includes('Inter')&&face.status==='loaded')"),true,'Inter font face loaded from local bundle');
-    assert.equal(await js("getComputedStyle(document.body).fontFamily.split(',')[0].includes('Inter')"),true,'Inter is the application font');
+    assert.equal(await js("document.fonts.check('14px Manrope','Tiếng Việt — Nguyễn, tỷ lệ, tài nguyên, chế tạo')"),true,'Bundled Manrope renders Vietnamese');
+    assert.equal(await js("[...document.fonts].some(face=>face.family.includes('Manrope')&&face.status==='loaded')"),true,'Manrope font face loaded from local bundle');
+    assert.equal(await js("getComputedStyle(document.body).fontFamily.split(',')[0].includes('Manrope')"),true,'Manrope is the application font');
     // Reset test config without interacting with any real user profile.
     await js("(async()=>window.desktop.save({version:1, config: (await import('../core/engine.mjs')).preset(),history:[]}))()");
     win.webContents.reload();await sleep(250);await waitFor("!!document.querySelector('.tree-row')");

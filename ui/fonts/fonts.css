@@ -1,8 +1,8 @@
-/* Inter is bundled locally under SIL OFL 1.1; see Inter-OFL.txt. */
+/* Manrope is bundled locally under SIL OFL 1.1; see OFL-Manrope.txt. */
 @font-face {
-  font-family: 'Inter';
-  src: url('./InterVariable.woff2') format('woff2');
+  font-family: 'Manrope';
+  src: url('./Manrope.ttf') format('truetype');
   font-style: normal;
-  font-weight: 100 900;
+  font-weight: 200 800;
   font-display: swap;
 }

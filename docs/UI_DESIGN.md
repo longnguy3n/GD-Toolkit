@@ -1,52 +1,43 @@
-# GD Toolkit — Garden Workspace
+# GD Toolkit — LongVest theme
 
-Design review: 20 October 2026. Garden Workspace replaces Graphite Studio with a complete visual system inspired by the current [Buffer website](https://buffer.com/) and its public product-interface images. This is an original GD Toolkit interface; no Buffer logo, screenshot or proprietary font is shipped.
+GD Toolkit now follows the established visual system of the user's LongVest project. The reference is the local LongVest UI source: `web/style.css` (the later reference-theme and Manrope rules), `web/themes.css`, `web/etf-theme.css`, and the UI-continuity convention in `AGENTS.md`. LongVest is read only during this work; no financial records, application data or credentials are needed.
 
-## What was inspected
+## Shared visual language
 
-The public homepage HTML and its linked stylesheets were inspected, then the following actual product images were downloaded and visually reviewed:
-
-| Primary reference | Concrete observation used in GD Toolkit |
-| --- | --- |
-| [Buffer homepage](https://buffer.com/) | Warm cream surfaces, dark forest-green text, fresh pale-green action/selection color, rounded controls, restrained borders and tight heading tracking. Its current palette is green/cream, rather than the older blue branding. |
-| [Publish composer](https://buffer.com/img/homepage/publish-composer.webp) | A white rounded work panel, quiet borders, readable field labels and pale-green active date/time and scheduling controls. Apply this hierarchy to editable panels, selections and primary actions. |
-| [Create ideas board](https://buffer.com/img/homepage/create-ideas.webp) | Warm neutral columns, white cards, a filled view switch and pastel metadata tags. Apply filled task tabs, separate summary cards and a clearer persistent tool rail. |
-| [Insights](https://buffer.com/img/homepage/insights.webp) | Readable analytics groups with soft colored chart/card accents and clear typographic hierarchy. Keep dense numeric tables and charts legible without making every figure the same accent color. |
-
-The observed CSS uses a near-white warm neutral (`hsl(40 43% 99%)`), cream neutral layers, pale green (`hsl(105 68% 77%)`) and dark green text (`hsl(176 20% 16%)`). The homepage uses Figtree and Stolzl; product Insights styling also references Inter. A live in-app browser was unavailable during this review, so observations above come from the actual downloaded public HTML/CSS and inspected image pixels, not an assumed interactive session.
-
-The earlier Pic1s reference-directory study informed the general workflow, but the active visual direction is now the user's explicit Buffer reference. Buffer's marketing-page scale is adapted to an editor: no large promotional hero, decorative artwork or oversized navigation.
-
-## Design system
-
-**Garden Workspace** pairs a warm light workspace with a derived forest-green dark theme. The dark palette is our adaptation, not a claim that Buffer's site provides this dark theme. Both modes use the same hierarchy, dimensions and interactions; the user's saved theme choice is preserved.
+The defining elements are **Manrope, cream paper, orange actions, pastel cards, dark ink borders and solid offset shadows**. The dark counterpart uses the same typography and component shapes on charcoal surfaces. This replaces the prior Buffer-inspired Garden theme.
 
 | Role | Light | Dark |
 | --- | --- | --- |
-| Application ground | `#f7f7f2` | `#152b28` |
-| Main surface | `#ffffff` | `#203a35` |
-| Raised/context surface | `#f0f1e9` | `#29463f` |
-| Divider | `#dddfd5` | `#456359` |
-| Main text | `#243c37` | `#f3f5ec` |
-| Supporting text | `#647169` | `#bdcdc0` |
-| Primary-action fill | `#b1e995` | `#b1e995` |
-| Primary-action text | `#203d30` | `#203d30` |
-| Selected surface | `#e1f2d6` | `#33533c` |
+| Application ground | `#f8f7f3` | `#191a1d` |
+| Sidebar | `#f3eee8` | `#202124` |
+| Main surface | `#ffffff` | `#24262a` |
+| Main text | `#191917` | `#f2eee6` |
+| Supporting text | `#707068` | `#b4b0a7` |
+| Primary action | `#ff781f` | `#ff8a38` |
+| Blue card | `#e8eef9` | `#29384a` |
+| Yellow card | `#fff4bf` | `#433a24` |
+| Pink card | `#fce4e8` | `#452e36` |
+| Mint card | `#ddf9e8` | `#253e34` |
+| Ink outline | `#191917` | `#73716a` |
+| Inner divider | `#deded5` | `#424347` |
+| Solid shadow | `3px 4px 0 #191917` | `3px 4px 0 #090a0c` |
 
-- **Typography:** bundled Inter Variable, body/inputs 14px, normal controls 13px, panel titles 16–18px, page headings 28px. Inter supports the full Vietnamese character set and is licensed under the SIL Open Font License. It avoids mixing a Latin-only font with Vietnamese fallback glyphs. Dense tree toolbars use 12px, with smaller secondary metadata where needed. Numeric values use tabular figures.
-- **Navigation:** a soft persistent rail with a pale-green filled active tool; a compact profile/banner context strip; rounded segmented task tabs. Economy retains distinct task tabs and Canvas/Table view controls.
-- **Panels and summaries:** rounded 13px cards, separated pastel summary cards, 9px buttons and 8px inputs, consistent readable title/label spacing, restrained borders and shadow. Long forms remain structured into sections.
-- **Canvas:** cream/forest graph ground with a functional alignment grid, distinct resource/source/drain/crafting colors, rounded node cards, an adjacent property inspector and compact zoom controls. Node ports retain their own hit geometry and connector behavior.
-- **Settings:** appearance, updates, randomness and data are explicit sections. Light/dark previews show their actual colors with a visible selected border. Update status/actions are inline rather than an extra top-level pop-up.
-- **Meaningful color:** hard-pity gold highlighting and user-selected item-tier colors remain intact. Resource, source, drain and crafting nodes keep distinct colors plus labels and symbols. Multi-series chart colors are not flattened into the green brand accent.
-- **States:** keyboard focus remains visible, selected controls have fill/border cues, disabled controls remain distinguishable, and reduced-motion preference is respected. CSS does not change focus, scroll position or saved application data.
+Manrope is bundled locally under the SIL Open Font License, using the same unmodified variable font file as LongVest. Body weight 500, prominent headings 800 and action weight 700 follow the reference. Inputs and body text remain readable at 14px, standard buttons at 13px, with tabular numeric values. Font loading does not require a network connection.
 
-The main/supporting text contrast against the main surface is approximately 11.82/5.11 in light mode and 11.11/7.37 in dark mode. Primary-action text against its pale-green fill is 8.44. These are checks of these token pairs, not a complete accessibility audit.
+## Application mapping
 
-## Implementation and verification
+- The sidebar has the reference's clear ink divider and orange active tool. The profile/banner context remains compact and distinct from task navigation.
+- Task buttons are individual outlined tabs with a solid active shadow. Main actions use orange and dark text; secondary controls use paper surfaces and ink outlines.
+- Panels, result cards, history cards and dialogs share the outlined paper treatment. Pastel summaries distinguish information groups. Dense tables retain subtle inner separators so a large grid does not become visually noisy.
+- Forms use the shared input surface, clear outlines and restrained offset shadows. Focus is visible, labels wrap, and reduced-motion preferences are respected.
+- Economy uses the same system for its canvas, toolbar, nodes, connections and Inspector. Node type colors and symbols remain meaningful; ports retain their interaction geometry and centering transform.
+- User-defined tier colors and strong gold hard-pity styling remain owned by their feature styles. Series colors remain distinct in charts.
+- Appearance and updates remain in General Settings. The theme previews show the actual paper/charcoal backgrounds and orange accents. No top-bar theme or update controls are restored.
 
-`ui/studio-theme.css` retains its filename for compatibility but is fully rewritten for Garden Workspace. It loads after feature styles; `ui/fonts/fonts.css` supplies the local Inter font. Original feature styles continue to own semantic pity/tier behavior and node-port geometry. Settings interactions remain in `ui/settings.mjs`.
+`ui/studio-theme.css` is the final shared stylesheet; `ui/fonts/fonts.css` declares Manrope. CSS does not mutate configurations, history, canvas layout, scroll position or focus. Both modes preserve existing theme preferences and all tool behavior.
 
-Visual verification uses an isolated Electron profile at `test-output/garden-preview-profile`, never the installed user's data. Actual 1440px and 900px viewport renders were reviewed in both themes; the test explicitly lowers the preview window minimum so the 900px result is not silently clamped. There is no horizontal page overflow. The first setup tree row starts at about 683px at 1440 width and 691px at 900 width, keeping editable content within a 960px preview. Inter was verified loaded in both modes.
+## Verification
 
-Both themes were also reviewed on the Economy canvas and Settings. Canvas-port dimensions remain 27×32px with transparent hit areas and the required vertical-centering transform; zoom buttons remain compact. Local evidence is in ignored `test-output/garden-*.png` and `test-output/buffer-*.webp`; reference images are not application assets.
+Visual checks used synthetic fixtures and isolated Electron profiles under ignored `test-output`, never the installed user's data. Both themes were reviewed at 1440px and an actual 900px viewport, including Setup, Calculate, Simulate, Compare, Players, Balance, Settings, dialogs and the Economy canvas. There was no horizontal page overflow; the first Setup tree row starts near 695px at 1440 width and 702px at 900 width. The final light background was confirmed as `rgb(248, 247, 243)` after replacing inherited legacy theme aliases.
+
+The desktop suite passed with the loaded Manrope face, theme persistence, updater interactions, selection/scroll stability and tool workflows. All 108 core tests passed. The font was checked for Vietnamese glyph coverage and actual Chromium shaping of both NFC and NFD text without fallback. Local comparison images use LongVest's actual styles with synthetic labels and numbers; the source app was never launched against personal data. Evidence is stored in ignored `test-output/longvest-*.png`. The release pipeline additionally verifies silent installation and automatic restart.
