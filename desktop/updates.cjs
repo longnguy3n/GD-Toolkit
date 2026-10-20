@@ -35,7 +35,7 @@ function createUpdateController({updater,version,enabled,onState=()=>{},beforeCh
     async install(){
       if(!enabled||state.status!=='ready'||installing)throw Error('Bản cập nhật chưa sẵn sàng cài đặt.');
       installing=true;
-      try{await beforeInstall();set({status:'installing',error:null});updater.quitAndInstall(false,true);}
+      try{await beforeInstall();set({status:'installing',error:null});updater.quitAndInstall(true,true);}
       catch(e){installing=false;set({status:'ready',error:'Chưa cài cập nhật: '+e.message});throw e;}
     }
   };

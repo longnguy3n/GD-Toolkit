@@ -4,7 +4,7 @@
 
 ## Cài đặt và cập nhật
 
-Tải **GD-Toolkit-Setup-0.7.0-x64.exe** từ [GitHub Releases](https://github.com/longnguy3n/GD-Toolkit/releases/latest). Windows x64, không cần Node.js hay Unity để chạy Custom hoặc Unity giả lập. Bộ cài dành cho tài khoản Windows hiện tại, chưa có chữ ký số thương mại.
+Tải **GD-Toolkit-Setup-0.7.1-x64.exe** từ [GitHub Releases](https://github.com/longnguy3n/GD-Toolkit/releases/latest). Windows x64, không cần Node.js hay Unity để chạy Custom hoặc Unity giả lập. Bộ cài dành cho tài khoản Windows hiện tại, chưa có chữ ký số thương mại.
 
 Nếu đã cài v0.2 trở lên: **Cập nhật → Kiểm tra ngay → Tải bản mới → Cài và mở lại**. Bản portable v0.1 cần chạy bộ cài mới một lần. App tự kiểm tra khi mở nhưng chỉ tải/cài khi bạn chọn; mất mạng vẫn dùng gacha bình thường. Nguồn cập nhật là repository public longnguy3n/GD-Toolkit, không cần token. Updater kiểm tra SHA-512 của bộ cài và không tự hạ phiên bản.
 
@@ -154,3 +154,5 @@ Chọn item mục tiêu trong banner hiện tại, số bản sao tối thiểu,
 - Lưu tối đa 20 lịch sử Players toàn workspace, độc lập với 30 history Simulate. Snapshot giữ cấu hình, tier/màu, RNG, thông số, từng người và thống kê; xuất JSON hoặc xóa từng lịch sử. Thay form/banner không sửa snapshot kết quả. Kết quả chưa lưu chỉ giữ trong phiên; cập nhật app sẽ lưu lần chạy Players hiện tại nếu còn chỗ.
 
 Workspace vẫn dùng schema v3, thêm trường tùy chọn playerHistory; workspace cũ không cần chuyển đổi. Tổng giới hạn file vẫn 100 MB. Worker có thể hủy để không khóa giao diện.
+
+Từ bộ cài v0.7.1, nút **Cài và mở lại** cập nhật im lặng và tự mở app, không hiện các trang Next/Finish. Bộ cài nhận cả lệnh cập nhật từ các bản cũ chưa gửi cờ silent. Mở EXE thủ công để cài lần đầu vẫn có trình hướng dẫn chọn thư mục. Quy trình lưu dữ liệu và xác minh bộ cài được giữ nguyên.

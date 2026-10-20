@@ -24,6 +24,9 @@ jobs:
       - run: npm run package
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Verify silent update and automatic restart
+        shell: pwsh
+        run: ./tests/installer-smoke.ps1
       - name: Publish update assets
         shell: pwsh
         env:

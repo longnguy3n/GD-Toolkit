@@ -24,7 +24,7 @@ async function switchBanner(id){if(result)drafts.set(activeProfile(doc).activeBa
 async function switchProfile(id){if(result)drafts.set(activeBanner(doc).id,result);doc.activeProfileId=id;result=drafts.get(activeBanner(doc).id)||null;resetView();render();await save();}
 async function changeSetting(key,value){const old={...doc.settings};doc.settings[key]=value;try{validateWorkspace(doc);}catch(e){doc.settings=old;render();throw e;}stopWorker();render();await save();}
 
-let updateState={status:'unsupported',currentVersion:'0.7.0',version:null,percent:0,error:null};
+let updateState={status:'unsupported',currentVersion:'0.7.1',version:null,percent:0,error:null};
 function applyTheme(theme){
   const value=theme==='light'?'light':'dark';document.documentElement.dataset.theme=value;
   try{localStorage.setItem('gd-toolkit-theme',value);}catch{}
@@ -39,7 +39,7 @@ function updateUi(state){
 }
 function renderUpdateDialog(){
   const view=captureView($('#update-dialog')),s=updateState;
-  const messages={idle:'Kiểm tra bản phát hành Windows mới nhất trên GitHub.',checking:'Đang kiểm tra GitHub Releases…',available:`Đã có phiên bản ${s.version}. Bạn có thể tải về và cài khi sẵn sàng.`,downloading:`Đang tải bản ${s.version} · ${Math.round(s.percent)}%`,ready:`Bản ${s.version} đã tải xong. App sẽ đóng, chạy bộ cài và mở lại. Cấu hình, history và theme được giữ nguyên.`,current:'Bạn đang dùng phiên bản mới nhất.',installing:'Đang đóng ứng dụng để chạy bộ cài…',unsupported:'Chức năng cập nhật dùng trong bản Windows đã đóng gói. Với bản phát triển, hãy tải bộ cài từ GitHub Releases.',error:s.error||'Không thể kiểm tra cập nhật.'};
+  const messages={idle:'Kiểm tra bản phát hành Windows mới nhất trên GitHub.',checking:'Đang kiểm tra GitHub Releases…',available:`Đã có phiên bản ${s.version}. Bạn có thể tải về và cài khi sẵn sàng.`,downloading:`Đang tải bản ${s.version} · ${Math.round(s.percent)}%`,ready:`Bản ${s.version} đã tải xong. App sẽ tự đóng, cài bản mới ở chế độ im lặng rồi mở lại. Cấu hình, history và theme được giữ nguyên.`,current:'Bạn đang dùng phiên bản mới nhất.',installing:'Đang lưu và đóng ứng dụng để tự cài bản mới, sau đó mở lại…',unsupported:'Chức năng cập nhật dùng trong bản Windows đã đóng gói. Với bản phát triển, hãy tải bộ cài từ GitHub Releases.',error:s.error||'Không thể kiểm tra cập nhật.'};
   $('#update-dialog').innerHTML=`<h2>Cập nhật GD Toolkit</h2><div class="update-version">Phiên bản hiện tại: <strong>v${esc(s.currentVersion)}</strong></div><div class="update-message ${s.status==='error'?'error':''}">${esc(messages[s.status]||messages.idle)}</div>${s.status==='downloading'?`<div class="progress"><div style="width:${s.percent}%"></div></div>`:''}${s.error&&s.status!=='error'?`<div class="error">${esc(s.error)}</div>`:''}<div class="update-repo">Nguồn: longnguy3n/GD-Toolkit · GitHub Releases<br>App kiểm tra một lần khi mở. Chỉ tải và cài khi bạn chọn.</div><div class="actions"><button class="small" data-action="update-releases">Mở Releases ↗</button>${['idle','current','error'].includes(s.status)?'<button class="primary" data-action="update-check">Kiểm tra ngay</button>':''}${s.status==='available'?'<button class="primary" data-action="update-download">Tải bản mới</button>':''}${s.status==='ready'?'<button class="primary" data-action="update-install">Cài và mở lại</button>':''}<button data-action="update-close">Đóng</button></div>`;
   view.restore();
 }

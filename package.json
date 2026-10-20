@@ -1,6 +1,6 @@
 {
   "name": "gd-toolkit",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Gacha design laboratory for Windows",
   "main": "desktop/main.cjs",
   "type": "module",
@@ -62,7 +62,8 @@
       "allowToChangeInstallationDirectory": true,
       "deleteAppDataOnUninstall": false,
       "createDesktopShortcut": true,
-      "runAfterFinish": true
+      "runAfterFinish": true,
+      "include": "build/installer.nsh"
     },
     "publish": [
       {
