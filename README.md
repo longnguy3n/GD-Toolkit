@@ -1,14 +1,53 @@
-# GD Toolkit · Windows v0.7
+# GD Toolkit · Windows v0.8
 
-Ứng dụng desktop offline dành cho game designer. Gacha Tool gồm Setup / Calculate / Simulate / Compare / Players; Simulate và Players có lịch sử riêng.
+Ứng dụng desktop offline dành cho game designer: **Gacha**, **Economy & Progression**, **Tìm thông số cân bằng**. Các công cụ dùng chung profile, giao diện sáng/tối và cài đặt random. Gacha gồm Thiết lập / Tính xác suất / Mô phỏng / So sánh / Người chơi.
 
 ## Cài đặt và cập nhật
 
-Tải **GD-Toolkit-Setup-0.7.1-x64.exe** từ [GitHub Releases](https://github.com/longnguy3n/GD-Toolkit/releases/latest). Windows x64, không cần Node.js hay Unity để chạy Custom hoặc Unity giả lập. Bộ cài dành cho tài khoản Windows hiện tại, chưa có chữ ký số thương mại.
+Tải **GD-Toolkit-Setup-0.8.0-x64.exe** từ [GitHub Releases](https://github.com/longnguy3n/GD-Toolkit/releases/latest). Windows x64, không cần Node.js hay Unity để chạy Custom hoặc Unity giả lập. Bộ cài dành cho tài khoản Windows hiện tại, chưa có chữ ký số thương mại.
 
 Nếu đã cài v0.2 trở lên: **Cập nhật → Kiểm tra ngay → Tải bản mới → Cài và mở lại**. Bản portable v0.1 cần chạy bộ cài mới một lần. App tự kiểm tra khi mở nhưng chỉ tải/cài khi bạn chọn; mất mạng vẫn dùng gacha bình thường. Nguồn cập nhật là repository public longnguy3n/GD-Toolkit, không cần token. Updater kiểm tra SHA-512 của bộ cài và không tự hạ phiên bản.
 
 Nút **Sáng / Tối** đổi theme và lưu lựa chọn. Dữ liệu nằm ở `%APPDATA%/GD Toolkit/workspace.json`; nút ↗ cạnh Local workspace mở thư mục này. App không gửi cấu hình/history lên mạng. Bộ cài giữ dữ liệu; gỡ cài đặt không tự xóa dữ liệu người dùng.
+
+## Luồng làm việc
+
+Chọn công cụ ở thanh bên. Chọn **profile** để chuyển dự án; trong Gacha và Tìm thông số, chọn thêm **banner** đang làm việc. Economy dùng các kịch bản riêng thuộc profile, không gắn nhầm vào pool gacha. Hướng dẫn ngắn ở từng trang giải thích bước hiện tại và đưa tới bước tiếp theo. Giữ nguyên Shift chọn nhiều, Inspector và vị trí cuộn khi chỉnh dữ liệu.
+
+1. **Gacha → Thiết lập:** thiết kế item/pool, pity và currency.
+2. **Tính xác suất / Mô phỏng:** kiểm tra một mục tiêu hoặc chuỗi roll; **Người chơi** xem phân bố của nhiều người bắt đầu độc lập; **So sánh** đối chiếu banner.
+3. **Tìm thông số:** đặt xác suất mong muốn, thử các weight/hard pity rồi áp dụng một phương án.
+4. **Economy & Progression:** thiết kế nguồn thu, tiêu hao, crafting và mốc tiến trình; mô phỏng theo ngày và xem các điểm thiếu tài nguyên.
+
+## Economy & Progression
+
+Mỗi profile giữ tối đa 12 kịch bản; bắt đầu bằng mẫu **Economy → ngân sách gacha**, **Crafting & progression**, hoặc kịch bản trống. Tạo, nhân bản, xóa, nhập/xuất JSON riêng. Có hoàn tác thay đổi gần nhất. Mỗi kịch bản có:
+
+- Tối đa 20 tài nguyên với tồn đầu và sức chứa tùy chọn. Đây là kho tài nguyên, khác với pool random trong Gacha.
+- Tối đa 40 quy tắc: nguồn cấp (không có đầu vào), tiêu hao (không có đầu ra), chuyển đổi/crafting với nhiều nguyên liệu và nhiều đầu ra. Chỉnh lịch bắt đầu, chu kỳ, xác suất kích hoạt, thời gian chờ giao đầu ra, điều kiện tài nguyên tối thiểu và chế độ chỉ thành công một lần.
+- Tối đa 12 mốc đạt số lượng tài nguyên. Sơ đồ đọc từ trái sang phải: nguyên liệu → quy tắc → đầu ra, chạy theo thứ tự từ trên xuống. Có thể đổi thứ tự quy tắc.
+
+Mỗi ngày nhận hàng đến hạn trước, sau đó kiểm tra từng quy tắc theo thứ tự. Một quy tắc chạy tối đa một lần/ngày. Điều kiện và đủ nguyên liệu được kiểm tra trước random; trượt xác suất không mất nguyên liệu. Thành công trừ đủ mọi nguyên liệu cùng lúc, giao đầu ra ngay hoặc sau số ngày đã đặt. Các đơn giao chậm chạy song song, không phải hàng đợi một công việc/lần. Kho đầy nhận tới sức chứa, phần dư được thống kê là mất; hàng chưa đến ngày giao được thống kê riêng. Mốc kiểm tra từ ngày 0 và sau mỗi quy tắc, nên ghi nhận cả tài nguyên từng đạt rồi bị chi đi.
+
+Mô phỏng 1–3.650 ngày, 1–2.000 người chơi, với giới hạn ngày × người chơi × max(số quy tắc, số tài nguyên, 1) ≤ 3 triệu. Mỗi người bắt đầu với tồn đầu mới; dùng một chuỗi RNG liên tục cho cả nhóm. Biểu đồ là tồn kho trung bình cuối ngày, bảng có min/max, tổng nhận/chi và điểm nghẽn. Mốc 90% là ngày 90% **toàn bộ** người chơi đã đạt, gồm người chưa đạt trong mẫu số; không tìm được trong thời gian chạy thì ghi rõ. Kết quả thực nghiệm phụ thuộc seed, không phải xác suất chính xác.
+
+Lưu tối đa 6 kết quả kèm snapshot cấu hình mỗi profile; xuất kết quả JSON hoặc chuỗi tồn kho trung bình CSV. Dùng bản lưu để tạo kịch bản mới. Khi xóa profile, dữ liệu Economy thuộc profile đó cũng bị xóa. Trong kết quả, tài nguyên trùng tên currency của banner có thể chuyển **tồn cuối trung bình / giá một lượt** thành số lượt trong Calculate. Đây là ngân sách trung bình, không bảo đảm từng người có đủ; không tự sửa số dư hay roll item/pity trong economy.
+
+## Tìm thông số cân bằng
+
+Chọn item cuối, ít nhất K bản sao, N lượt và xác suất mong muốn. Chọn một weight (item hoặc pool) hoặc hard pity đang bật, khoảng min/max và 2–31 giá trị thử. Công cụ khảo sát các giá trị cách đều, làm tròn/loại trùng với hard pity, tính xác suất nhận **ít nhất K** sau đúng N lượt bằng cùng mô hình counter của Calculate.
+
+Bảng và biểu đồ đối chiếu cấu hình lúc chạy với các phương án, xếp hạng theo sai lệch điểm phần trăm. Chọn **Áp dụng** để lưu đúng một thông số vào banner; những thiết lập khác giữ nguyên. Nếu banner đổi trong lúc xem kết quả, cần chạy lại. Khoảng hard pity phải giữ được counter hiện tại và soft pity. Phương án không hợp lệ hoặc vượt giới hạn tính toán không được xếp hạng hay áp dụng.
+
+Đây là khảo sát hữu hạn một thông số, không phải AI và không bảo đảm tối ưu toàn cục. Mỗi phương án tối đa 1 triệu bước chuyển trạng thái; K≤50, N≤10.000. Rate gốc bỏ qua pity; rate lượt kế tiếp dùng counter hiện tại, không phải rate dài hạn. Xác suất tính bằng mô hình độc lập với RNG/seed.
+
+## Sao lưu và nguồn tham khảo thiết kế
+
+**Cài đặt chung → Xuất bản sao JSON** lưu toàn bộ workspace, gồm profile/banner, kịch bản Economy và lịch sử đã lưu. **Khôi phục bản sao** kiểm tra dữ liệu rồi hiển thị số profile/banner trước khi thay thế workspace; nên xuất bản hiện tại trước. Các bản lưu v1/v2/v3 cũ vẫn được nâng cấp và đọc.
+
+Các công cụ mới vận dụng mô hình nguồn–kho–tiêu hao/chuyển đổi của [Machinations Framework Basics](https://machinations.io/docs/framework-basics), và luồng đặt mục tiêu–thử tham số–áp dụng trong [Balancer](https://machinations.io/docs/ai-balancer-selecting-nodes-for-balancer). GD Toolkit triển khai riêng và hoạt động offline; chưa bao gồm canvas kéo-thả tự do, biểu thức tùy ý, dịch vụ AI, cộng tác cloud hoặc đồng bộ live với Unity.
+
+Tham khảo UI từ [bài Pic1s](https://pic1s.com/blog/9-trang-web-thiet-ke-ui-ux-hang-dau-ban-nen-biet-23), [Mobbin](https://mobbin.com), [Lookup](https://lookup.design) và nguyên tắc phân cấp, header gọn, nền nhiều lớp trong [thiết kế lại Linear UI](https://linear.app/now/how-we-redesigned-the-linear-ui). Giao diện được viết riêng cho luồng desktop của GD Toolkit.
 
 ## Profile → Banner → Pool → Item
 

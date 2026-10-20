@@ -2,6 +2,7 @@ import {emptyBanner,validate,clone,walk} from './engine.mjs';
 import {defaultEconomy,validateEconomy} from './economy.mjs';
 import {allRuleEntries} from './pity-rules.mjs';
 import {validatePlayerHistory} from './players.mjs';
+import {validateFlowLab} from './flow.mjs';
 
 export function profileConfig(config) {
   const c=clone(config);delete c.rng;delete c.seed;c.version=c.root.pities?3:2;
@@ -38,6 +39,7 @@ export function validateWorkspace(d) {
   const checkId=id=>{if(typeof id!=='string'||!/^[-\w]{1,80}$/.test(id)||ids.has(id))throw Error('ID profile/banner không hợp lệ.');ids.add(id);};
   for(const p of d.profiles){
     checkId(p.id);validName(p.name,'profile');
+    if(p.flowLab!==undefined)validateFlowLab(p.flowLab);
     if(!Array.isArray(p.banners)||!p.banners.length||p.banners.length>50)throw Error('Mỗi profile cần 1–50 banner.');
     for(const b of p.banners){
       checkId(b.id);validate({...b.config,rng:d.settings.rng,seed:d.settings.seed},{allowEmpty:true});validateEconomy(b.config.economy);
@@ -75,7 +77,9 @@ export function removeBanner(d,id) {
 export function addProfile(d,name,source=null) {
   if(d.profiles.length>=50)throw Error('Tối đa 50 profile.');validName(name,'profile');
   const banners=source?source.banners.map(b=>({...newBanner(d,b.config.name||'Banner',b.config),collapsed:[...b.collapsed]})):[newBanner(d,'Banner đầu tiên',emptyBanner())];
-  const p={id:crypto.randomUUID(),name:name.trim(),activeBannerId:banners[0].id,banners};d.profiles.push(p);return p;
+  const p={id:crypto.randomUUID(),name:name.trim(),activeBannerId:banners[0].id,banners};
+  if(source?.flowLab)p.flowLab=clone(source.flowLab);
+  d.profiles.push(p);return p;
 }
 export function removeProfile(d,id) {
   if(d.profiles.length===1)throw Error('Cần giữ ít nhất một profile.');

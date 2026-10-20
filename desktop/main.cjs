@@ -1,6 +1,7 @@
 const {app,BrowserWindow,ipcMain,dialog,shell}=require('electron');
 const fs=require('node:fs/promises');
 const path=require('node:path');
+const {replaceFile}=require('./storage.cjs');
 let win,saveQueue=Promise.resolve(),updates;
 const {createUpdateController,RELEASE_URL}=require('./updates.cjs');
 const dataPath=()=>path.join(app.getPath('userData'),'workspace.json');
@@ -14,8 +15,9 @@ async function validDocument(doc){
   if(doc.version===3)validateWorkspace(doc);else upgradeWorkspace(doc);
 }
 ipcMain.handle('load',async()=>{try{return JSON.parse(await fs.readFile(dataPath(),'utf8'));}catch(e){if(e.code==='ENOENT')return null;throw Error('Không đọc được workspace. Dữ liệu cũ được giữ nguyên; hãy kiểm tra thư mục dữ liệu.');}});
-ipcMain.handle('save',async(_,doc)=>{await validDocument(doc);const job=saveQueue.catch(()=>{}).then(async()=>{await fs.mkdir(app.getPath('userData'),{recursive:true});const file=dataPath(),temp=file+'.tmp';if(doc.version===3){try{const old=JSON.parse(await fs.readFile(file,'utf8'));if(old.version===1||old.version===2)await fs.copyFile(file,file+'.v'+old.version+'.backup',require('node:fs').constants.COPYFILE_EXCL);}catch(e){if(!['ENOENT','EEXIST'].includes(e.code))throw e;}}await fs.writeFile(temp,JSON.stringify(doc),'utf8');await fs.rename(temp,file);});saveQueue=job;await job;return true;});
+ipcMain.handle('save',async(_,doc)=>{await validDocument(doc);const job=saveQueue.catch(()=>{}).then(async()=>{await fs.mkdir(app.getPath('userData'),{recursive:true});const file=dataPath(),temp=file+'.tmp';if(doc.version===3){try{const old=JSON.parse(await fs.readFile(file,'utf8'));if(old.version===1||old.version===2)await fs.copyFile(file,file+'.v'+old.version+'.backup',require('node:fs').constants.COPYFILE_EXCL);}catch(e){if(!['ENOENT','EEXIST'].includes(e.code))throw e;}}await fs.writeFile(temp,JSON.stringify(doc),'utf8');await replaceFile(fs.rename,temp,file);});saveQueue=job;await job;return true;});
 ipcMain.handle('export',async(_,value,name)=>{const result=await dialog.showSaveDialog(win,{defaultPath:String(name).replace(/[^a-zA-Z0-9._-]/g,'_'),filters:[{name:'JSON',extensions:['json']}]});if(result.canceled)return false;await fs.writeFile(result.filePath,JSON.stringify(value,null,2),'utf8');return true;});
+ipcMain.handle('export-text',async(_,value,name)=>{if(typeof value!=='string'||value.length>20000000)throw Error('Nội dung CSV vượt giới hạn 20 MB.');const result=await dialog.showSaveDialog(win,{defaultPath:String(name).replace(/[^a-zA-Z0-9._-]/g,'_').replace(/\.[^.]*$/,'')+'.csv',filters:[{name:'CSV',extensions:['csv']}]});if(result.canceled)return false;await fs.writeFile(result.filePath,'\uFEFF'+value,'utf8');return true;});
 ipcMain.handle('import',async()=>{const result=await dialog.showOpenDialog(win,{properties:['openFile'],filters:[{name:'JSON',extensions:['json']}]});if(result.canceled)return null;const file=result.filePaths[0];if((await fs.stat(file)).size>100000000)throw Error('File vượt 100 MB.');return JSON.parse(await fs.readFile(file,'utf8'));});
 ipcMain.handle('open-data',()=>shell.openPath(app.getPath('userData')));
 ipcMain.handle('update-state',()=>updates.getState());

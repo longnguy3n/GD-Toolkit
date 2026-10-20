@@ -463,6 +463,7 @@ app.whenReady().then(async()=>{
     assert.ok((await js("document.querySelector('.forecast-notice').textContent")).includes('không thể xuất hiện'));
     assert.equal(await js("document.querySelector('.quantile b').textContent"),'Không thể đạt');
     await require('./experiments-desktop.cjs')({win,js,waitFor,change,capture,sleep});
+    await require('./labs-desktop.cjs')({win,js,waitFor,change,capture,sleep});
     assert.deepEqual(errors,[]);
     console.log('PASS desktop: migration, themes, updater, math workers, history, profiles, currency, global Unity emulation, bulk deletion, collapse persistence, responsive layout, no console errors.');
     app.exit(0);

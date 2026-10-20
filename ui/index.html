@@ -1,4 +1,56 @@
 <!doctype html>
-<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; worker-src 'self'; connect-src 'none'"><title>GD Toolkit</title><script src="theme-init.js"></script><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="light.css"><link rel="stylesheet" href="features.css"><link rel="stylesheet" href="experiments.css"></head><body>
-<aside class="sidebar"><div class="brand"><span class="brand-mark">g<span>d</span></span><div>GD Toolkit<small>THE DESIGN WORKBENCH</small></div></div><div class="side-label">WORKSPACE</div><button class="side-tool active" data-action="tab" data-tab="setup"><span>◇</span> Gacha Tool <i>01</i></button><button class="side-tool" data-action="tab" data-tab="settings"><span>⚙</span> Cài đặt chung</button><div class="side-note"><span class="orbit">✧</span><strong>From chance to clarity.</strong><p>Thiết kế, tính toán và kiểm chứng hệ thống gacha của bạn.</p></div><div class="side-bottom"><span class="online"></span> Local workspace<button data-action="open-data" title="Mở thư mục dữ liệu">↗</button><small id="app-version">GD Toolkit · v0.7.1</small></div></aside>
-<div class="shell"><header><div class="breadcrumb">Workspace <span>/</span> <b>Gacha Tool</b></div><div class="header-right"><span id="save-state">Đang tải…</span><button class="header-control" id="theme-toggle" data-action="theme" aria-label="Chuyển sang theme sáng">☀ Sáng</button><button class="header-control" id="update-button" data-action="updates">↻ Cập nhật</button><span class="version">DESKTOP / V0.7</span></div></header><main><section class="page-heading"><div><div class="eyebrow">GAME DESIGN TOOLKIT</div><h1>Gacha <span>Lab.</span></h1><p>Mọi xác suất đều có một thiết kế phía sau.</p></div><div class="heading-actions"><button data-action="import">↥ Nhập cấu hình</button><button data-action="export">↧ Xuất JSON</button></div></section><div id="profile-bar"></div><div id="stats" class="stats"></div><nav class="tabs" aria-label="Gacha tool tabs"><button data-action="tab" data-tab="setup"><span>01</span> Setup</button><button data-action="tab" data-tab="calculate"><span>02</span> Calculate</button><button data-action="tab" data-tab="simulate"><span>03</span> Simulate</button><button data-action="tab" data-tab="compare"><span>04</span> Compare</button><button data-action="tab" data-tab="players"><span>05</span> Players</button><div class="tab-caption">BUILD. BALANCE. VALIDATE.</div></nav><div id="content"></div><footer><span><i class="online"></i> Offline ready · Dữ liệu lưu trên máy</span><span>Crafted for game designers <b>✧</b></span></footer></main></div><div id="toast" role="status"></div><dialog id="dialog"></dialog><dialog id="update-dialog" aria-label="Cập nhật GD Toolkit"></dialog><script type="module" src="app.mjs"></script></body></html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; worker-src 'self'; connect-src 'none'">
+  <title>GD Toolkit</title>
+  <script src="theme-init.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="light.css">
+  <link rel="stylesheet" href="features.css">
+  <link rel="stylesheet" href="experiments.css">
+  <link rel="stylesheet" href="flow-lab.css">
+  <link rel="stylesheet" href="balance-lab.css">
+  <link rel="stylesheet" href="workbench.css">
+</head>
+<body>
+  <aside class="sidebar" aria-label="Công cụ thiết kế">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">g<span>d</span></span><div>GD Toolkit<small>GAME DESIGN WORKBENCH</small></div></div>
+    <div class="side-label">CÔNG CỤ THIẾT KẾ</div>
+    <nav class="tool-navigation" aria-label="Công cụ">
+      <button class="side-tool active" data-action="tab" data-tab="setup" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5v8l-9 5-9-5V8zM3 8l9 5 9-5M12 13v8"/></svg><span class="side-tool-copy">Gacha<small>Banner, pity & xác suất</small></span></button>
+      <button class="side-tool" data-action="tab" data-tab="flow"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="6" height="6" rx="1"/><rect x="16" y="15" width="6" height="6" rx="1"/><path d="M8 6h8a3 3 0 0 1 3 3v6M16 18H8a3 3 0 0 1-3-3V9m11 3 3 3 3-3"/></svg><span class="side-tool-copy">Economy & Progression<small>Tài nguyên & vòng lặp</small></span></button>
+      <button class="side-tool" data-action="tab" data-tab="balance"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v16h16M7 15l4-4 4 2 5-7M16 6h4v4"/></svg><span class="side-tool-copy">Tìm thông số<small>Cân bằng theo mục tiêu</small></span></button>
+    </nav>
+    <div class="side-flow" aria-label="Quy trình thiết kế"><span>THIẾT KẾ → KIỂM CHỨNG</span><p>Thiết lập mô hình, chạy thử và đối chiếu kết quả trước khi đưa vào game.</p></div>
+    <div class="side-bottom">
+      <button class="side-tool" data-action="tab" data-tab="settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/></svg><span class="side-tool-copy">Cài đặt chung<small>Theme & random engine</small></span></button>
+      <div class="local-status"><span class="online"></span> Dữ liệu trên máy<button data-action="open-data" title="Mở thư mục dữ liệu" aria-label="Mở thư mục dữ liệu">↗</button></div>
+      <small id="app-version">GD Toolkit · v0.8.0</small>
+    </div>
+  </aside>
+  <div class="shell">
+    <header><div class="breadcrumb">Workbench <span>/</span> <b>Gacha</b></div><div class="header-right"><span id="save-state" role="status">Đang tải…</span><button class="header-control" id="theme-toggle" data-action="theme" aria-label="Chuyển sang theme sáng">☀ Sáng</button><button class="header-control" id="update-button" data-action="updates">↻ Cập nhật</button><span class="version">DESKTOP</span></div></header>
+    <main id="main-content">
+      <section class="page-heading"><div><div class="eyebrow">GACHA TOOL</div><h1>Thiết kế <span>gacha</span></h1><p>Thiết lập banner, kiểm tra xác suất và trải nghiệm người chơi.</p></div><div class="heading-actions"><button data-action="import" title="Nhập cấu hình banner từ JSON">↥ Nhập JSON</button><button data-action="export" title="Xuất cấu hình banner ra JSON">↧ Xuất JSON</button></div></section>
+      <div id="profile-bar"></div>
+      <div id="stats" class="stats"></div>
+      <nav class="tabs" aria-label="Chức năng Gacha">
+        <button data-action="tab" data-tab="setup" title="Setup · Thiết lập item, pool, pity và currency"><span>01</span> Thiết lập</button>
+        <button data-action="tab" data-tab="calculate" title="Calculate · Dự báo số lượt và xác suất"><span>02</span> Tính toán</button>
+        <button data-action="tab" data-tab="simulate" title="Simulate · Roll thử và lưu lịch sử"><span>03</span> Mô phỏng</button>
+        <button data-action="tab" data-tab="compare" title="Compare · So sánh các banner"><span>04</span> So sánh</button>
+        <button data-action="tab" data-tab="players" title="Players · Mô phỏng nhiều người chơi"><span>05</span> Người chơi</button>
+      </nav>
+      <div id="workbench-guide"></div>
+      <div id="content"></div>
+      <footer><span><i class="online"></i> Dữ liệu tự lưu · Hoạt động offline</span><span>GD Toolkit <b>✧</b></span></footer>
+    </main>
+  </div>
+  <div id="toast" role="status"></div>
+  <dialog id="dialog"></dialog>
+  <dialog id="update-dialog" aria-label="Cập nhật GD Toolkit"></dialog>
+  <script type="module" src="app.mjs"></script>
+</body>
+</html>
