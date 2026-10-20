@@ -6,6 +6,7 @@ module.exports=async({win,js,waitFor,change,capture,sleep=ms=>new Promise(resolv
   const saved=condition=>waitFor(`(async()=>{${current}return !!s&&(${condition});})()`);
   const click=selector=>js(`document.querySelector(${JSON.stringify(selector)}).click()`);
   const bounds=selector=>js(`(()=>{const r=document.querySelector(${JSON.stringify(selector)}).getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};})()`);
+  async function reload(){const loaded=new Promise(resolve=>win.webContents.once('did-finish-load',resolve));win.webContents.reload();await loaded;await waitFor("!!document.querySelector('.tree-list')");}
   async function pointerClick(selector,modifiers=[]){
     const r=await bounds(selector),x=Math.round(r.x+r.width/2),y=Math.round(r.y+r.height/2);
     win.webContents.sendInputEvent({type:'mouseMove',x,y,modifiers});await sleep(30);
@@ -13,13 +14,15 @@ module.exports=async({win,js,waitFor,change,capture,sleep=ms=>new Promise(resolv
     win.webContents.sendInputEvent({type:'mouseUp',x,y,button:'left',clickCount:1,modifiers});await sleep(90);
   }
   async function dragNode(id,left,top){
-    const selector=`[data-gc-node="${id}"]`,r=await bounds(selector),zoom=await js("Number(document.querySelector('[data-gc-zoom-label]').textContent.replace('%',''))/100");
+    const selector=`[data-gc-node="${id}"]`,r=await bounds(selector),zoom=await js("new DOMMatrixReadOnly(getComputedStyle(document.querySelector('[data-gc-stage]')).transform).a"),before=await scenario();
     const x=Math.round(r.x+55*zoom),y=Math.round(r.y+32*zoom),dx=left-r.x,dy=top-r.y;
+    const selected=await js("[...document.querySelectorAll('.gc-node.selected')].map(e=>e.dataset.gcNode)"),ids=selected.includes(id)?selected:[id];
+    const expected=Object.fromEntries(ids.map(key=>[key,{x:before.canvas.positions[key].x+(Math.round(x+dx)-x)/zoom,y:before.canvas.positions[key].y+(Math.round(y+dy)-y)/zoom}]));
     win.webContents.sendInputEvent({type:'mouseMove',x,y});await sleep(25);
     win.webContents.sendInputEvent({type:'mouseDown',x,y,button:'left',clickCount:1});await sleep(25);
     for(let i=1;i<=5;i++){win.webContents.sendInputEvent({type:'mouseMove',x:Math.round(x+dx*i/5),y:Math.round(y+dy*i/5),button:'left'});await sleep(25);}
     win.webContents.sendInputEvent({type:'mouseUp',x:Math.round(x+dx),y:Math.round(y+dy),button:'left',clickCount:1});
-    await sleep(150);await waitFor("document.querySelector('#save-state').textContent.includes('Đã lưu')");
+    await saved(`Object.entries(${JSON.stringify(expected)}).every(([id,p])=>s.canvas?.positions[id]&&Math.abs(s.canvas.positions[id].x-p.x)<1.5&&Math.abs(s.canvas.positions[id].y-p.y)<1.5)`);
     const moved=await bounds(selector);assert.ok(Math.abs(moved.x-left)<3,`Node ${id} dragged horizontally: ${moved.x} vs ${left}`);assert.ok(Math.abs(moved.y-top)<3,`Node ${id} dragged vertically: ${moved.y} vs ${top}`);
   }
   async function create(kind,name,col,row,drop=false){
@@ -28,6 +31,7 @@ module.exports=async({win,js,waitFor,change,capture,sleep=ms=>new Promise(resolv
       await js(`(()=>{const palette=document.querySelector('[data-gc-create="${kind}"]'),v=document.querySelector('[data-gc-viewport]'),r=v.getBoundingClientRect(),dataTransfer=new DataTransfer(),x=r.x+20+(r.width-260)/2*${col},y=r.y+85+${row}*215;palette.dispatchEvent(new DragEvent('dragstart',{bubbles:true,dataTransfer}));v.dispatchEvent(new DragEvent('dragover',{bubbles:true,cancelable:true,dataTransfer,clientX:x,clientY:y}));v.dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer,clientX:x,clientY:y}));})()`);
     }else await click(`[data-gc-create="${kind}"]`);
     await waitFor(`document.querySelectorAll('[data-gc-node]').length===${count+1}`);
+    await saved(`s.resources.length+s.rules.length===${count+1}`);
     await change('[data-gc-field=name]',name);await saved(`s.${kind==='resource'?'resources':'rules'}.some(x=>x.name===${JSON.stringify(name)})`);
     const s=await scenario(),id=(kind==='resource'?s.resources:s.rules).find(x=>x.name===name).id;
     const area=await bounds('[data-gc-viewport]'),step=(area.width-260)/2;
@@ -51,15 +55,17 @@ module.exports=async({win,js,waitFor,change,capture,sleep=ms=>new Promise(resolv
 
   // Start from an isolated clean workspace; create the empty scenario via UI.
   await js(`(async()=>{const w=await import('../core/workspace.mjs'),d=w.upgradeWorkspace(null);d.settings.theme='dark';d.settings.rng='custom';d.settings.seed=42;await window.desktop.save(d);})()`);
-  win.webContents.reload();await sleep(300);await waitFor("!!document.querySelector('.tree-list')");win.setSize(1600,1040);await sleep(100);
+  await reload();win.setSize(1600,1040);await sleep(100);
   await click('.side-tool[data-tab=flow]');await click('[data-action=flow-new][data-template=blank]');
   await waitFor("!!document.querySelector('[data-gc-editor]')");
+  const scenarioId=await js("document.querySelector('[data-gc-editor]').dataset.scenarioId");
+  await saved(`s.id===${JSON.stringify(scenarioId)}&&s.resources.length===0&&s.rules.length===0`);
   assert.equal(await js("document.querySelectorAll('[data-gc-node]').length"),0);
   await js("document.querySelector('[data-gc-editor]').scrollIntoView({block:'start'})");
   const ore=await create('resource','Quặng QA',1,0,true),income=await create('source','Khai thác QA',0,0),craft=await create('converter','Chế tạo QA',2,0),sword=await create('resource','Kiếm QA',1,1),drain=await create('drain','Tiêu hao QA',2,1);
   assert.equal(await js("document.querySelectorAll('.gc-node.incomplete').length"),3);
   assert.equal((await scenario()).resources.length,2);assert.equal((await scenario()).rules.length,3);
-  assert.equal(await js("document.querySelector('#save-state').textContent.includes('Đã lưu')"),true);
+  await waitFor("document.querySelector('#save-state').textContent.includes('Đã lưu')");
   await pointerClick(`[data-gc-node="${ore}"] .gc-node-name`);await pointerClick(`[data-gc-node="${income}"] .gc-node-name`,['shift']);
   assert.equal(await js("document.querySelectorAll('.gc-node.selected').length"),2);
   const grouped=await scenario(),oreRect=await bounds(`[data-gc-node="${ore}"]`);
@@ -94,7 +100,8 @@ module.exports=async({win,js,waitFor,change,capture,sleep=ms=>new Promise(resolv
   const beforeZoom=(await scenario()).canvas.viewport.zoom;
   await click('[data-gc-command=zoom-out]');await saved(`s.canvas.viewport.zoom<${beforeZoom}`);
   const wheelBefore=(await scenario()).canvas.viewport.zoom,area=await bounds('[data-gc-viewport]');
-  win.webContents.sendInputEvent({type:'mouseWheel',x:Math.round(area.x+area.width/2),y:Math.round(area.y+area.height/2),deltaY:-70,canScroll:true});await sleep(25);
+  win.webContents.sendInputEvent({type:'mouseWheel',x:Math.round(area.x+area.width/2),y:Math.round(area.y+area.height/2),deltaY:-70,canScroll:true});
+  await waitFor(`document.querySelector('[data-gc-zoom-label]').textContent!==${JSON.stringify(`${Math.round(wheelBefore*100)}%`)}`);
   const wheelLabel=await js("document.querySelector('[data-gc-zoom-label]').textContent");assert.notEqual(wheelLabel,`${Math.round(wheelBefore*100)}%`);
   await click('[data-action=flow-view][data-view=results]');await saved(`s.canvas.viewport.zoom!==${wheelBefore}`);
   await click('[data-action=flow-view][data-view=build]');await js("document.querySelector('[data-gc-editor]').scrollIntoView({block:'start'})");
@@ -104,7 +111,7 @@ module.exports=async({win,js,waitFor,change,capture,sleep=ms=>new Promise(resolv
   assert.equal(await js('document.documentElement.scrollWidth>innerWidth'),false);
   win.setSize(900,800);await sleep(120);assert.equal(await js('document.documentElement.scrollWidth>innerWidth'),false);win.setSize(1600,1040);
   await waitFor("document.querySelector('#save-state').textContent.includes('Đã lưu')");
-  win.webContents.reload();await sleep(300);await waitFor("!!document.querySelector('.tree-list')");await click('.side-tool[data-tab=flow]');
+  await reload();await click('.side-tool[data-tab=flow]');
   await waitFor("document.querySelectorAll('[data-gc-node]').length===5");
   assert.deepEqual((await scenario()).canvas,snapshot.canvas);
   assert.equal(await js("document.querySelector('[data-gc-zoom-label]').textContent"),`${Math.round(snapshot.canvas.viewport.zoom*100)}%`);
@@ -132,6 +139,10 @@ module.exports=async({win,js,waitFor,change,capture,sleep=ms=>new Promise(resolv
 if(require.main===module||process.argv[1]&&require('node:path').resolve(process.argv[1]).toLowerCase()===__filename.toLowerCase()){
   const {app,BrowserWindow}=require('electron'),path=require('node:path'),fs=require('node:fs/promises');
   const output=path.resolve(__dirname,'../test-output'),sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+  // Optional fault injection checks that UI rendering cannot outrun disk-based
+  // assertions on slower Windows runners. Only this standalone test process is affected.
+  const saveDelay=Number(process.env.GD_CANVAS_TEST_SAVE_DELAY_MS||0);
+  if(saveDelay>0){const rename=fs.rename;fs.rename=async(...args)=>{if(String(args[1]).endsWith('workspace.json'))await sleep(saveDelay);return rename(...args);};}
   app.setPath('userData',path.join(output,'canvas-profile'));app.disableHardwareAcceleration();process.env.GD_TOOLKIT_TEST='1';require('../desktop/main.cjs');
   app.whenReady().then(async()=>{
     try{

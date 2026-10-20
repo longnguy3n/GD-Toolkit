@@ -1,4 +1,4 @@
-# GD Toolkit v0.9.0
+# GD Toolkit v0.9.1
 
 - **Canvas Economy & Progression:** tạo và kéo thả tài nguyên, nguồn thu, tiêu hao, crafting trực tiếp trên sơ đồ. Kéo hoặc bấm hai cổng để nối; chọn đường nối để chỉnh số lượng tài nguyên.
 - **Inspector:** sửa tồn đầu, sức chứa, lịch chạy, xác suất, điều kiện mở khóa, độ trễ và thứ tự quy tắc. Canvas và Bảng chi tiết dùng chung mô hình mô phỏng hiện có.
@@ -11,4 +11,4 @@
 
 **Cập nhật:** Cập nhật → Kiểm tra ngay → Tải bản mới → Cài và mở lại.
 
-**Bộ cài:** GD-Toolkit-Setup-0.9.0-x64.exe.
+**Bộ cài:** GD-Toolkit-Setup-0.9.1-x64.exe.

@@ -28,7 +28,7 @@ async function switchBanner(id){if(result)drafts.set(activeProfile(doc).activeBa
 async function switchProfile(id){if(result)drafts.set(activeBanner(doc).id,result);doc.activeProfileId=id;result=drafts.get(activeBanner(doc).id)||null;resetView();render();await save();}
 async function changeSetting(key,value){const old={...doc.settings};doc.settings[key]=value;try{validateWorkspace(doc);}catch(e){doc.settings=old;render();throw e;}stopWorker();render();await save();}
 
-let updateState={status:'unsupported',currentVersion:'0.9.0',version:null,percent:0,error:null};
+let updateState={status:'unsupported',currentVersion:'0.9.1',version:null,percent:0,error:null};
 function applyTheme(theme){
   const value=theme==='light'?'light':'dark';document.documentElement.dataset.theme=value;
   try{localStorage.setItem('gd-toolkit-theme',value);}catch{}
