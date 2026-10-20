@@ -1,12 +1,12 @@
-# GD Toolkit v0.6.0
+# GD Toolkit v0.7.0
 
-- **Calculate chỉ xét ít nhất K bản sao:** nhận nhiều hơn vẫn đạt mục tiêu. Bỏ thẻ xác suất đúng K bản sao.
-- **Bỏ ô nhập horizon.** App tự tìm số lượt cần để đạt 50%, 90%, 95%, 99% cơ hội nhận đủ số bản sao, có xét pity và counter khởi đầu.
-- Mốc 50% tại 1.320 lượt nghĩa là quay 1.320 lượt có ít nhất 50% cơ hội nhận đủ K bản sao. Giao diện giải thích trực tiếp ý nghĩa từng mốc.
-- Số lượt dự định quay dùng để xem xác suất, chi phí và thống kê pity tại số lượt đó. Dự báo tự tìm độc lập, có thể vượt quá số lượt dự định.
-- Nếu chạm giới hạn tài nguyên, giữ mốc đã tìm được và ghi rõ phần chưa tìm được. Không hiển thị nhiều mốc giống nhau dưới dạng >200.
-- Đã kiểm tra dự báo item hiếm trên 100.000 lượt, nhiều pity/ưu tiên/reset, item không thể nhận, giới hạn tài nguyên và giao diện desktop.
+- **Compare:** so sánh 2–6 banner trong cùng profile, chọn item mục tiêu riêng và dùng chung số bản sao/số lượt.
+- Bảng so sánh rate gốc/dài hạn, pity/reset, xác suất nhận đủ, mốc 50/90/95/99%, hard pity kỳ vọng, currency và chi phí; biểu đồ tích lũy chung và xuất JSON.
+- **Players:** mô phỏng nhiều người chơi, reset kho item và counter pity riêng, tiếp tục chuỗi RNG để tránh lặp cùng kết quả cho mọi người. Hỗ trợ Custom, Unity giả lập và mẫu Unity thực.
+- Tỷ lệ đạt mục tiêu, histogram bản sao, mốc thực nghiệm, phân bố thời gian/chi phí nhận đủ đồ, tổng item kèm tier, hard pity và bảng từng người.
+- Lưu/xem/xóa tối đa 20 lịch sử Players, xuất JSON; giữ snapshot cấu hình và kết quả sau khi mở lại app.
+- Tối đa 10.000 người, 10.000 lượt/người và 2.000.000 lượt cho cả nhóm. Có tiến trình và hủy; giữ theme và vị trí cuộn.
 
 **Cập nhật:** Cập nhật → Kiểm tra ngay → Tải bản mới → Cài và mở lại.
 
-**Cài lần đầu:** tải GD-Toolkit-Setup-0.6.0-x64.exe.
+**Cài lần đầu:** GD-Toolkit-Setup-0.7.0-x64.exe.

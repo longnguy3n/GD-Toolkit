@@ -1,10 +1,10 @@
-# GD Toolkit · Windows v0.6
+# GD Toolkit · Windows v0.7
 
-Ứng dụng desktop offline dành cho game designer. Gacha Tool gồm Setup / Calculate / Simulate, với History trong Simulate.
+Ứng dụng desktop offline dành cho game designer. Gacha Tool gồm Setup / Calculate / Simulate / Compare / Players; Simulate và Players có lịch sử riêng.
 
 ## Cài đặt và cập nhật
 
-Tải **GD-Toolkit-Setup-0.6.0-x64.exe** từ [GitHub Releases](https://github.com/longnguy3n/GD-Toolkit/releases/latest). Windows x64, không cần Node.js hay Unity để chạy Custom hoặc Unity giả lập. Bộ cài dành cho tài khoản Windows hiện tại, chưa có chữ ký số thương mại.
+Tải **GD-Toolkit-Setup-0.7.0-x64.exe** từ [GitHub Releases](https://github.com/longnguy3n/GD-Toolkit/releases/latest). Windows x64, không cần Node.js hay Unity để chạy Custom hoặc Unity giả lập. Bộ cài dành cho tài khoản Windows hiện tại, chưa có chữ ký số thương mại.
 
 Nếu đã cài v0.2 trở lên: **Cập nhật → Kiểm tra ngay → Tải bản mới → Cài và mở lại**. Bản portable v0.1 cần chạy bộ cài mới một lần. App tự kiểm tra khi mở nhưng chỉ tải/cài khi bạn chọn; mất mạng vẫn dùng gacha bình thường. Nguồn cập nhật là repository public longnguy3n/GD-Toolkit, không cần token. Updater kiểm tra SHA-512 của bộ cài và không tự hạ phiên bản.
 
@@ -132,3 +132,25 @@ Chọn item trong Setup → nhập tên Tier → **Màu tier**. Chọn một tro
 Màu hiển thị trong cây Setup, bảng kết quả và pull log. Chữ tự chọn đen/trắng theo màu nền để dễ đọc. History, export/import và nhân bản banner giữ bảng màu; thay màu hiện tại không đổi history đã lưu hoặc xác suất/chuỗi gacha. History cũ chưa có màu dùng giao diện mặc định.
 
 **Hard pity** có nền vàng, dải màu dày, nhãn ★ TRÚNG HARD PITY và tên quy tắc đã kích hoạt. Lượt trúng trong vùng **soft pity** có nền xanh ngọc và nhãn riêng; đây là trúng khi rate đã tăng, không phải bảo đảm chắc chắn. Chi tiết quy tắc hard/soft cũng được tô màu khi mở từng lượt. Áp dụng cho cả theme sáng và tối.
+
+## Compare · So sánh banner
+
+Chọn 2–6 banner trong profile hiện tại, chọn item mục tiêu riêng cho từng banner, rồi nhập số bản sao tối thiểu K (1–50) và số lượt chung N (1–10.000). Banner trống không chọn được. App không tự suy ra rằng các item cùng tên là cùng một mục tiêu.
+
+So sánh xác suất nhận ít nhất K sau N lượt, rate gốc/dài hạn, pity banner và reset, số lần hard pity kỳ vọng toàn banner, các mốc 50/90/95/99%, currency và chi phí. Biểu đồ vẽ các đường tích lũy trên cùng trục số lượt; từng đường kết thúc ở phạm vi thực sự đã tính. Pity trong pool con vẫn được tính theo mô hình hiện tại.
+
+Các banner giữ currency, số dư và đơn vị tiền riêng; không quy đổi hoặc xếp hạng giá giữa VND, USD hay các currency khác nhau. Giá 0 vẫn là chưa định giá. Kết quả là snapshot có thể xuất JSON; đổi cấu hình hoặc mục tiêu sẽ bỏ kết quả so sánh cũ. Chạm giới hạn tính toán vẫn giữ các mốc đã tìm được. Không cần nhập horizon. Compare dùng mô hình xác suất, không phụ thuộc RNG/seed.
+
+## Players · Nhiều người chơi
+
+Chọn item mục tiêu trong banner hiện tại, số bản sao tối thiểu, số người (1–10.000) và lượt mỗi người (1–10.000). Giới hạn cả nhóm là 2.000.000 lượt. Tất cả người chơi bắt đầu với kho item trống và counter pity giống Setup. Mỗi người quay đủ N lượt; sau khi đạt mục tiêu vẫn tiếp tục quay để ghi số bản sao cuối cùng.
+
+- RNG dùng cài đặt chung: Custom, Unity giả lập hoặc mẫu Unity thực. Một chuỗi RNG tiếp tục xuyên suốt nhóm, không khởi tạo lại cùng seed cho mỗi người; counter và kho item được reset riêng. Cùng seed/mẫu và thông số tái hiện cùng kết quả.
+- Mẫu Unity tiêu thụ liên tiếp một mẫu cho mỗi pool được gọi. Hết mẫu báo lỗi, không vòng lại hay trả kết quả một phần.
+- Kết quả gồm tỷ lệ nhận ít nhất K, số người đạt/chưa đạt, trung bình/trung vị/min/max bản sao, histogram, tổng item cuối kèm tier, số hard pity và lượt có hard pity, thống kê từng quy tắc. Bảng từng người phân trang 50 người, ghi bản sao, lượt đầu nhận đủ và hard pity.
+- Các mốc 50/90/95/99% thực nghiệm tính trên toàn nhóm, kể cả người chưa thành công. Chưa đạt trong N lượt ghi rõ Chưa đạt; không ngoại suy. Đây là lấy mẫu Monte Carlo, không phải kết quả chính xác của Calculate.
+- Phân bố thời gian và chi phí đạt mục tiêu trong phần mở rộng chỉ xét người đã thành công. Trung bình cần nạp tính riêng từng người rồi lấy trung bình, không lấy chi phí tại thời gian trung bình trừ số dư. Nhóm chưa thành công không được coi là mất 0 lượt hoặc 0 tiền.
+- Chi phí chạy đủ N lượt hiển thị riêng mỗi người và cả nhóm. Số dư banner áp dụng riêng cho mỗi người, không tự trừ Setup.
+- Lưu tối đa 20 lịch sử Players toàn workspace, độc lập với 30 history Simulate. Snapshot giữ cấu hình, tier/màu, RNG, thông số, từng người và thống kê; xuất JSON hoặc xóa từng lịch sử. Thay form/banner không sửa snapshot kết quả. Kết quả chưa lưu chỉ giữ trong phiên; cập nhật app sẽ lưu lần chạy Players hiện tại nếu còn chỗ.
+
+Workspace vẫn dùng schema v3, thêm trường tùy chọn playerHistory; workspace cũ không cần chuyển đổi. Tổng giới hạn file vẫn 100 MB. Worker có thể hủy để không khóa giao diện.

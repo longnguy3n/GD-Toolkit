@@ -1,6 +1,7 @@
 import {emptyBanner,validate,clone,walk} from './engine.mjs';
 import {defaultEconomy,validateEconomy} from './economy.mjs';
 import {allRuleEntries} from './pity-rules.mjs';
+import {validatePlayerHistory} from './players.mjs';
 
 export function profileConfig(config) {
   const c=clone(config);delete c.rng;delete c.seed;c.version=c.root.pities?3:2;
@@ -29,6 +30,10 @@ export function upgradeWorkspace(input) {
 export function validateWorkspace(d) {
   if(!d||d.version!==3||!Array.isArray(d.profiles)||!d.profiles.length||d.profiles.length>50||!Array.isArray(d.history)||d.history.length>30)throw Error('Workspace cần 1–50 profile và tối đa 30 lịch sử.');
   if(!d.settings||!['dark','light'].includes(d.settings.theme))throw Error('Theme không hợp lệ.');
+  if(d.playerHistory!==undefined){
+    if(!Array.isArray(d.playerHistory)||d.playerHistory.length>20||new Set(d.playerHistory.map(h=>h?.id)).size!==d.playerHistory.length)throw Error('Tối đa 20 lịch sử Players, không trùng ID.');
+    d.playerHistory.forEach(validatePlayerHistory);
+  }
   const ids=new Set();
   const checkId=id=>{if(typeof id!=='string'||!/^[-\w]{1,80}$/.test(id)||ids.has(id))throw Error('ID profile/banner không hợp lệ.');ids.add(id);};
   for(const p of d.profiles){
