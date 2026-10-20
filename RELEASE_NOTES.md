@@ -1,14 +1,14 @@
-# GD Toolkit v0.8.0
+# GD Toolkit v0.9.0
 
-- **Economy & Progression:** thiết kế tài nguyên, nguồn thu, tiêu hao, crafting, điều kiện mở khóa, xác suất và phần thưởng giao chậm. Có mẫu economy/gacha, crafting/lên cấp, sơ đồ dòng tài nguyên và kịch bản trống.
-- **Mô phỏng economy nhiều người:** xem tồn kho theo ngày, min/max, thiếu nguyên liệu, đầy kho, hàng chờ và ngày đạt các mốc 50/90/95/99% người chơi. Lưu lịch sử cùng cấu hình, xuất JSON/CSV và chuyển ngân sách sang Calculate.
-- **Tìm thông số cân bằng:** đặt mục tiêu nhận ít nhất K bản sao sau N lượt, thử tối đa 31 giá trị weight hoặc hard pity. Đối chiếu biểu đồ/bảng, rồi chọn phương án để áp dụng vào banner. Khảo sát hữu hạn, không phải AI hay bảo đảm tối ưu toàn cục.
-- **UI mới:** tách công cụ bằng sidebar, tab Gacha tiếng Việt, ngữ cảnh profile/banner rõ hơn, điều khiển gọn để thấy nhiều item ngay khi mở. Cải thiện tương phản sáng/tối, cửa sổ hẹp và giữ vị trí cuộn/focus khi chỉnh sửa.
-- **Dữ liệu:** sao lưu/khôi phục toàn bộ workspace trong Cài đặt; Economy thuộc profile và được sao chép cùng profile. Đọc lại cấu hình cũ. Tự thử lại khi Windows khóa file trong chốc lát lúc lưu, không xóa bản dữ liệu đang có.
-- Giữ cập nhật im lặng và tự mở lại từ v0.7.1; lưu kết quả Economy chưa lưu trước khi cài bản mới nếu lịch sử còn chỗ.
+- **Canvas Economy & Progression:** tạo và kéo thả tài nguyên, nguồn thu, tiêu hao, crafting trực tiếp trên sơ đồ. Kéo hoặc bấm hai cổng để nối; chọn đường nối để chỉnh số lượng tài nguyên.
+- **Inspector:** sửa tồn đầu, sức chứa, lịch chạy, xác suất, điều kiện mở khóa, độ trễ và thứ tự quy tắc. Canvas và Bảng chi tiết dùng chung mô hình mô phỏng hiện có.
+- **Thao tác sơ đồ:** Shift chọn nhiều, kéo cả nhóm, xóa, hoàn tác/làm lại 30 bước, pan/zoom, tự sắp xếp, vừa màn hình và mở rộng canvas. Vị trí và khung nhìn lưu theo kịch bản, đi cùng bản sao và JSON.
+- **Nháp rõ ràng:** kịch bản mới hoàn toàn trống. Quy tắc chưa nối đủ vẫn lưu được và được báo trước khi chạy. Gỡ nguyên liệu crafting không biến thành nguồn thu miễn phí; xóa tài nguyên điều kiện sẽ tắt quy tắc liên quan.
+- **Graphite Studio:** thiết kế lại theme toàn app với nền xám than và accent xanh ngọc; light mode đồng bộ. Sidebar, tab, bảng, form, biểu đồ và dialog thống nhất; giữ màu tier tùy chọn và nhãn hard pity nổi bật.
+- **Tương thích:** cấu hình Economy cũ mở thành sơ đồ và giữ nguyên kết quả mô phỏng. Giữ sao lưu workspace, lịch sử, các công cụ Gacha/Compare/Players/Balance và cập nhật im lặng rồi tự mở lại.
 
-**Bắt đầu:** chọn Economy & Progression → nạp một mẫu → Chạy & phân tích; hoặc Tìm thông số → đặt xác suất mong muốn → Thử các phương án → Áp dụng.
+**Bắt đầu:** Economy & Progression → chọn mẫu hoặc Kịch bản trống → kéo node và nối cổng → chỉnh thuộc tính → Chạy & phân tích. Mục tiêu tiến triển được chỉnh trong Bảng chi tiết.
 
 **Cập nhật:** Cập nhật → Kiểm tra ngay → Tải bản mới → Cài và mở lại.
 
-**Bộ cài:** GD-Toolkit-Setup-0.8.0-x64.exe.
+**Bộ cài:** GD-Toolkit-Setup-0.9.0-x64.exe.

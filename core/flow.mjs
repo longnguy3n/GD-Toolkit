@@ -1,4 +1,5 @@
 import {customRandom,unityEmulated,validateTape,clone} from './engine.mjs';
+import {validateCanvas,ruleComplete} from './flow-graph.mjs';
 
 export const FLOW_LIMITS={scenarios:12,resources:20,rules:40,milestones:12,history:6,operations:3000000};
 const uid=()=>crypto.randomUUID();
@@ -12,7 +13,7 @@ const amount=(resource,amount)=>({resource,amount});
 const rule=(id,name,inputs,outputs,extra={})=>({id,name,enabled:true,inputs,outputs,every:1,start:1,probability:1,delay:0,repeat:true,condition:null,...extra});
 
 export function makeFlowScenario(template='economy',economy={currency:'Gem',balance:0,perPull:160}){
-  if(template==='blank')return {id:uid(),name:'Kịch bản mới',resources:[resource('currency','Currency')],rules:[],milestones:[]};
+  if(template==='blank')return {id:uid(),name:'Kịch bản mới',resources:[],rules:[],milestones:[]};
   if(template==='crafting')return {id:uid(),name:'Crafting & progression',resources:[resource('ore','Quặng',5),resource('coin','Vàng',100),resource('xp','XP'),resource('level','Cấp độ'),resource('blueprint','Bản vẽ'),resource('sword','Kiếm')],rules:[
     rule('mine','Khai thác quặng',[],[amount('ore',3)],{probability:.8}),
     rule('quest','Nhiệm vụ mỗi ngày',[],[amount('coin',50),amount('xp',20)]),
@@ -30,18 +31,21 @@ export function makeFlowScenario(template='economy',economy={currency:'Gem',bala
 export function makeFlowLab(){return {version:1,activeScenarioId:null,scenarios:[],history:[]};}
 export function validateFlowScenario(s){
   if(!s||!validId(s.id)||!validName(s.name)||s.note!==undefined&&(typeof s.note!=='string'||s.note.length>1000))throw Error('Tên kịch bản cần 1–80 ký tự.');
-  if(!Array.isArray(s.resources)||s.resources.length<1||s.resources.length>FLOW_LIMITS.resources)throw Error('Kịch bản cần 1–20 tài nguyên.');
+  if(!Array.isArray(s.resources)||s.resources.length>FLOW_LIMITS.resources)throw Error('Kịch bản hỗ trợ tối đa 20 tài nguyên.');
   if(!Array.isArray(s.rules)||s.rules.length>FLOW_LIMITS.rules||!Array.isArray(s.milestones)||s.milestones.length>FLOW_LIMITS.milestones)throw Error('Tối đa 40 quy tắc và 12 mục tiêu trong một kịch bản.');
   const ids=new Set(),check=x=>{if(!x||!validId(x.id)||ids.has(x.id)||!validName(x.name))throw Error('Tên hoặc ID của thành phần economy không hợp lệ.');ids.add(x.id);};
   for(const r of s.resources){check(r);if(!finite(r.initial)||r.capacity!==null&&(!finite(r.capacity)||r.initial>r.capacity))throw Error('Tồn đầu phải không âm và không vượt sức chứa; tối đa 1.000 tỷ.');}
   const refs=new Set(s.resources.map(r=>r.id));
   const checkAmounts=xs=>{if(!Array.isArray(xs)||xs.length>20||new Set(xs.map(x=>x?.resource)).size!==xs.length)throw Error('Mỗi tài nguyên chỉ xuất hiện một lần trong mỗi vế của quy tắc.');for(const x of xs)if(!x||!refs.has(x.resource)||!finite(x.amount,1e9)||x.amount===0)throw Error('Số lượng phải lớn hơn 0, tối đa 1 tỷ và dùng tài nguyên đang tồn tại.');};
-  for(const r of s.rules){check(r);checkAmounts(r.inputs);checkAmounts(r.outputs);if(!r.inputs.length&&!r.outputs.length)throw Error('Quy tắc cần ít nhất một tài nguyên vào hoặc ra.');if(typeof r.enabled!=='boolean'||typeof r.repeat!=='boolean'||!Number.isInteger(r.every)||r.every<1||r.every>3650||!Number.isInteger(r.start)||r.start<1||r.start>3650||!Number.isInteger(r.delay)||r.delay<0||r.delay>3650||!finite(r.probability,1))throw Error('Lịch chạy, độ trễ hoặc xác suất quy tắc không hợp lệ.');if(r.condition!==null&&(!r.condition||!refs.has(r.condition.resource)||!finite(r.condition.atLeast)))throw Error('Điều kiện mở khóa không hợp lệ.');}
+  for(const r of s.rules){check(r);checkAmounts(r.inputs);checkAmounts(r.outputs);if(r.kind!==undefined&&!['source','drain','converter'].includes(r.kind))throw Error('Loại quy tắc Economy không hợp lệ.');if(r.kind==='source'&&r.inputs.length||r.kind==='drain'&&r.outputs.length)throw Error('Nguồn thu chỉ có đầu ra; tiêu hao chỉ có đầu vào.');if(r.kind===undefined&&!r.inputs.length&&!r.outputs.length)throw Error('Quy tắc cần ít nhất một tài nguyên vào hoặc ra.');if(typeof r.enabled!=='boolean'||typeof r.repeat!=='boolean'||!Number.isInteger(r.every)||r.every<1||r.every>3650||!Number.isInteger(r.start)||r.start<1||r.start>3650||!Number.isInteger(r.delay)||r.delay<0||r.delay>3650||!finite(r.probability,1))throw Error('Lịch chạy, độ trễ hoặc xác suất quy tắc không hợp lệ.');if(r.condition!==null&&(!r.condition||!refs.has(r.condition.resource)||!finite(r.condition.atLeast)))throw Error('Điều kiện mở khóa không hợp lệ.');}
   for(const m of s.milestones){check(m);if(!refs.has(m.resource)||!finite(m.amount)||m.amount===0)throw Error('Mục tiêu cần tài nguyên đang tồn tại và số lượng lớn hơn 0.');}
-  return s;
+  validateCanvas(s.canvas,s);return s;
 }
-export function validateFlowOptions(s,o){
+export function validateFlowOptions(s,o,{runnable=true}={}){
   validateFlowScenario(s);
+  if(runnable&&!s.resources.length)throw Error('Thêm ít nhất một tài nguyên trước khi chạy mô phỏng.');
+  const drafts=s.rules.filter(r=>r.enabled&&!ruleComplete(r));
+  if(runnable&&drafts.length)throw Error(`Quy tắc chưa nối đủ tài nguyên: ${drafts.map(r=>r.name).join(', ')}. Nguồn thu cần đầu ra; tiêu hao cần đầu vào; crafting cần cả hai. Hãy nối đủ hoặc tắt quy tắc trước khi chạy.`);
   if(!o||!Number.isInteger(o.days)||o.days<1||o.days>3650||!Number.isInteger(o.players)||o.players<1||o.players>2000)throw Error('Mô phỏng 1–3.650 ngày và 1–2.000 người chơi.');
   if(o.days*o.players*Math.max(1,s.rules.length,s.resources.length)>FLOW_LIMITS.operations)throw Error('Kịch bản quá lớn: ngày × người chơi × số tài nguyên/quy tắc lớn nhất không vượt 3 triệu. Hãy giảm số ngày hoặc người chơi.');
   return o;

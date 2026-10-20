@@ -1,5 +1,6 @@
+import {resetCanvasState} from './flow-canvas.mjs';
 import {experiments,syncExperiments,comparisonPage,populationPage} from './experiments.mjs';
-import {flowState,syncFlow,flowPage,flowAction,flowChange,saveFlowResult} from './flow-lab.mjs';
+import {flowState,syncFlow,flowPage,flowAction,flowChange,saveFlowResult,mountFlowCanvas} from './flow-lab.mjs';
 import {balanceState,syncBalance,balancePage,balanceAction,balanceChange} from './balance-lab.mjs';
 import {syncWorkbench} from './workbench.mjs';
 import {validatePlayerOptions} from '../core/players.mjs';
@@ -27,7 +28,7 @@ async function switchBanner(id){if(result)drafts.set(activeProfile(doc).activeBa
 async function switchProfile(id){if(result)drafts.set(activeBanner(doc).id,result);doc.activeProfileId=id;result=drafts.get(activeBanner(doc).id)||null;resetView();render();await save();}
 async function changeSetting(key,value){const old={...doc.settings};doc.settings[key]=value;try{validateWorkspace(doc);}catch(e){doc.settings=old;render();throw e;}stopWorker();render();await save();}
 
-let updateState={status:'unsupported',currentVersion:'0.8.0',version:null,percent:0,error:null};
+let updateState={status:'unsupported',currentVersion:'0.9.0',version:null,percent:0,error:null};
 function applyTheme(theme){
   const value=theme==='light'?'light':'dark';document.documentElement.dataset.theme=value;
   try{localStorage.setItem('gd-toolkit-theme',value);}catch{}
@@ -53,8 +54,9 @@ async function save(){if(loadFailed)throw Error('Không thể lưu vì workspace
 function configChanged(){validate(runConfig(doc),{allowEmpty:true});const ids=new Set();walk(doc.config.root,n=>ids.add(n.id));activeBanner(doc).collapsed=activeBanner(doc).collapsed.filter(id=>ids.has(id));checked=new Set([...checked].filter(id=>ids.has(id)));calculation=null;result=null;drafts.delete(activeProfile(doc).activeBannerId);historyView=null;stopWorker();if(!findNode(doc.config.root,selected))selected=doc.config.root.id;if(!leaves(doc.config.root).some(n=>n.id===calcForm.id))calcForm.id=leaves(doc.config.root)[0]?.id||'';render();return save();}
 function mutate(fn){const old=clone(doc.config);try{fn();validate(runConfig(doc),{allowEmpty:true});}catch(e){doc.config=old;render();throw e;}return configChanged();}
 function stats(){const rates=leafRates(doc.config.root,doc.config.pityReset),pools=[];walk(doc.config.root,n=>{if(n.children)pools.push(n);});const activeRules=rulesFor(doc.config.root),p=activeRules[0];const target=p?.enabled?findNode(doc.config.root,p.target):null;const targetRate=target?effective(doc.config.root,doc.config.pityReset)[doc.config.root.children.indexOf(target)]:null;$('#stats').innerHTML=`<div class="stat"><span class="stat-icon">◇</span><label>ITEM CUỐI CÙNG<strong>${rates.length.toString().padStart(2,'0')}</strong></label><small>${pools.length-1} pool<br>trong hệ thống</small></div><div class="stat"><span class="stat-icon">✦</span><label>RATE THỰC · PITY BANNER<strong>${targetRate===null?'—':pct(targetRate)}</strong></label><small>${target?esc(target.name):'Chưa bật pity'}<br>dài hạn</small></div><div class="stat"><span class="stat-icon">↻</span><label>HARD PITY · BANNER<strong>${doc.config.root.pities?activeRules.length+' pity':p?.enabled?fmt(p.hard):'OFF'} ${!doc.config.root.pities&&p?.enabled?'<small>lượt</small>':''}</strong></label><small>${p?.enabled?'Soft pity từ '+(p.soft||'—'):'Random theo weight'}</small></div>`;}
-let renderedView=null;
+let renderedView=null,canvasCleanup=null;
 function render(){
+  canvasCleanup?.();canvasCleanup=null;
   syncExperiments(doc);
   syncFlow(doc);syncBalance(doc);
   const view=captureView(),viewKey=JSON.stringify([doc.activeProfileId,activeBanner(doc).id,tab,tab==='simulate'?subtab:null,historyView,tab==='simulate'?result?.id:null]);
@@ -68,6 +70,7 @@ function render(){
   $('#profile-bar').innerHTML=profileBar(doc);
   $('#content').innerHTML=settings?globalSettings(doc,tape):tab==='flow'?flowPage(doc,busy,progressHtml()):tab==='balance'?balancePage(doc,busy,progressHtml()):tab==='setup'?setup():tab==='calculate'?calculate():tab==='compare'?comparisonPage(doc,busy,progressHtml()):tab==='players'?populationPage(doc,busy,progressHtml()):simulation();
   syncWorkbench(tab,doc);
+  if(tab==='flow')canvasCleanup=mountFlowCanvas($('#content'),labContext());
   view.restore({content:sameView});renderedView=viewKey;
 }
 const precisePct=n=>!Number.isFinite(n)?'—':(n*100).toLocaleString('vi-VN',{maximumSignificantDigits:10})+'%';
@@ -127,7 +130,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-acti
   if(action==='workspace-import'){
     const imported=await importJson();if(!imported)return;const next=upgradeWorkspace(imported);
     if(await modal('Khôi phục workspace',`Bản sao gồm ${next.profiles.length} profile, ${next.profiles.reduce((n,p)=>n+p.banners.length,0)} banner và ${next.history.length} lịch sử gacha. Workspace hiện tại sẽ được thay thế. Hãy xuất bản sao hiện tại trước nếu cần giữ.`,'Khôi phục')){
-      const old=doc;stopWorker();doc=next;try{await save();}catch(e){doc=old;throw e;}drafts.clear();result=null;experiments.population=null;experiments.comparison=null;flowState.result=null;flowState.profileId=null;balanceState.result=null;balanceState.profileId=null;experiments.profileId=null;experiments.historyId=null;resetView();applyTheme(doc.settings.theme);render();toast('Đã khôi phục workspace.');
+      const old=doc;stopWorker();canvasCleanup?.();canvasCleanup=null;resetCanvasState();doc=next;try{await save();}catch(e){doc=old;throw e;}drafts.clear();result=null;experiments.population=null;experiments.comparison=null;flowState.result=null;flowState.profileId=null;balanceState.result=null;balanceState.profileId=null;experiments.profileId=null;experiments.historyId=null;resetView();applyTheme(doc.settings.theme);render();toast('Đã khôi phục workspace.');
     }
   }
   if(action==='theme'){doc.settings={...doc.settings,theme:document.documentElement.dataset.theme==='light'?'dark':'light'};applyTheme(doc.settings.theme);render();await save();}

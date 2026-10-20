@@ -34,6 +34,7 @@ module.exports=async({win,js,waitFor,change,capture,sleep})=>{
   assert.equal(await js("document.querySelector('.banner-child').hidden"),true);
   assert.equal(await js("document.querySelector('#profile-bar').hidden"),false);
   assert.equal(await js("document.querySelectorAll('.side-tool.active').length"),1);
+  await js("document.querySelector('[data-action=flow-editor][data-editor=form]').click()");
   await capture('economy-builder-light.png');
   await js("document.querySelector('[data-flow-resource=coin] input[data-flow-field=name]').scrollIntoView({block:'center'});document.querySelector('[data-flow-resource=coin] input[data-flow-field=name]').focus({preventScroll:true})");
   const flowScroll=await js('scrollY');await change('[data-flow-resource=coin] input[data-flow-field=name]','Vàng QA');
@@ -50,8 +51,8 @@ module.exports=async({win,js,waitFor,change,capture,sleep})=>{
   win.setSize(900,760);await sleep(150);assert.equal(await js('document.documentElement.scrollWidth>innerWidth'),false);win.setSize(1440,960);
   await js("document.querySelector('[data-action=flow-save]').click()");await waitFor("document.querySelector('[data-action=flow-save]').disabled && document.querySelector('#save-state').textContent.includes('Đã lưu')");
   assert.equal((await js('window.desktop.load()')).profiles[0].flowLab.history.length,1);
-  await js("document.querySelector('[data-action=flow-new][data-template=blank]').click()");await waitFor("!!document.querySelector('[data-flow-resource=currency]')");
-  await change('[data-flow-resource=currency] input[data-flow-field=name]','Gem');await change('[data-flow-resource=currency] input[data-flow-field=initial]',1600);
+  await js("document.querySelector('[data-action=flow-new][data-template=blank]').click()");await waitFor("!!document.querySelector('[data-action=flow-resource-add]')");await js("document.querySelector('[data-action=flow-resource-add]').click()");await waitFor("document.querySelectorAll('[data-flow-resource]').length===1");
+  await change('[data-flow-resource] input[data-flow-field=name]','Gem');await change('[data-flow-resource] input[data-flow-field=initial]',1600);
   await js("document.querySelector('[data-action=flow-view][data-view=results]').click();document.querySelector('[data-action=flow-run]').click()");
   await waitFor("document.querySelector('.flow-result')?.textContent.includes('Kịch bản mới')");
   assert.equal(await js("document.querySelector('[data-flow-select=banner]').value"),data.profiles[0].activeBannerId);

@@ -38,7 +38,7 @@ test('decimal thresholds unlock on their mathematical day, but zero cannot pay t
  const z=scenario();z.rules=[rule('tiny',[a('coin',1e-20)],[a('item',1)]),rule('tinycondition',[],[a('item',1)],{condition:{resource:'coin',atLeast:1e-20}})];z.milestones=[{id:'tinygoal',name:'Tiny',resource:'coin',amount:1e-20}];const zero=simulateFlow(z,{days:1,players:1});assert.equal(inventory(zero,'item').mean,0);assert.equal(zero.milestones[0].reached,0);
 });
 test('templates and empty scenarios validate; bounds and dangling or duplicate references reject',()=>{
- for(const template of ['blank','economy','crafting']){const s=makeFlowScenario(template);assert.doesNotThrow(()=>validateFlowScenario(s));assert.doesNotThrow(()=>validateFlowLab(save(simulateFlow(s,{days:30,players:100}))));}
+ for(const template of ['blank','economy','crafting']){const s=makeFlowScenario(template);assert.doesNotThrow(()=>validateFlowScenario(s));if(template==='blank'){assert.equal(s.resources.length,0);assert.throws(()=>simulateFlow(s,{days:30,players:100}),/tài nguyên/);}else assert.doesNotThrow(()=>validateFlowLab(save(simulateFlow(s,{days:30,players:100}))));}
  assert.doesNotThrow(()=>validateFlowLab(makeFlowLab()));
  const s=scenario();assert.throws(()=>validateFlowOptions(s,{days:3650,players:2000}),/quá lớn/);assert.throws(()=>validateFlowOptions(s,{days:1.5,players:1}));s.rules=[rule('bad',[],[a('missing',1)])];assert.throws(()=>validateFlowScenario(s));s.rules=[rule('bad',[a('coin',1),a('coin',1)],[a('item',1)])];assert.throws(()=>validateFlowScenario(s),/một lần/);s.rules=[];s.resources[0].id='__proto__';assert.throws(()=>validateFlowScenario(s));
 });
