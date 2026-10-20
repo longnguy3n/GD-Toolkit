@@ -1,14 +1,14 @@
-# GD Toolkit v0.9.1
+# GD Toolkit v0.10.0
 
-- **Canvas Economy & Progression:** tạo và kéo thả tài nguyên, nguồn thu, tiêu hao, crafting trực tiếp trên sơ đồ. Kéo hoặc bấm hai cổng để nối; chọn đường nối để chỉnh số lượng tài nguyên.
-- **Inspector:** sửa tồn đầu, sức chứa, lịch chạy, xác suất, điều kiện mở khóa, độ trễ và thứ tự quy tắc. Canvas và Bảng chi tiết dùng chung mô hình mô phỏng hiện có.
-- **Thao tác sơ đồ:** Shift chọn nhiều, kéo cả nhóm, xóa, hoàn tác/làm lại 30 bước, pan/zoom, tự sắp xếp, vừa màn hình và mở rộng canvas. Vị trí và khung nhìn lưu theo kịch bản, đi cùng bản sao và JSON.
-- **Nháp rõ ràng:** kịch bản mới hoàn toàn trống. Quy tắc chưa nối đủ vẫn lưu được và được báo trước khi chạy. Gỡ nguyên liệu crafting không biến thành nguồn thu miễn phí; xóa tài nguyên điều kiện sẽ tắt quy tắc liên quan.
-- **Graphite Studio:** thiết kế lại theme toàn app với nền xám than và accent xanh ngọc; light mode đồng bộ. Sidebar, tab, bảng, form, biểu đồ và dialog thống nhất; giữ màu tier tùy chọn và nhãn hard pity nổi bật.
-- **Tương thích:** cấu hình Economy cũ mở thành sơ đồ và giữ nguyên kết quả mô phỏng. Giữ sao lưu workspace, lịch sử, các công cụ Gacha/Compare/Players/Balance và cập nhật im lặng rồi tự mở lại.
+- **Garden Workspace:** thiết kế lại toàn bộ giao diện dựa trên hướng hình ảnh của Buffer. Nền kem, chữ xanh đậm, nút xanh lá nhạt, panel bo tròn; dark mode xanh rừng đồng bộ.
+- **Font mới:** Inter Variable đóng gói sẵn, hỗ trợ đầy đủ tiếng Việt và hoạt động offline. Làm lại cỡ chữ, phân cấp tiêu đề, bảng, biểu đồ và Inspector.
+- **Không gian làm việc:** sidebar, profile/banner, thẻ chỉ số, tab, form, canvas và hộp thoại dùng cùng hệ thống giao diện. Giữ màu tier do người dùng chọn và dấu hiệu hard pity nổi bật.
+- **Cài đặt chung:** gộp Giao diện, Cập nhật ứng dụng, Random engine và Dữ liệu & sao lưu. Bỏ nút sáng/tối và cập nhật khỏi thanh trên.
+- **Cập nhật ngay trong Settings:** hiển thị phiên bản, tiến độ tải và nút Cài và mở lại. Tiến độ cập nhật không làm mất nội dung đang nhập hay chuyển focus ở phần cài đặt khác.
+- Giữ cấu hình, lịch sử, bố cục canvas và lựa chọn sáng/tối hiện có. Cập nhật vẫn cài im lặng và tự mở lại.
 
-**Bắt đầu:** Economy & Progression → chọn mẫu hoặc Kịch bản trống → kéo node và nối cổng → chỉnh thuộc tính → Chạy & phân tích. Mục tiêu tiến triển được chỉnh trong Bảng chi tiết.
+**Đổi sáng/tối:** Cài đặt chung → Giao diện → Chế độ hiển thị.
 
-**Cập nhật:** Cập nhật → Kiểm tra ngay → Tải bản mới → Cài và mở lại.
+**Cập nhật từ v0.10:** Cài đặt chung → Cập nhật ứng dụng → Kiểm tra ngay → Tải bản mới → Cài và mở lại. Ở bản cũ, dùng nút Cập nhật trên thanh trên để nâng cấp.
 
-**Bộ cài:** GD-Toolkit-Setup-0.9.1-x64.exe.
+**Bộ cài:** GD-Toolkit-Setup-0.10.0-x64.exe.

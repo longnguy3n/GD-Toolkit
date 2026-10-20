@@ -1,49 +1,52 @@
-# GD Toolkit — Graphite Studio
+# GD Toolkit — Garden Workspace
 
-Design review: 20 October 2026. This is an original UI theme for a Windows game-design workbench. Reference sites were used to study hierarchy and interaction patterns; their logos, screenshots and proprietary assets are not bundled in the application.
+Design review: 20 October 2026. Garden Workspace replaces Graphite Studio with a complete visual system inspired by the current [Buffer website](https://buffer.com/) and its public product-interface images. This is an original GD Toolkit interface; no Buffer logo, screenshot or proprietary font is shipped.
 
-## Reference research
+## What was inspected
 
-The starting directory was [Pic1s: 9 Trang Web Thiết Kế UI/UX](https://pic1s.com/blog/9-trang-web-thiet-ke-ui-ux-hang-dau-ban-nen-biet-23). The useful references were evaluated for a dense desktop editor, rather than copied as landing-page styling.
+The public homepage HTML and its linked stylesheets were inspected, then the following actual product images were downloaded and visually reviewed:
 
-| Reference inspected | Observation and decision |
+| Primary reference | Concrete observation used in GD Toolkit |
 | --- | --- |
-| [Dark Mode Design](https://www.darkmodedesign.com/) and its linked [ToDowl](https://todowl.com/) example | Inspected the gallery visually, then ToDowl's interactive Board preview in both light and dark themes. Its workspace separates persistent navigation, board/list views and content. Adopt a persistent tool rail, quiet neutral layers and a clear active state; reserve saturated color for actions and meaning. Use lighter graphite layers than the almost-black preview so numeric fields, connectors and dense labels remain visible. |
-| [Lookup navigation examples](https://lookup.design/search?query=navigation) | Inspected the component search and navigation examples indexed for Linear, Mixpanel, Voiceflow, Airtable and others. This reinforces choosing a familiar navigation pattern before decoration. Some enlarged image assets did not load, so those unavailable details were not treated as visual evidence. Apply one stable left rail, restrained tab underlines and a compact profile/banner context strip. |
-| [Mobbin](https://mobbin.com/) | Inspected the live gallery and visible real-app onboarding examples; checked its separate Screens, Flows and UI Elements categories and publicly listed dashboard references. The dashboard image endpoint for Linear was blocked in this environment. Use task context and controls close to the relevant content; do not claim to have copied or inspected that unavailable dashboard. |
-| [Page Flows: Productboard CSV import](https://pageflows.com/post/desktop-web/csv-import/product-board/) and [Notion document creation](https://pageflows.com/post/desktop-web/creating-a-document/notion/) | Search-indexed step lists expose the progression from a creation action to an editor and subsequent changes. Direct page access returned HTTP 403. Apply the general interaction lesson: create a model, edit it, then run/analyze; distinguish the Canvas/Form view switch from the Design/Results/History task switch. No protected screenshot or flow was accessed. |
-| [Chamjo](https://chamjo.design/) | Reviewed the public description of regional real-app screens and flows. Its current focus is local UX research; the Pic1s description should not be interpreted as a promise of an animation kit. Keep Vietnamese instructions, explicit action labels and recognizable controls. |
-| [Appshot Gallery](https://www.appshot.gallery/) | Inspected its Functional, Minimalist, Dark Mode, tone-of-voice and color filters. This is primarily an App Store screenshot collection. Reject the large advertising compositions for the workbench; use compact headings and content-first panels. Its Dark Mode category link returned 404 during the review. |
+| [Buffer homepage](https://buffer.com/) | Warm cream surfaces, dark forest-green text, fresh pale-green action/selection color, rounded controls, restrained borders and tight heading tracking. Its current palette is green/cream, rather than the older blue branding. |
+| [Publish composer](https://buffer.com/img/homepage/publish-composer.webp) | A white rounded work panel, quiet borders, readable field labels and pale-green active date/time and scheduling controls. Apply this hierarchy to editable panels, selections and primary actions. |
+| [Create ideas board](https://buffer.com/img/homepage/create-ideas.webp) | Warm neutral columns, white cards, a filled view switch and pastel metadata tags. Apply filled task tabs, separate summary cards and a clearer persistent tool rail. |
+| [Insights](https://buffer.com/img/homepage/insights.webp) | Readable analytics groups with soft colored chart/card accents and clear typographic hierarchy. Keep dense numeric tables and charts legible without making every figure the same accent color. |
 
-CodeSandbox is a prototyping/development environment, not the neumorphism generator implied by the duplicated entry in the source article. Pattern backgrounds and promotional artwork are deliberately not part of the theme; the only pattern is the functional canvas alignment grid.
+The observed CSS uses a near-white warm neutral (`hsl(40 43% 99%)`), cream neutral layers, pale green (`hsl(105 68% 77%)`) and dark green text (`hsl(176 20% 16%)`). The homepage uses Figtree and Stolzl; product Insights styling also references Inter. A live in-app browser was unavailable during this review, so observations above come from the actual downloaded public HTML/CSS and inspected image pixels, not an assumed interactive session.
 
-## Selected direction
+The earlier Pic1s reference-directory study informed the general workflow, but the active visual direction is now the user's explicit Buffer reference. Buffer's marketing-page scale is adapted to an editor: no large promotional hero, decorative artwork or oversized navigation.
 
-**Graphite Studio:** neutral graphite backgrounds, a restrained teal interaction color, a clear density hierarchy, and semantic node colors. This is appropriate for long editing sessions with a canvas, nested gacha trees, probability charts and data tables. The light theme uses the same hierarchy and spacing with white/pale-slate surfaces. It is a counterpart of the same theme, not a separate visual design.
+## Design system
 
-| Role | Dark | Light |
+**Garden Workspace** pairs a warm light workspace with a derived forest-green dark theme. The dark palette is our adaptation, not a claim that Buffer's site provides this dark theme. Both modes use the same hierarchy, dimensions and interactions; the user's saved theme choice is preserved.
+
+| Role | Light | Dark |
 | --- | --- | --- |
-| Application ground | `#101316` | `#f3f6f8` |
-| Main surface | `#171c20` | `#ffffff` |
-| Raised/context surface | `#20272d` | `#edf2f5` |
-| Divider | `#303b43` | `#d7e0e5` |
-| Main text | `#edf3f6` | `#1c2a32` |
-| Supporting text | `#9caeb9` | `#596e7a` |
-| Interaction accent | `#62dbc4` | `#087e70` |
-| Selected surface | `#183b35` | `#e0f2ec` |
+| Application ground | `#f7f7f2` | `#152b28` |
+| Main surface | `#ffffff` | `#203a35` |
+| Raised/context surface | `#f0f1e9` | `#29463f` |
+| Divider | `#dddfd5` | `#456359` |
+| Main text | `#243c37` | `#f3f5ec` |
+| Supporting text | `#647169` | `#bdcdc0` |
+| Primary-action fill | `#b1e995` | `#b1e995` |
+| Primary-action text | `#203d30` | `#203d30` |
+| Selected surface | `#e1f2d6` | `#33533c` |
 
-Resource/source/drain/crafting nodes use blue/teal/rose/amber with labels and distinct symbols, so color is supplementary. Hard pity keeps its strong gold badge and tinted row, and item tier colors remain user-controlled.
+- **Typography:** bundled Inter Variable, body/inputs 14px, normal controls 13px, panel titles 16–18px, page headings 28px. Inter supports the full Vietnamese character set and is licensed under the SIL Open Font License. It avoids mixing a Latin-only font with Vietnamese fallback glyphs. Dense tree toolbars use 12px, with smaller secondary metadata where needed. Numeric values use tabular figures.
+- **Navigation:** a soft persistent rail with a pale-green filled active tool; a compact profile/banner context strip; rounded segmented task tabs. Economy retains distinct task tabs and Canvas/Table view controls.
+- **Panels and summaries:** rounded 13px cards, separated pastel summary cards, 9px buttons and 8px inputs, consistent readable title/label spacing, restrained borders and shadow. Long forms remain structured into sections.
+- **Canvas:** cream/forest graph ground with a functional alignment grid, distinct resource/source/drain/crafting colors, rounded node cards, an adjacent property inspector and compact zoom controls. Node ports retain their own hit geometry and connector behavior.
+- **Settings:** appearance, updates, randomness and data are explicit sections. Light/dark previews show their actual colors with a visible selected border. Update status/actions are inline rather than an extra top-level pop-up.
+- **Meaningful color:** hard-pity gold highlighting and user-selected item-tier colors remain intact. Resource, source, drain and crafting nodes keep distinct colors plus labels and symbols. Multi-series chart colors are not flattened into the green brand accent.
+- **States:** keyboard focus remains visible, selected controls have fill/border cues, disabled controls remain distinguishable, and reduced-motion preference is respected. CSS does not change focus, scroll position or saved application data.
 
-## Implementation contract
+The main/supporting text contrast against the main surface is approximately 11.82/5.11 in light mode and 11.11/7.37 in dark mode. Primary-action text against its pale-green fill is 8.44. These are checks of these token pairs, not a complete accessibility audit.
 
-- `ui/studio-theme.css` is the last stylesheet and provides the shared color/spacing/control system. Existing CSS continues to own feature layout and semantic pity/tier styling.
-- The sidebar identifies the tool. The context strip identifies the profile/banner. Underlined Gacha tabs select tasks. Economy uses separate task and view switches, with actions on the canvas toolbar and properties beside the selection.
-- No marketing hero or decorative gradients. Heading 24px, body and inputs 13px, key controls 12px; dense toolbar actions/supporting text may be 10–11px. Numeric columns use tabular figures.
-- Base controls have 5–7px corners and visible borders, selected states include a border/underline, and keyboard focus has a 2px accent outline. Canvas ports keep their own geometry and hit targets.
-- Dark primary/supporting/accent text against the panel has approximately 15.3/7.5/10.2 contrast; light equivalents exceed 4.5. These are token checks, not a claim of a complete accessibility audit.
-- Theme preference, data persistence and scroll/focus restoration are unchanged. Styles do not set focus or scroll positions.
-- Respect `prefers-reduced-motion`; no decorative motion or blurred translucent work surfaces.
+## Implementation and verification
 
-## Visual verification
+`ui/studio-theme.css` retains its filename for compatibility but is fully rewritten for Garden Workspace. It loads after feature styles; `ui/fonts/fonts.css` supplies the local Inter font. Original feature styles continue to own semantic pity/tier behavior and node-port geometry. Settings interactions remain in `ui/settings.mjs`.
 
-Reviewed isolated Electron renders at 1440px and 900px, in both dark and light themes. The workspace used `test-output/studio-preview-profile`, never the installed user's data. Verified no horizontal page overflow, readable profile/tree/inspector controls, consistent surfaces, and the Economy canvas in both themes. Screenshots are generated locally under `test-output/studio-*.png` and are not shipped.
+Visual verification uses an isolated Electron profile at `test-output/garden-preview-profile`, never the installed user's data. Actual 1440px and 900px viewport renders were reviewed in both themes; the test explicitly lowers the preview window minimum so the 900px result is not silently clamped. There is no horizontal page overflow. The first setup tree row starts at about 683px at 1440 width and 691px at 900 width, keeping editable content within a 960px preview. Inter was verified loaded in both modes.
+
+Both themes were also reviewed on the Economy canvas and Settings. Canvas-port dimensions remain 27×32px with transparent hit areas and the required vertical-centering transform; zoom buttons remain compact. Local evidence is in ignored `test-output/garden-*.png` and `test-output/buffer-*.webp`; reference images are not application assets.

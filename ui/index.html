@@ -6,6 +6,8 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; worker-src 'self'; connect-src 'none'">
   <title>GD Toolkit</title>
   <script src="theme-init.js"></script>
+  <link rel="preload" href="fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="fonts/fonts.css">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="light.css">
   <link rel="stylesheet" href="features.css">
@@ -27,13 +29,13 @@
     </nav>
     <div class="side-flow" aria-label="Quy trình thiết kế"><span>THIẾT KẾ → KIỂM CHỨNG</span><p>Thiết lập mô hình, chạy thử và đối chiếu kết quả trước khi đưa vào game.</p></div>
     <div class="side-bottom">
-      <button class="side-tool" data-action="tab" data-tab="settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/></svg><span class="side-tool-copy">Cài đặt chung<small>Theme & random engine</small></span></button>
+      <button class="side-tool" data-action="tab" data-tab="settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/></svg><span class="side-tool-copy">Cài đặt chung<small>Giao diện, random & cập nhật</small></span></button>
       <div class="local-status"><span class="online"></span> Dữ liệu trên máy<button data-action="open-data" title="Mở thư mục dữ liệu" aria-label="Mở thư mục dữ liệu">↗</button></div>
-      <small id="app-version">GD Toolkit · v0.9.1</small>
+      <small id="app-version">GD Toolkit · v0.10.0</small>
     </div>
   </aside>
   <div class="shell">
-    <header><div class="breadcrumb">Workbench <span>/</span> <b>Gacha</b></div><div class="header-right"><span id="save-state" role="status">Đang tải…</span><button class="header-control" id="theme-toggle" data-action="theme" aria-label="Chuyển sang theme sáng">☀ Sáng</button><button class="header-control" id="update-button" data-action="updates">↻ Cập nhật</button><span class="version">DESKTOP</span></div></header>
+    <header><div class="breadcrumb">Không gian làm việc <span>/</span> <b>Gacha</b></div><div class="header-right"><span id="save-state" role="status">Đang tải…</span><span class="version">DESKTOP</span></div></header>
     <main id="main-content">
       <section class="page-heading"><div><div class="eyebrow">GACHA TOOL</div><h1>Thiết kế <span>gacha</span></h1><p>Thiết lập banner, kiểm tra xác suất và trải nghiệm người chơi.</p></div><div class="heading-actions"><button data-action="import" title="Nhập cấu hình banner từ JSON">↥ Nhập JSON</button><button data-action="export" title="Xuất cấu hình banner ra JSON">↧ Xuất JSON</button></div></section>
       <div id="profile-bar"></div>
@@ -52,7 +54,6 @@
   </div>
   <div id="toast" role="status"></div>
   <dialog id="dialog"></dialog>
-  <dialog id="update-dialog" aria-label="Cập nhật GD Toolkit"></dialog>
   <script type="module" src="app.mjs"></script>
 </body>
 </html>

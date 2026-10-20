@@ -17,7 +17,20 @@ app.whenReady().then(async()=>{
     let errors=[];win.webContents.on('console-message',event=>{if(event.level==='error'||event.level>=3)errors.push(event.message);});
     const js=async code=>{try{return await win.webContents.executeJavaScript(code);}catch(e){throw Error(code+'\n'+e.message);}};
     async function waitFor(code){for(let i=0;i<200;i++){if(await js(code))return;await sleep(100);}console.log(await js("document.querySelector('#toast').textContent+' | '+document.querySelector('dialog').outerHTML"));throw Error('Timeout: '+code);}
+    async function setTheme(theme){
+      const previous=await js("document.querySelector('.tabs button.active')?.dataset.tab||document.querySelector('.side-tool.active')?.dataset.tab||'setup'");
+      theme??=await js("document.documentElement.dataset.theme==='light'?'dark':'light'");
+      await js("document.querySelector('.side-tool[data-tab=settings]').click()");await waitFor("!!document.querySelector('[data-setting=theme]')");
+      await js(`(()=>{const input=document.querySelector('[data-setting=theme]');input.value=${JSON.stringify(theme)};input.dispatchEvent(new Event('change',{bubbles:true}));})()`);
+      await waitFor(`document.documentElement.dataset.theme===${JSON.stringify(theme)}&&document.querySelector('#save-state').textContent.includes('Đã lưu')`);
+      await waitFor(`window.desktop.load().then(d=>d.settings.theme===${JSON.stringify(theme)})`);
+      if(previous!=='settings')await js(`(()=>{const tab=${JSON.stringify(previous)};if(['flow','balance'].includes(tab))document.querySelector('.side-tool[data-tab="'+tab+'"]').click();else{document.querySelector('.side-tool[data-tab=setup]').click();document.querySelector('.tabs [data-tab="'+tab+'"]').click();}})()`);
+    }
     await waitFor("!!document.querySelector('.tree-list')");
+    await js('document.fonts.ready');
+    assert.equal(await js("document.fonts.check('14px Inter','Tiếng Việt — Nguyễn, tỷ lệ, tài nguyên, chế tạo')"),true,'Bundled Inter renders Vietnamese');
+    assert.equal(await js("[...document.fonts].some(face=>face.family.includes('Inter')&&face.status==='loaded')"),true,'Inter font face loaded from local bundle');
+    assert.equal(await js("getComputedStyle(document.body).fontFamily.split(',')[0].includes('Inter')"),true,'Inter is the application font');
     // Reset test config without interacting with any real user profile.
     await js("(async()=>window.desktop.save({version:1, config: (await import('../core/engine.mjs')).preset(),history:[]}))()");
     win.webContents.reload();await sleep(250);await waitFor("!!document.querySelector('.tree-row')");
@@ -30,16 +43,53 @@ app.whenReady().then(async()=>{
     win.webContents.reload();await sleep(250);await waitFor("document.querySelectorAll('.tree-row').length===12");
     await sleep(500);
     await capture('setup.png');
-    await js("document.querySelector('#theme-toggle').click()");
+    assert.equal(await js("!!document.querySelector('#theme-toggle,#update-button,#update-dialog')"),false);
+    await setTheme('light');
     await waitFor("document.documentElement.dataset.theme==='light' && document.querySelector('#save-state').textContent.includes('Đã lưu')");
     await capture('setup-light.png');
     let themeDoc=JSON.parse(await fs.readFile(path.join(output,'profile/workspace.json'),'utf8'));
     assert.equal(themeDoc.settings.theme,'light');
     win.webContents.reload();await sleep(250);await waitFor("!!document.querySelector('.tree-row')");
     assert.equal(await js("document.documentElement.dataset.theme"),'light');
-    await js("document.querySelector('#update-button').click()");await waitFor("document.querySelector('#update-dialog').open");
-    assert.ok((await js("document.querySelector('#update-dialog').textContent")).includes('GitHub Releases'));
-    await js("document.querySelector('[data-action=update-close]').click();document.querySelector('#theme-toggle').click()");
+    await js("document.querySelector('.side-tool[data-tab=settings]').click()");await waitFor("!!document.querySelector('#settings-updates')");
+    assert.ok((await js("document.querySelector('#settings-updates').textContent")).includes('GitHub Releases'));
+    assert.equal(await js("document.querySelector('#settings-updates [data-update-status]').dataset.updateStatus"),'unsupported');
+    assert.equal(await js("!!document.querySelector('#settings-updates [data-action=update-releases]')"),true);
+    assert.equal(await js("document.querySelector('[data-setting=theme]').value"),'light');
+    // Push real IPC notifications to verify inline updater rendering without
+    // invoking a network download or installer in the isolated development app.
+    const updaterState=await js('window.desktop.updateState()');
+    await js("(()=>{document.querySelector('#settings-updates').scrollIntoView({block:'center'});const seed=document.querySelector('[data-setting=seed]');seed.value='271828';seed.focus({preventScroll:true});})()");
+    const settingsScroll=await js('scrollY');
+    win.webContents.send('update-status',{...updaterState,status:'idle'});await waitFor("!!document.querySelector('#settings-updates [data-action=update-check]')");
+    win.webContents.send('update-status',{...updaterState,status:'available',version:'99.0.0'});await waitFor("!!document.querySelector('#settings-updates [data-action=update-download]')");
+    win.webContents.send('update-status',{...updaterState,status:'downloading',version:'99.0.0',percent:42});await waitFor("document.querySelector('#settings-updates [role=progressbar]')?.getAttribute('aria-valuenow')==='42'");
+    assert.equal(await js("document.activeElement.dataset.setting"),'seed');assert.equal(await js("document.querySelector('[data-setting=seed]').value"),'271828');assert.ok(Math.abs(await js('scrollY')-settingsScroll)<3);
+    // A simulation may keep running after navigation to Settings. Feed its real
+    // message callback deterministically, without starting an expensive job.
+    await js("window.__gdOriginalWorker=window.Worker;window.Worker=class{constructor(){window.__gdWorkerProbe=this;}postMessage(){}terminate(){this.terminated=true;}};void 0;");
+    try{
+      await js("document.querySelector('.side-tool[data-tab=setup]').click();document.querySelector('.tabs [data-tab=simulate]').click();document.querySelector('[data-action=simulate]').click();document.querySelector('.side-tool[data-tab=settings]').click()");
+      await waitFor("typeof window.__gdWorkerProbe?.onmessage==='function'&&document.querySelector('#settings-updates [role=progressbar]')?.getAttribute('aria-valuenow')==='42'");
+      await js("(()=>{document.querySelector('#settings-updates').scrollIntoView({block:'center'});const seed=document.querySelector('[data-setting=seed]');seed.value='314159';seed.focus({preventScroll:true});window.__gdWorkerProbe.onmessage({data:{progress:0.8}});})()");
+      assert.equal(await js("document.querySelector('#settings-updates [role=progressbar] > div').style.width"),'42%','Worker progress must not overwrite update download progress');
+      assert.equal(await js("document.querySelector('#settings-updates [role=progressbar]').getAttribute('aria-valuenow')"),'42');
+      assert.equal(await js("document.activeElement.dataset.setting"),'seed');assert.equal(await js("document.querySelector('[data-setting=seed]').value"),'314159');
+      await js("(async()=>{const w=await import('../core/workspace.mjs'),engine=await import('../core/engine.mjs'),d=w.upgradeWorkspace(await window.desktop.load());window.__gdSeedProbe=document.querySelector('[data-setting=seed]');window.__gdWorkerProbe.onmessage({data:{result:engine.simulate(w.runConfig(d),1)}});})()");
+      assert.equal(await js("document.querySelector('[data-setting=seed]')===window.__gdSeedProbe&&document.activeElement===window.__gdSeedProbe&&window.__gdSeedProbe.value==='314159'"),true,'Background completion preserves a pending Settings edit');
+      for(const notification of ["window.__gdWorkerProbe.onmessage({data:{error:'QA worker failure'}})","window.__gdWorkerProbe.onerror({message:'QA transport failure'})"]){
+        await js("document.querySelector('.side-tool[data-tab=setup]').click();document.querySelector('.tabs [data-tab=simulate]').click();document.querySelector('[data-action=simulate]').click();document.querySelector('.side-tool[data-tab=settings]').click();window.__gdSeedProbe=document.querySelector('[data-setting=seed]');window.__gdSeedProbe.value='161803';window.__gdSeedProbe.focus({preventScroll:true});"+notification);
+        assert.equal(await js("document.querySelector('[data-setting=seed]')===window.__gdSeedProbe&&document.activeElement===window.__gdSeedProbe&&window.__gdSeedProbe.value==='161803'"),true,'Background failure preserves a pending Settings edit');
+      }
+    }finally{
+      await js("window.Worker=window.__gdOriginalWorker;delete window.__gdOriginalWorker;document.querySelector('.side-tool[data-tab=setup]').click();document.querySelector('.tabs [data-tab=simulate]').click();document.querySelector('[data-action=cancel]')?.click();document.querySelector('.side-tool[data-tab=settings]').click();delete window.__gdWorkerProbe;delete window.__gdSeedProbe;");
+    }
+    // Discard the deliberately unsaved one-pull probe before the regular runs.
+    win.webContents.reload();await sleep(250);await waitFor("!!document.querySelector('.tree-row')");
+    await js("document.querySelector('.side-tool[data-tab=settings]').click()");
+    win.webContents.send('update-status',{...updaterState,status:'ready',version:'99.0.0'});await waitFor("!!document.querySelector('#settings-updates [data-action=update-install]')");
+    win.webContents.send('update-status',updaterState);await waitFor("document.querySelector('#settings-updates [data-update-status]').dataset.updateStatus==='unsupported'");
+    await setTheme('dark');await js("document.querySelector('.side-tool[data-tab=setup]').click()");
     await waitFor("document.documentElement.dataset.theme==='dark'");
     await js("document.querySelector('[data-weight=featured]').value='75';document.querySelector('[data-weight=featured]').dispatchEvent(new Event('change',{bubbles:true}));");
     await waitFor("document.querySelector('#save-state').textContent.includes('Đã lưu')");
@@ -152,7 +202,7 @@ app.whenReady().then(async()=>{
     assert.equal(await js("document.querySelectorAll('.tree-row').length"),1);
     await js("document.querySelector('.side-tool[data-tab=settings]').click()");
     assert.equal(await js("document.querySelector('.radio-card.active').dataset.value"),'unity-emulated');
-    await js("document.querySelector('#theme-toggle').click()");await capture('settings-light.png');
+    await setTheme('light');await capture('settings-light.png');
     // A profile is a project container with multiple independent banners.
     await js("document.querySelector('.side-tool[data-tab=setup]').click();document.querySelector('[data-action=profile-new]').click()");await waitFor("document.querySelector('dialog').open");
     await js("document.querySelector('dialog input[name=name]').value='Pity Project QA';document.querySelector('dialog .primary').click()");
@@ -316,14 +366,10 @@ app.whenReady().then(async()=>{
     assert.equal(await js("document.querySelector('[data-weight=dust]').value"),'4');
     await js("document.querySelector('[data-action=pool-toggle][data-id=common]').click()");await assertPosition(nodeScroll,'collapse pool');
     await js("document.querySelector('[data-action=pool-toggle][data-id=common]').click()");await assertPosition(nodeScroll,'expand pool');
-    await js("document.querySelector('#theme-toggle').click()");await assertPosition(nodeScroll,'change theme');
     await js("document.querySelector('.brand').click()");await assertPosition(nodeScroll,'brand does not navigate to #');
     await js("document.querySelector('[data-action=add-item]').click()");await waitFor("document.querySelector('dialog').open");
     await assertPosition(nodeScroll,'open item dialog');
     await js("document.querySelector('dialog button[value=cancel]').click()");await waitFor("!document.querySelector('dialog').open");await assertPosition(nodeScroll,'cancel item dialog');
-    await js("document.querySelector('#update-button').click()");await waitFor("document.querySelector('#update-dialog').open");
-    await assertPosition(nodeScroll,'open updater dialog');
-    await js("document.querySelector('[data-action=update-close]').click()");await waitFor("!document.querySelector('#update-dialog').open");await assertPosition(nodeScroll,'close updater dialog');
     await js("document.querySelector('[data-action=add-item]').click()");await waitFor("document.querySelector('dialog').open");
     await js("document.querySelector('dialog input[name=name]').value='Scroll QA';document.querySelector('dialog .primary').click()");await waitFor("document.querySelectorAll('.tree-row').length===21");await assertPosition(nodeScroll,'create item');
     await js("document.querySelector('[data-action=delete-node]').click()");await waitFor("document.querySelector('dialog').open");
@@ -407,7 +453,8 @@ app.whenReady().then(async()=>{
     await js("document.querySelector('.pagination button:last-child').click()");await assertPosition(logScroll,'next log page');
     assert.equal(await js("document.querySelector('[data-view-key=simulation-counters]').open"),true);
     await change('[data-log-jump]',100);await assertPosition(logScroll,'jump log page');
-    await js("document.querySelector('#theme-toggle').click()");await assertPosition(logScroll,'theme on simulation');
+    const themeLogPage=await js("document.querySelector('[data-log-jump]').value");await setTheme();
+    assert.equal(await js("document.querySelector('[data-log-jump]').value"),themeLogPage,'Settings theme changes preserve simulation page');
 
     // Tier colors are shared by name in a banner and snapshotted with each result.
     await js("document.querySelector('.tabs [data-tab=setup]').click();document.querySelector('.tree-row[data-id=c]').click()");await change('[data-node=tier]','SSR');
@@ -437,9 +484,9 @@ app.whenReady().then(async()=>{
     win.webContents.reload();await sleep(250);await waitFor("!!document.querySelector('.tree-list')");
     await js("document.querySelector('.tabs [data-tab=simulate]').click();document.querySelector('[data-action=sim-tab][data-value=history]').click();document.querySelector('.history-card [data-action=view-history]').click()");
     assert.equal(await js("document.querySelectorAll('.hard-pull').length"),2);assert.equal(await js("document.querySelectorAll('.soft-pull').length"),1);
-    if(await js("document.documentElement.dataset.theme!=='dark'"))await js("document.querySelector('#theme-toggle').click()");
+    if(await js("document.documentElement.dataset.theme!=='dark'"))await setTheme('dark');
     await js("document.querySelector('.pity-legend').scrollIntoView({block:'start'})");await capture('pity-contrast-dark.png');
-    await js("document.querySelector('#theme-toggle').click()");await capture('pity-contrast-light.png');
+    await setTheme('light');await js("document.querySelector('.pity-legend').scrollIntoView({block:'start'})");await capture('pity-contrast-light.png');
     assert.equal(await js("getComputedStyle(document.querySelector('.hard-pull>summary')).backgroundColor"),'rgb(255, 240, 191)');
     win.setSize(1020,760);await sleep(150);assert.equal(await js("document.documentElement.scrollWidth>innerWidth"),false);
     // No horizon or exact-K input: forecast beyond N automatically, with readable milestones.
@@ -462,9 +509,9 @@ app.whenReady().then(async()=>{
     await js("document.querySelector('.tabs [data-tab=calculate]').click();document.querySelector('[data-action=analyze]').click()");await waitFor("!!document.querySelector('.forecast-notice')");
     assert.ok((await js("document.querySelector('.forecast-notice').textContent")).includes('không thể xuất hiện'));
     assert.equal(await js("document.querySelector('.quantile b').textContent"),'Không thể đạt');
-    await require('./experiments-desktop.cjs')({win,js,waitFor,change,capture,sleep});
-    await require('./labs-desktop.cjs')({win,js,waitFor,change,capture,sleep});
-    await require('./canvas-desktop.cjs')({win,js,waitFor,change,capture,sleep});
+    await require('./experiments-desktop.cjs')({win,js,waitFor,change,capture,sleep,setTheme});
+    await require('./labs-desktop.cjs')({win,js,waitFor,change,capture,sleep,setTheme});
+    await require('./canvas-desktop.cjs')({win,js,waitFor,change,capture,sleep,setTheme});
     assert.deepEqual(errors,[]);
     console.log('PASS desktop: migration, themes, updater, math workers, history, profiles, currency, global Unity emulation, bulk deletion, collapse persistence, responsive layout, no console errors.');
     app.exit(0);

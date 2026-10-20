@@ -1,0 +1,8 @@
+/* Inter is bundled locally under SIL OFL 1.1; see Inter-OFL.txt. */
+@font-face {
+  font-family: 'Inter';
+  src: url('./InterVariable.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}

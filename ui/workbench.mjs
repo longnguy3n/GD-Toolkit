@@ -9,7 +9,7 @@ const metadata={
   players:{group:'gacha',title:'Mô phỏng người chơi',accent:'người chơi',eyebrow:'GACHA TOOL',description:'Đo trải nghiệm của cả nhóm, từ người may mắn đến người chưa đạt mục tiêu.',guideTitle:'Mỗi người là một lần bắt đầu mới',guide:'Mỗi người chơi có kho đồ trống và counter ban đầu theo Setup. Xem phân bố phần thưởng, tỷ lệ đạt mục tiêu và chi phí.',next:'compare',nextLabel:'So sánh banner'},
   flow:{group:'flow',title:'Economy & Progression',accent:'Progression',eyebrow:'RESOURCE FLOW LAB',description:'Mô hình hóa tài nguyên, crafting và tiến trình trong cùng một profile.',guideTitle:'Thiết kế vòng lặp tài nguyên',guide:'Bắt đầu từ tài nguyên và nguồn thu, thêm chi tiêu hoặc chuyển đổi, rồi mô phỏng sự thay đổi theo thời gian.'},
   balance:{group:'balance',title:'Tìm thông số cân bằng',accent:'cân bằng',eyebrow:'BALANCE LAB',description:'Khảo sát các phương án để tiến gần mục tiêu thiết kế của bạn.',guideTitle:'Đặt mục tiêu → thử thông số → đối chiếu',guide:'Chọn thông số được phép thay đổi và khoảng khảo sát. Kiểm tra các phương án trước khi áp dụng vào banner.',next:'compare',nextLabel:'So sánh banner'},
-  settings:{group:'settings',title:'Cài đặt chung',accent:'chung',eyebrow:'WORKSPACE SETTINGS',description:'Giao diện và nguồn random dùng chung cho mọi công cụ trong ứng dụng.'}
+  settings:{group:'settings',title:'Cài đặt chung',accent:'chung',eyebrow:'WORKSPACE SETTINGS',description:'Giao diện, random engine, cập nhật và dữ liệu của ứng dụng.'}
 };
 
 /** Display-only context. The workspace continues to own selected profiles and banners. */

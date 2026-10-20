@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-module.exports=async({win,js,waitFor,change,capture,sleep})=>{
+module.exports=async({win,js,waitFor,change,capture,sleep,setTheme})=>{
  await js(`(async()=>{const {upgradeWorkspace,addBanner}=await import('../core/workspace.mjs');const {defaultEconomy}=await import('../core/economy.mjs');const c={version:2,name:'Banner A · 10%',rng:'custom',seed:42,economy:{...defaultEconomy(),unitPrice:2,balance:1000},root:{id:'r',name:'Banner',weight:1,children:[{id:'a',name:'Hero <A>',tier:'SSR',weight:1},{id:'b',name:'Other',weight:9}]}};const d=upgradeWorkspace({version:1,config:c,history:[],settings:{theme:"light"}});const second=structuredClone(c);second.name='Banner B · 50%';second.root.children[0].weight=9;second.economy.money='USD';second.economy.perPull=2;addBanner(d,second.name,second);addBanner(d,'Banner trống');await window.desktop.save(d)})()`);
  win.webContents.reload();await sleep(250);await waitFor("!!document.querySelector('.tree-row')");win.setSize(1440,960);
  await js("document.querySelector('.tabs [data-tab=compare]').click();window.scrollTo(0,0)");
@@ -11,7 +11,7 @@ module.exports=async({win,js,waitFor,change,capture,sleep})=>{
  assert.ok((await js("document.querySelector('.comparison-result').textContent")).includes('USD'));
  assert.ok(!(await js("document.querySelector('#content').textContent")).includes('NaN'));
  await js("document.querySelector('.comparison-result').scrollIntoView({block:'start'})");await capture('compare-light.png');
- await js("document.querySelector('#theme-toggle').click()");await capture('compare-dark.png');
+ await setTheme('dark');await js("document.querySelector('.comparison-result').scrollIntoView({block:'start'})");await capture('compare-dark.png');
  await js("document.querySelector('.compare-legend').scrollIntoView({block:'start'})");await capture('compare-chart.png');
  await change('[data-experiment=compare][data-field=copies]',1);assert.equal(await js("document.querySelector('.comparison-result')===null"),true);
  await js("document.querySelector('.tabs [data-tab=players]').click();window.scrollTo(0,0)");
@@ -24,7 +24,7 @@ module.exports=async({win,js,waitFor,change,capture,sleep})=>{
  const saved=await js("window.desktop.load()");assert.equal(saved.playerHistory.length,1);assert.equal(saved.playerHistory[0].rows.length,1000);
  assert.equal(Object.values(saved.playerHistory[0].counts).reduce((a,b)=>a+b),20000);
  await js("document.querySelector('.population-result').scrollIntoView({block:'start'})");await capture('players-dark.png');
- await js("document.querySelector('#theme-toggle').click()");await capture('players-light.png');
+ await setTheme('light');await js("document.querySelector('.population-result').scrollIntoView({block:'start'})");await capture('players-light.png');
  await js("document.querySelector('[data-view-key=players-goal-cost]').open=true;document.querySelector('[data-view-key=players-goal-cost]').scrollIntoView({block:'start'})");await capture('players-goal-cost.png');
  assert.ok(!(await js("document.querySelector('.goal-distribution').textContent")).includes('NaN'));
  await js("document.querySelector('[data-view-key=player-rows]').open=true;document.querySelector('[data-view-key=player-rows]').scrollIntoView({block:'start'})");

@@ -1,10 +1,15 @@
 const assert=require('node:assert/strict');
 
-module.exports=async({win,js,waitFor,change,capture,sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms))})=>{
+module.exports=async({win,js,waitFor,change,capture,sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms)),setTheme})=>{
   const current=`const d=await window.desktop.load(),p=d.profiles.find(p=>p.id===d.activeProfileId),s=p.flowLab?.scenarios.find(s=>s.id===p.flowLab.activeScenarioId);`;
   const scenario=()=>js(`(async()=>{${current}return s;})()`);
   const saved=condition=>waitFor(`(async()=>{${current}return !!s&&(${condition});})()`);
   const click=selector=>js(`document.querySelector(${JSON.stringify(selector)}).click()`);
+  setTheme??=async theme=>{
+    await click('.side-tool[data-tab=settings]');await waitFor("!!document.querySelector('[data-setting=theme]')");
+    await change('[data-setting=theme]',theme);await waitFor(`window.desktop.load().then(d=>d.settings.theme===${JSON.stringify(theme)})`);
+    await click('.side-tool[data-tab=flow]');
+  };
   const bounds=selector=>js(`(()=>{const r=document.querySelector(${JSON.stringify(selector)}).getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};})()`);
   async function reload(){const loaded=new Promise(resolve=>win.webContents.once('did-finish-load',resolve));win.webContents.reload();await loaded;await waitFor("!!document.querySelector('.tree-list')");}
   async function pointerClick(selector,modifiers=[]){
@@ -107,7 +112,7 @@ module.exports=async({win,js,waitFor,change,capture,sleep=ms=>new Promise(resolv
   await click('[data-action=flow-view][data-view=build]');await js("document.querySelector('[data-gc-editor]').scrollIntoView({block:'start'})");
   assert.equal(await js("document.querySelector('[data-gc-zoom-label]').textContent"),wheelLabel);
   const snapshot=await scenario();await capture('economy-canvas-dark.png');
-  await click('#theme-toggle');await capture('economy-canvas-light.png');
+  await setTheme('light');await js("document.querySelector('[data-gc-editor]').scrollIntoView({block:'start'})");await capture('economy-canvas-light.png');
   assert.equal(await js('document.documentElement.scrollWidth>innerWidth'),false);
   win.setSize(900,800);await sleep(120);assert.equal(await js('document.documentElement.scrollWidth>innerWidth'),false);win.setSize(1600,1040);
   await waitFor("document.querySelector('#save-state').textContent.includes('Đã lưu')");

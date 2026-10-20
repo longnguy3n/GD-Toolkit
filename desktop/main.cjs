@@ -35,7 +35,7 @@ app.whenReady().then(()=>{
     onState:state=>{if(win&&!win.isDestroyed())win.webContents.send('update-status',state);},
     beforeInstall:async()=>{await saveQueue;}
   });
-  win=new BrowserWindow({width:1440,height:960,minWidth:1020,minHeight:720,show:!testing,backgroundColor:'#101316',title:'GD Toolkit',autoHideMenuBar:true,webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,backgroundThrottling:false,offscreen:testing}});
+  win=new BrowserWindow({width:1440,height:960,minWidth:1020,minHeight:720,show:!testing,backgroundColor:'#152b28',title:'GD Toolkit',autoHideMenuBar:true,webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,backgroundThrottling:false,offscreen:testing}});
   win.webContents.setWindowOpenHandler(()=>({action:'deny'}));win.webContents.on('will-navigate',e=>e.preventDefault());win.loadFile(path.join(__dirname,'../ui/index.html'));
   if(app.isPackaged){const timer=setTimeout(()=>updates.check(),8000);timer.unref();}
 });

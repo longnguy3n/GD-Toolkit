@@ -3,7 +3,7 @@ const {dialog}=require('electron');
 const fs=require('node:fs/promises');
 const path=require('node:path');
 
-module.exports=async({win,js,waitFor,change,capture,sleep})=>{
+module.exports=async({win,js,waitFor,change,capture,sleep,setTheme})=>{
   await js(`(async()=>{
     const w=await import('../core/workspace.mjs'),f=await import('../core/flow.mjs');
     const d=w.upgradeWorkspace(null),p=w.activeProfile(d);
@@ -23,7 +23,7 @@ module.exports=async({win,js,waitFor,change,capture,sleep})=>{
   const best=await js("(async()=>{const {balanceState:s}=await import('./balance-lab.mjs');return s.result.rows[s.result.bestIndex]})()");
   assert.equal(best.value,3);assert.equal(best.probability,.75);
   await js("document.querySelector('.balance-result').scrollIntoView({block:'start'})");await capture('balance-dark.png');
-  await js("document.querySelector('#theme-toggle').click()");await capture('balance-light.png');
+  await setTheme('light');await js("document.querySelector('.balance-result').scrollIntoView({block:'start'})");await capture('balance-light.png');
   const before=await js('scrollY');await js("document.querySelector('.balance-best [data-action=balance-apply]').click()");await waitFor("!document.querySelector('.balance-result')");
   await waitFor("document.querySelector('#save-state').textContent.includes('Đã lưu')");
   const data=await js("window.desktop.load()");assert.equal(data.profiles[0].banners[0].config.root.children[0].weight,3);
@@ -47,7 +47,7 @@ module.exports=async({win,js,waitFor,change,capture,sleep})=>{
   assert.ok(Math.abs(flow.resources.find(r=>r.id==='level').mean-6)<1e-10);
   assert.equal(flow.milestones.find(m=>m.id==='level-five').quantiles[99],25);
   await js("document.querySelector('.flow-result').scrollIntoView({block:'start'})");await capture('economy-result-light.png');
-  await js("document.querySelector('#theme-toggle').click()");await capture('economy-result-dark.png');
+  await setTheme('dark');await js("document.querySelector('.flow-result').scrollIntoView({block:'start'})");await capture('economy-result-dark.png');
   win.setSize(900,760);await sleep(150);assert.equal(await js('document.documentElement.scrollWidth>innerWidth'),false);win.setSize(1440,960);
   await js("document.querySelector('[data-action=flow-save]').click()");await waitFor("document.querySelector('[data-action=flow-save]').disabled && document.querySelector('#save-state').textContent.includes('Đã lưu')");
   assert.equal((await js('window.desktop.load()')).profiles[0].flowLab.history.length,1);

@@ -68,10 +68,7 @@
 [data-theme=light] ::-webkit-scrollbar-thumb{background:#c6bed5}
 .header-control{font-size:11px;white-space:nowrap;min-height:31px;padding:6px 10px}
 .header-right{gap:10px}
-#update-button.has-update{color:var(--purple);border-color:var(--purple)}
-#update-dialog{width:490px}
 .update-version{margin:0 0 16px;font-size:12px;color:var(--muted)}
 .update-message{min-height:45px;font-size:13px;line-height:1.7}
 .update-repo{font-size:11px;margin-top:16px;word-break:break-word;color:var(--muted)}
-#update-dialog .actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
 @media(max-width:1150px){#save-state{font-size:10px}.header-right .version{display:none}}

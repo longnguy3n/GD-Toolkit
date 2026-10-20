@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {EventEmitter} from 'node:events';
 import {createRequire} from 'node:module';
+import {updatePanel} from '../ui/settings.mjs';
 const {createUpdateController}=createRequire(import.meta.url)('../desktop/updates.cjs');
 function setup(overrides={}){const updater=new EventEmitter();let checked=0,downloaded=0,installed=0;
   updater.checkForUpdates=async()=>{checked++;updater.emit('update-available',{version:'0.3.0'});};
@@ -17,3 +18,18 @@ test('failed download never enables install',async()=>{const {updater,controller
 test('failed persistence blocks install and preserves downloaded state',async()=>{const {controller,counts}=setup({beforeInstall:async()=>{throw Error('Disk full');}});await controller.check();await controller.download();await assert.rejects(()=>controller.install(),/Disk full/);assert.equal(controller.getState().status,'ready');assert.equal(counts().installed,0);});
 test('concurrent checks reuse one operation; downloaded update is not discarded',async()=>{const {controller,counts}=setup();await Promise.all([controller.check(),controller.check()]);assert.equal(counts().checked,1);await controller.download();await controller.check();assert.equal(controller.getState().status,'ready');assert.equal(counts().checked,1);});
 test('development builds do not contact GitHub or run installers',async()=>{const {controller,counts}=setup({enabled:false});await controller.check();assert.equal(controller.getState().status,'unsupported');assert.deepEqual(counts(),{checked:0,downloaded:0,installed:0});await assert.rejects(()=>controller.download());await assert.rejects(()=>controller.install());});
+
+test('inline settings exposes installation only after a verified download and escapes errors',async()=>{
+  const {controller,states}=setup();
+  assert.match(updatePanel(controller.getState()),/data-action="update-check"/);
+  await controller.check();
+  assert.match(updatePanel(controller.getState()),/data-action="update-download"/);
+  await controller.download();
+  for(const state of states){
+    assert.equal(updatePanel(state).includes('data-action="update-install"'),state.status==='ready');
+    if(state.status==='downloading')assert.match(updatePanel(state),/role="progressbar"/);
+  }
+  const error=updatePanel({status:'error',currentVersion:'0.9.1',error:'<img src=x onerror=alert(1)>'});
+  assert.ok(!error.includes('<img'));assert.match(error,/&lt;img/);assert.match(error,/data-action="update-check"/);
+  assert.ok(!updatePanel({status:'unsupported',currentVersion:'dev'}).includes('data-action="update-install"'));
+});
